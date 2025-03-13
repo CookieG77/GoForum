@@ -27,6 +27,9 @@ func LaunchWebApp() {
 	// Handle the routes
 	http.HandleFunc("/", pages.HomePage)
 
+	// Initialize the mail configuration
+	f.InitMail("MailConfig.json")
+
 	// Launch the server
 	f.SuccessPrintf("Server started at -> http://localhost%s\n", finalPort)
 	if err := http.ListenAndServe(finalPort, nil); err != nil {
@@ -40,8 +43,9 @@ func getPort() int {
 	if err != nil {
 		f.ErrorPrintf("Error while getting the port value: %v\n", err)
 	}
+	f.InfoPrintf("Getting the port value: %v\n", strPort)
 	port, err2 := strPort.(int)
-	if err2 { // If the port is not an int
+	if !err2 { // If the port is not an int
 		f.ErrorPrintf("Error while converting the port value to int: %v\n", err2)
 		port = 8080
 	}
