@@ -1,19 +1,11 @@
 package functions
 
 import (
-	"encoding/json"
 	"github.com/go-gomail/gomail"
 	"os"
 	"strconv"
 	"sync"
 )
-
-type SMTPServerConfig struct {
-	SMTPHost string `json:"smtpHost"`
-	SMTPPort int    `json:"smtpPort"`
-	SMTPUser string `json:"smtpUser"`
-	SMTPPass string `json:"smtpPass"`
-}
 
 // wg (WaitGroup) is a struct that waits for a collection of goroutines to finish
 var wg sync.WaitGroup
@@ -26,41 +18,23 @@ var initialized bool = false
 // InitMail initializes the mailer.
 // If the SMTP server configuration file is not found, the function will log an error and return.
 func InitMail(SMTPServerConfigFile string) {
-	// Load the SMTP server configuration
-	SMTPConfig, err := loadSMTPServerConfig(SMTPServerConfigFile)
-	if err != nil {
-		WarningPrintf("Could not load the SMTP server configuration file -> %v\n", err)
+	// Load the SMTP server configuration from the .env file
+	smtpServer := os.Getenv("SMTP_HOST")
+	smtpPort, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	smtpUser := os.Getenv("SMTP_USER")
+	smtpPassword := os.Getenv("SMTP_PASSWORD")
+	if err != nil || smtpServer == "" || smtpUser == "" || smtpPassword == "" {
+		ErrorPrintln("SMTP configuration not found in the .env file")
 		return
 	}
-	dialer = gomail.NewDialer(SMTPConfig.SMTPHost, SMTPConfig.SMTPPort, SMTPConfig.SMTPUser, SMTPConfig.SMTPPass)
+	dialer = gomail.NewDialer(smtpServer, smtpPort, smtpUser, smtpPassword)
 	initialized = true
 	SuccessPrintf(
 		"SMTP server connected\n\t- host : \"%s\"\n\t- port : \"%s\"\n\t- user : \"%s\"\n",
-		SMTPConfig.SMTPHost,
-		strconv.Itoa(SMTPConfig.SMTPPort),
-		SMTPConfig.SMTPUser,
+		smtpServer,
+		strconv.Itoa(smtpPort),
+		smtpUser,
 	)
-}
-
-// LoadSMTPServerConfig loads the SMTP server configuration from a json file.
-// The file should contain the following fields:
-// - smtpHost: the SMTP server host (e.g. smtp.gmail.com) (string)
-// - smtpPort: the SMTP server port (e.g. 587) (int)
-// - smtpUser: the SMTP server username (e.g. examplemail@gmail.com) (string)
-// - smtpPass: the SMTP server password (e.g. password123) (string)
-func loadSMTPServerConfig(SMTPServerConfigFile string) (SMTPServerConfig, error) {
-	content, err := os.ReadFile(SMTPServerConfigFile)
-	if err != nil {
-		return SMTPServerConfig{}, err
-	}
-
-	var config SMTPServerConfig
-	err = json.Unmarshal(content, &config)
-	if err != nil {
-		return SMTPServerConfig{}, err
-	}
-
-	return config, nil
 }
 
 // SendMail sends an email to the specified address.
