@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Forum : {{ .Title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/img/icon.ico" type="image/x-icon">
+    <!-- stylesheets -->
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    {{ range $_, $style := .AdditionalStyles }}
+    <link href="{{ $style }}" rel="stylesheet" type="text/css">
+    {{ end }}
+    <!-- scripts -->
+    {{ range $_, $script := .AdditionalScripts }}
+    <script src="{{ $script }}"></script>
+    {{ end }}
+</head>
+<body>
+    <main>
+        {{ template "content" . }}
+    </main>
+</body>
+</html>

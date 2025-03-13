@@ -1,0 +1,8 @@
+{
+  "pageNames" : {
+    "home" : "Home"
+  },
+  "home" : {
+    "test" : "This is a test"
+  }
+}
