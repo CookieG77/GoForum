@@ -23,10 +23,10 @@ func LaunchWebApp() {
 	f.AddValueArg(f.ArgIntValue, "port", "p") // Argument to change the port
 	f.AddNoValueArg("debug", "d")             // Argument to enable the debug mode
 	f.AddNoValueArg("log", "l")               // Argument to enable the log mode
-	if f.IsNoValueArgPresent("debug") || f.IsNoValueArgPresent("d") {
-		f.SetShouldLogInfo(true)
+	if isPresent, err := f.GetArgNoValue("debug", "d"); isPresent && err == nil {
+		f.SetShouldLogDebug(true)
 	}
-	if f.IsNoValueArgPresent("log") || f.IsNoValueArgPresent("l") {
+	if isPresent, err := f.GetArgNoValue("log", "l"); isPresent && err == nil {
 		f.InitLogger()
 	}
 	finalPort := fmt.Sprintf(":%s", strconv.Itoa(getPort()))

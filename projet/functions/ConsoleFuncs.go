@@ -162,11 +162,14 @@ func SwitchLoggerFile() {
 	}
 }
 
-// SetShouldLogInfo set the shouldLogDebug variable to the given value
-func SetShouldLogInfo(value bool) {
+// SetShouldLogDebug set the shouldLogDebug variable to the given value
+func SetShouldLogDebug(value bool) {
 	shouldLogDebug = value
 }
 
+// CompressCurrentLogs compress the current logs in a zip file
+// The zip file will be named 'logs-YYYY-MM-DD-HH-MM-SS.zip'
+// The logs will be removed after being compressed
 func CompressCurrentLogs() {
 	DebugPrintln("CompressCurrentLogs started")
 

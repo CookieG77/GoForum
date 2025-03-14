@@ -135,8 +135,38 @@ func GetArgValue(names ...string) (any, error) {
 	return nil, nil
 }
 
-// HasArg returns true if the argument with the given name exists
-func HasArg(name string) bool {
+// GetArgNoValue returns true if the argument with the given name is present and doesn't have a value
+// Returns false if the argument doesn't exist or if it's given a value
+func GetArgNoValue(names ...string) (bool, error) {
+	if len(names) == 0 {
+		return false, fmt.Errorf("no names given for the argument")
+	}
+	args := getArgs()
+	for _, name := range names {
+		for _, arg := range argList {
+			switch arg.(type) {
+			case NoValueArg:
+				argWithoutValue := arg.(NoValueArg)
+				if argWithoutValue.Name == name {
+					for _, arg := range args {
+						if arg == "-"+name {
+							return true, nil
+						}
+					}
+				}
+			case ValueArg:
+				argWithoutValue := arg.(ValueArg)
+				if argWithoutValue.Name == name {
+					return false, fmt.Errorf("the argument %s is not a NoValueArg and cannot have a value", name)
+				}
+			}
+		}
+	}
+	return false, nil
+}
+
+// ArgPresent returns true if the argument with the given name exists
+func ArgPresent(name string) bool {
 	for _, arg := range argList {
 		switch arg.(type) {
 		case NoValueArg:
@@ -162,6 +192,21 @@ func IsNoValueArgPresent(name string) bool {
 		case NoValueArg:
 			argWithoutValue := arg.(NoValueArg)
 			if argWithoutValue.Name == name {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// IsValueArgPresent returns true if the argument with the given name is present
+// and has a value
+func IsValueArgPresent(name string) bool {
+	for _, arg := range argList {
+		switch arg.(type) {
+		case ValueArg:
+			argWithValue := arg.(ValueArg)
+			if argWithValue.Name == name {
 				return true
 			}
 		}
