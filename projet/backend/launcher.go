@@ -5,9 +5,7 @@ import (
 	f "GoForum/functions"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
-	"github.com/markbates/goth/gothic"
 	"net/http"
 	"os"
 	"strconv"
@@ -15,11 +13,22 @@ import (
 
 // LaunchWebApp launches the web application and handles the routes.
 func LaunchWebApp() {
+	// Getting the environment variables
+	f.InfoPrintf("Getting the environment variables\n")
+	err := godotenv.Load()
+	if err != nil {
+		f.ErrorPrintln("Error loading .env file")
+	}
+	
 	// Managing the program arguments
-	f.AddValueArg(f.ArgIntValue, "port", "p")
-	f.AddNoValueArg("debug", "d")
+	f.AddValueArg(f.ArgIntValue, "port", "p") // Argument to change the port
+	f.AddNoValueArg("debug", "d")             // Argument to enable the debug mode
+	f.AddNoValueArg("log", "l")               // Argument to enable the log mode
 	if f.IsNoValueArgPresent("debug") || f.IsNoValueArgPresent("d") {
 		f.SetShouldLogInfo(true)
+	}
+	if f.IsNoValueArgPresent("log") || f.IsNoValueArgPresent("l") {
+		f.InitLogger()
 	}
 	finalPort := fmt.Sprintf(":%s", strconv.Itoa(getPort()))
 
@@ -35,45 +44,30 @@ func LaunchWebApp() {
 	// Handle the routes
 	r.HandleFunc("/", pages.HomePage)
 
-	// Getting the environment variables
-	f.InfoPrintf("Getting the environment variables\n")
-	err := godotenv.Load()
-	if err != nil {
-		f.ErrorPrintln("Error loading .env file")
-	}
-
 	// Creating the session store
-	var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
+	var store = f.SetupCookieStore()
 
-	// Handle the OAuth routes
-	f.SetupOAuth(finalPort)
-	r.HandleFunc("/auth/{provider}", func(w http.ResponseWriter, r *http.Request) {
-		gothic.BeginAuthHandler(w, r)
-	})
-
-	// link the store to the gothic package
-	gothic.Store = store
-
-	// Handle the OAuth callback routes
-	r.HandleFunc("/auth/callback/{provider}", func(w http.ResponseWriter, r *http.Request) {
-		user, err := gothic.CompleteUserAuth(w, r)
-		if err != nil {
-			f.ErrorPrintf("Error while completing the user auth: %v\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		f.SuccessPrintf("User connected !\n\t- Name : %v\n\t- Email : %v\n", user.Name, user.Email)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	})
+	// Initialize the OAuth keys and routes
+	f.InitOAuthKeys(finalPort, r, store)
 
 	// Initialize the mail configuration
 	f.InitMail("MailConfig.json")
 
 	// Launch the server
-	f.SuccessPrintf("Server started at -> http://localhost%s\n", finalPort)
-	if err := http.ListenAndServe(finalPort, r); err != nil {
-		panic(err)
+	if os.Getenv("CERT_FILE") == "" || os.Getenv("CERT_KEY_FILE") == "" {
+		f.WarningPrintln("No certificate file or key file provided, the server will run in HTTP mode.")
+		f.SuccessPrintf("Server started at -> http://localhost%s\n", finalPort)
+		if err := http.ListenAndServe(finalPort, r); err != nil {
+			panic(err)
+		}
+	} else {
+		f.SuccessPrintln("Certificate file and key file provided, the server will run in HTTPS mode.")
+		f.SuccessPrintf("Server started at -> https://localhost%s\n", finalPort)
+		if err := http.ListenAndServeTLS(finalPort, os.Getenv("CERT_FILE"), os.Getenv("CERT_KEY_FILE"), r); err != nil {
+			panic(err)
+		}
 	}
+
 }
 
 // getPort returns the port number to use for the server.
