@@ -1,0 +1,39 @@
+{{ define "register" }}
+
+<div id="auth-register" class="auth-container">
+    <h1>Register</h1>
+    <form id="register-form" class="auth-form" method="POST" action="">
+        <div class="form-group">
+            <label class="auth-label" for="first-name">First Name:</label>
+            <input class="auth-input" type="text" id="first-name" name="first_name" placeholder="First Name" required>
+        </div>
+        <div class="form-group">
+            <label class="auth-label" for="last-name">Last Name:</label>
+            <input class="auth-input" type="text" id="last-name" name="last_name" placeholder="Last Name" required>
+        </div>
+        <div class="form-group">
+            <label class="auth-label" for="register-email">Email:</label>
+            <input class="auth-input" type="email" id="register-email" name="email" placeholder="Email" required>
+        </div>
+        <div class="form-group">
+            <label class="auth-label" for="nickname">Nickname:</label>
+            <input class="auth-input" type="text" id="nickname" name="nickname" placeholder="Nickname">
+        </div>
+        <div class="form-group">
+            <label class="auth-label" for="register-password">Password:</label>
+            <input class="auth-input" type="password" id="register-password" name="password" placeholder="Password" required>
+        </div>
+        <div class="form-group">
+            <label class="auth-label" for="register-confirm-password">Confirm Password:</label>
+            <input class="auth-input" type="password" id="register-confirm-password" name="confirm_password" placeholder="Confirm Password" required>
+        </div>
+        <div class="form-group-checkbox">
+            <input type="checkbox" id="terms" name="terms" required>
+            <label class="auth-label-checkbox" for="terms">I Agree to the Terms &amp; Conditions</label>
+        </div>
+        <button type="submit" class="auth-button">Register</button>
+    </form>
+    <p class="register-redirect">Already have an Account? <a href="#">Login</a></p>
+</div>
+
+{{ end }}
