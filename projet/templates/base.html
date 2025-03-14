@@ -7,17 +7,50 @@
     <link rel="icon" href="/img/icon.ico" type="image/x-icon">
     <!-- stylesheets -->
     <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=search" />
     {{ range $_, $style := .AdditionalStyles }}
     <link href="{{ $style }}" rel="stylesheet" type="text/css">
     {{ end }}
     <!-- scripts -->
+    <script src="/js/script.js"></script>
     {{ range $_, $script := .AdditionalScripts }}
     <script src="{{ $script }}"></script>
     {{ end }}
 </head>
 <body>
-    <main>
-        {{ template "content" . }}
-    </main>
+<header>
+    <section class="logo header-sections">
+        <img id="logo-image" class="minimized-image" src="https://media.makeameme.org/created/best-placeholder-ever.jpg" alt="logo icon">
+        <span id="logo-title">Logo Title</span>
+    </section>
+    <section class="search-box header-sections">
+        <div id="search-container">
+            <span class="material-symbols-outlined">search</span>
+            <form>
+                <input type="search">
+                <button>Rechercher</button>
+            </form>
+
+        </div>
+    </section>
+    <nav class="options header-sections">
+        <button>Poster</button>
+        <button>Creer un compte</button>
+        <button>Se connecter</button>
+        <button id="user-profile-button" class="invisible">
+            <img id="user-profile-picture" class="minimized-image" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTK--BS2C9_TQHkmBXDrSd6JmLJzf99_ZcUWQ&s" alt="profile picture">
+        </button>
+    </nav>
+</header>
+<section id="user-dropdown">
+    <ul>
+        <li><a href="#">Profile</a></li>
+        <li><a href="#">Settings</a></li>
+        <li><a href="#">Logout</a></li>
+    </ul>
+</section>
+<main>
+    {{ template "content" . }}
+</main>
 </body>
 </html>
