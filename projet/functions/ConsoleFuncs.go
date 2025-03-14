@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-var shouldLogInfo = false
+var shouldLogDebug = false
 var logFolder = "logs"
 var defaultLogTime = 3600
 var loggerInitialized = false
@@ -45,14 +45,14 @@ func ClearCmd() {
 // Also, set up a goroutine to change the log file every 'LOG_FILE_CHANGE_TIME' seconds (default 1 hour)
 func InitLogger() {
 	if !loggerInitialized {
-		InfoPrintln("InitLogger started")
+		InfoPrintln("Initialising the logger")
 		// Check if the logs directory exists
 		// If it does, check if empty, if not compress the logs in a zip file and create a new 'latest.log' file
 		// If not, create it
 		if _, err := os.Stat("logs"); os.IsNotExist(err) {
 			err := os.Mkdir("logs", os.ModePerm)
 			if err != nil {
-				InfoPrintf("InitLogger mkdir failed -> %s\n", err)
+				DebugPrintf("InitLogger mkdir failed -> %s\n", err)
 				return
 			}
 		} else {
@@ -61,7 +61,7 @@ func InitLogger() {
 			// If it is, create a new 'latest.log' file
 			files, err := os.ReadDir("logs")
 			if err != nil {
-				InfoPrintf("InitLogger readDir failed -> %s\n", err)
+				DebugPrintf("InitLogger readDir failed -> %s\n", err)
 				return
 			}
 			// If there are remaining logs from previous launch, we compress them in a zip file
@@ -72,25 +72,25 @@ func InitLogger() {
 		// Create the new 'latest.log' file
 		newLogFile, err := os.Create("logs/latest.log")
 		if err != nil {
-			InfoPrintf("InitLogger create failed -> %s\n", err)
+			DebugPrintf("InitLogger create failed -> %s\n", err)
 			return
 		}
 		currentLogFile = newLogFile
-		InfoPrintln("New log file created")
+		DebugPrintln("New log file created")
 
 		log.SetOutput(io.MultiWriter(os.Stdout, currentLogFile)) // Set the output of the logger to the console and the log file
 		loggerInitialized = true
 		var loggerResetTime int
 		if val := os.Getenv("LOG_FILE_CHANGE_TIME"); val == "" {
-			InfoPrintf("LOG_FILE_CHANGE_TIME not set, defaulting to %d seconds\n", defaultLogTime)
+			DebugPrintf("LOG_FILE_CHANGE_TIME not set, defaulting to %d seconds\n", defaultLogTime)
 			loggerResetTime = defaultLogTime
 		} else {
 			val2, err := strconv.Atoi(val)
 			if err != nil {
-				InfoPrintf("LOG_FILE_CHANGE_TIME is not an int, defaulting to %d seconds\n", defaultLogTime)
+				DebugPrintf("LOG_FILE_CHANGE_TIME is not an int, defaulting to %d seconds\n", defaultLogTime)
 				loggerResetTime = defaultLogTime
 			} else {
-				InfoPrintf("LOG_FILE_CHANGE_TIME set to %d\n", val2)
+				DebugPrintf("LOG_FILE_CHANGE_TIME set to %d\n", val2)
 				loggerResetTime = val2
 			}
 		}
@@ -110,13 +110,13 @@ func SwitchLoggerFile() {
 	if loggerInitialized {
 		err := currentLogFile.Close()
 		if err != nil {
-			InfoPrintf("SwitchLoggerFile close failed -> %s\n", err)
+			DebugPrintf("SwitchLoggerFile close failed -> %s\n", err)
 			return
 		}
 		// Get the list of files in the logs directory
 		files, err := os.ReadDir("logs")
 		if err != nil {
-			InfoPrintf("SwitchLoggerFile readDir failed -> %s\n", err)
+			DebugPrintf("SwitchLoggerFile readDir failed -> %s\n", err)
 			return
 		}
 
@@ -136,7 +136,7 @@ func SwitchLoggerFile() {
 						newName := fmt.Sprintf("logs/log%d.log", num+1)
 						err := os.Rename("logs/"+file.Name(), newName)
 						if err != nil {
-							InfoPrintf("SwitchLoggerFile rename failed -> %s\n", err)
+							DebugPrintf("SwitchLoggerFile rename failed -> %s\n", err)
 							return
 						}
 					}
@@ -147,28 +147,28 @@ func SwitchLoggerFile() {
 		// Rename latest.log to log1.log
 		err = os.Rename("logs/latest.log", "logs/log1.log")
 		if err != nil {
-			InfoPrintf("SwitchLoggerFile rename latest.log failed -> %s\n", err)
+			DebugPrintf("SwitchLoggerFile rename latest.log failed -> %s\n", err)
 			return
 		}
 
 		// Create the new 'latest.log' file
 		currentLogFile, err = os.Create("logs/latest.log")
 		if err != nil {
-			InfoPrintf("SwitchLoggerFile create failed -> %s\n", err)
+			DebugPrintf("SwitchLoggerFile create failed -> %s\n", err)
 			return
 		}
 		log.SetOutput(io.MultiWriter(os.Stdout, currentLogFile)) // Set the output of the logger to the console and the log file
-		InfoPrintln("New log file created")
+		DebugPrintln("New log file created")
 	}
 }
 
-// SetShouldLogInfo set the shouldLogInfo variable to the given value
+// SetShouldLogInfo set the shouldLogDebug variable to the given value
 func SetShouldLogInfo(value bool) {
-	shouldLogInfo = value
+	shouldLogDebug = value
 }
 
 func CompressCurrentLogs() {
-	InfoPrintln("CompressCurrentLogs started")
+	DebugPrintln("CompressCurrentLogs started")
 
 	// Create the zip file
 	zipAddress := fmt.Sprintf(
@@ -179,13 +179,13 @@ func CompressCurrentLogs() {
 
 	zipFile, err := os.Create(zipAddress)
 	if err != nil {
-		InfoPrintf("CompressCurrentLogs create failed -> %s\n", err)
+		DebugPrintf("CompressCurrentLogs create failed -> %s\n", err)
 		return
 	}
 	defer func(zipFile *os.File) {
 		err := zipFile.Close()
 		if err != nil {
-			InfoPrintf("CompressCurrentLogs close failed -> %s\n", err)
+			DebugPrintf("CompressCurrentLogs close failed -> %s\n", err)
 		}
 	}(zipFile)
 
@@ -194,14 +194,14 @@ func CompressCurrentLogs() {
 	defer func(zipWriter *zip.Writer) {
 		err := zipWriter.Close()
 		if err != nil {
-			InfoPrintf("CompressCurrentLogs close failed -> %s\n", err)
+			DebugPrintf("CompressCurrentLogs close failed -> %s\n", err)
 		}
 	}(zipWriter)
 
 	// Get the list of files in the logs directory
 	files, err := os.ReadDir(logFolder)
 	if err != nil {
-		InfoPrintf("CompressCurrentLogs readDir failed -> %s\n", err)
+		DebugPrintf("CompressCurrentLogs readDir failed -> %s\n", err)
 		return
 	}
 
@@ -210,7 +210,7 @@ func CompressCurrentLogs() {
 		if !file.IsDir() && !strings.HasSuffix(file.Name(), ".zip") {
 			err := addFileToZip(zipWriter, logFolder+"/"+file.Name())
 			if err != nil {
-				InfoPrintf("CompressCurrentLogs addFileToZip failed -> %s\n", err)
+				DebugPrintf("CompressCurrentLogs addFileToZip failed -> %s\n", err)
 				return
 			}
 		}
@@ -221,7 +221,7 @@ func CompressCurrentLogs() {
 		if !file.IsDir() && !strings.HasSuffix(file.Name(), ".zip") {
 			err := os.Remove(fmt.Sprintf("%s/%s", logFolder, file.Name()))
 			if err != nil {
-				InfoPrintf("CompressCurrentLogs remove failed -> %s\n", err)
+				DebugPrintf("CompressCurrentLogs remove failed -> %s\n", err)
 				return
 			}
 		}
@@ -230,14 +230,14 @@ func CompressCurrentLogs() {
 
 // AddFileToZip add the file at the given path to the given zip.Writer
 func addFileToZip(zipWriter *zip.Writer, filePath string) error {
-	InfoPrintln("addFileToZip started")
+	DebugPrintln("addFileToZip started")
 	// Check if the file is a directory
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
 		return err
 	}
 	if fileInfo.IsDir() {
-		InfoPrintf("addFileToZip skipping directory %s\n", filePath)
+		DebugPrintf("addFileToZip skipping directory %s\n", filePath)
 		return nil
 	}
 	// Open the file
@@ -248,7 +248,7 @@ func addFileToZip(zipWriter *zip.Writer, filePath string) error {
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			InfoPrintf("addFileToZip close failed -> %s\n", err)
+			DebugPrintf("addFileToZip close failed -> %s\n", err)
 			return
 		}
 	}(file)
@@ -279,16 +279,12 @@ func addFileToZip(zipWriter *zip.Writer, filePath string) error {
 
 // InfoPrintf print the given info message formatted with the given arguments
 func InfoPrintf(format string, a ...interface{}) {
-	if shouldLogInfo {
-		log.Printf("\033[1;34m[Info] :\033[0m "+format, a...)
-	}
+	log.Printf("\033[1;34m[Info] :\033[0m "+format, a...)
 }
 
 // InfoPrintln print the given info message with a new line
 func InfoPrintln(s string) {
-	if shouldLogInfo {
-		log.Println("\033[1;34m[Info] :\033[0m " + s)
-	}
+	log.Println("\033[1;34m[Info] :\033[0m " + s)
 }
 
 // ErrorPrintf print the given error message formatted with the given arguments
@@ -329,4 +325,18 @@ func FatalPrintf(format string, a ...interface{}) {
 // FatalPrintln print the given fatal message with a new line and exit the program
 func FatalPrintln(s string) {
 	log.Fatalln("\033[1;31m[Fatal] :\033[0m " + s)
+}
+
+// DebugPrintf print the given debug message formatted with the given arguments
+func DebugPrintf(format string, a ...interface{}) {
+	if shouldLogDebug {
+		log.Printf("\033[1;35m[Debug] :\033[0m "+format, a...)
+	}
+}
+
+// DebugPrintln print the given debug message with a new line
+func DebugPrintln(s string) {
+	if shouldLogDebug {
+		log.Println("\033[1;35m[Debug] :\033[0m " + s)
+	}
 }

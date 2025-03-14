@@ -7,6 +7,9 @@ import (
 	"os"
 )
 
+var isCertified bool = false
+var isInitialized bool = false
+
 // MakeTemplate create a template from one or more template files given as parameter in the form of their path in string.
 func MakeTemplate(w http.ResponseWriter, templatesDir ...string) *template.Template {
 	templatesDir = append(templatesDir, "templates/base.html")
@@ -74,7 +77,7 @@ func AddAdditionalScriptsToContentInterface(content *map[string]interface{}, scr
 	}
 }
 
-// AddAdditionalStylesToContentInterface ajoute des styles CSS supplémentaires pour qu'ils soient chargés par le template.
+// AddAdditionalStylesToContentInterface add additional CSS styles to be loaded by the template.
 func AddAdditionalStylesToContentInterface(content *map[string]interface{}, styles ...string) {
 	for _, styleName := range styles {
 		(*content)["AdditionalStyles"] = append((*content)["AdditionalStyles"].([]string), styleName)
@@ -93,24 +96,46 @@ func GetIP(r *http.Request) string {
 	return ip
 }
 
+// InitServerCertification sets up the certification for the server.
+// Required for OAuth and other services to work properly.
+// If the CERT_FILE and CERT_KEY_FILE environment variables are not set, the server will run in HTTP mode.
+// If they are set, the server will run in HTTPS mode.
+func InitServerCertification() {
+	if os.Getenv("CERT_FILE") == "" || os.Getenv("CERT_KEY_FILE") == "" {
+		WarningPrintln("No certificate file or key file provided, the server will run in HTTP mode.")
+		isCertified = false
+	} else {
+		SuccessPrintln("Certificate file and key file provided, the server will run in HTTPS mode.")
+		isCertified = true
+	}
+	isInitialized = true
+}
+
 // LaunchServer launches the server with the given router and port.
 // If the CERT_FILE and CERT_KEY_FILE environment variables are not set, the server will run in HTTP mode.
 // If they are set, the server will run in HTTPS mode.
 // r is the router to use for the server.
 // port is the port to use for the server. It should be given as a string. (e.g. ":8080")
 func LaunchServer(r *mux.Router, port string) {
+	if !isInitialized {
+		InitServerCertification()
+		WarningPrintln("Server certification was initialized automatically, OAuth and other services may not work properly.")
+	}
 	// Launch the server
-	if os.Getenv("CERT_FILE") == "" || os.Getenv("CERT_KEY_FILE") == "" {
-		WarningPrintln("No certificate file or key file provided, the server will run in HTTP mode.")
+	if !isCertified {
 		SuccessPrintf("Server started at -> http://localhost%s\n", port)
 		if err := http.ListenAndServe(port, r); err != nil {
 			panic(err)
 		}
 	} else {
-		SuccessPrintln("Certificate file and key file provided, the server will run in HTTPS mode.")
 		SuccessPrintf("Server started at -> https://localhost%s\n", port)
 		if err := http.ListenAndServeTLS(port, os.Getenv("CERT_FILE"), os.Getenv("CERT_KEY_FILE"), r); err != nil {
 			panic(err)
 		}
 	}
+}
+
+// IsCertified returns true if the server is running in HTTPS mode, false otherwise.
+func IsCertified() bool {
+	return isCertified
 }

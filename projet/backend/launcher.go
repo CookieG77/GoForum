@@ -13,7 +13,7 @@ import (
 // LaunchWebApp launches the web application and handles the routes.
 func LaunchWebApp() {
 	// Getting the environment variables
-	f.InfoPrintf("Getting the environment variables\n")
+	f.DebugPrintf("Getting the environment variables\n")
 	err := godotenv.Load()
 	if err != nil {
 		f.ErrorPrintln("Error loading .env file")
@@ -35,16 +35,19 @@ func LaunchWebApp() {
 	r := mux.NewRouter()
 
 	// Handle the static files
-	r.Handle("/css/", http.StripPrefix("/css", http.FileServer(http.Dir("./statics/css"))))
-	r.Handle("/img/", http.StripPrefix("/img", http.FileServer(http.Dir("./statics/img"))))
-	r.Handle("/js/", http.StripPrefix("/js", http.FileServer(http.Dir("./statics/js"))))
-	r.Handle("/fonts/", http.StripPrefix("/fonts", http.FileServer(http.Dir("./statics/fonts"))))
+	r.PathPrefix("/css/").Handler(http.StripPrefix("/css", http.FileServer(http.Dir("./statics/css"))))
+	r.PathPrefix("/img/").Handler(http.StripPrefix("/img", http.FileServer(http.Dir("./statics/img"))))
+	r.PathPrefix("/js/").Handler(http.StripPrefix("/js", http.FileServer(http.Dir("./statics/js"))))
+	r.PathPrefix("/fonts/").Handler(http.StripPrefix("/fonts", http.FileServer(http.Dir("./statics/fonts"))))
 
 	// Handle the routes
 	r.HandleFunc("/", pages.HomePage)
 
 	// Creating the session store
 	var store = f.SetupCookieStore()
+
+	// Initialize the certificate
+	f.InitServerCertification()
 
 	// Initialize the OAuth keys and routes
 	f.InitOAuthKeys(finalPort, r, store)
@@ -62,7 +65,7 @@ func getPort() int {
 	if err != nil {
 		f.ErrorPrintf("Error while getting the port value: %v\n", err)
 	}
-	f.InfoPrintf("Getting the port value: %v\n", strPort)
+	f.DebugPrintf("Getting the port value: %v\n", strPort)
 	var port int
 	if strPort == nil { // If the port is not provided
 		port = 8080

@@ -95,6 +95,6 @@ func sendMailWithAttachments(to string, subject string, content string, attachme
 	if err := dialer.DialAndSend(m); err != nil {
 		ErrorPrintf("Could not send mail to %s -> %v\n", to, err)
 	} else {
-		InfoPrintf("Mail sent to %s\n", to)
+		InfoPrintf("Mail with one or more attachments sent to %s\n", to)
 	}
 }
