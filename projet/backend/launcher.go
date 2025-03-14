@@ -4,37 +4,56 @@ import (
 	"GoForum/backend/pages"
 	f "GoForum/functions"
 	"fmt"
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"net/http"
 	"strconv"
 )
 
 // LaunchWebApp launches the web application and handles the routes.
 func LaunchWebApp() {
+	// Getting the environment variables
+	f.InfoPrintf("Getting the environment variables\n")
+	err := godotenv.Load()
+	if err != nil {
+		f.ErrorPrintln("Error loading .env file")
+	}
+
 	// Managing the program arguments
-	f.AddValueArg(f.ArgIntValue, "port", "p")
-	f.AddNoValueArg("debug", "d")
+	f.AddValueArg(f.ArgIntValue, "port", "p") // Argument to change the port
+	f.AddNoValueArg("debug", "d")             // Argument to enable the debug mode
+	f.AddNoValueArg("log", "l")               // Argument to enable the log mode
 	if f.IsNoValueArgPresent("debug") || f.IsNoValueArgPresent("d") {
 		f.SetShouldLogInfo(true)
 	}
+	if f.IsNoValueArgPresent("log") || f.IsNoValueArgPresent("l") {
+		f.InitLogger()
+	}
 	finalPort := fmt.Sprintf(":%s", strconv.Itoa(getPort()))
 
+	// Create the router
+	r := mux.NewRouter()
+
 	// Handle the static files
-	http.Handle("/css/", http.StripPrefix("/css", http.FileServer(http.Dir("./statics/css"))))
-	http.Handle("/img/", http.StripPrefix("/img", http.FileServer(http.Dir("./statics/img"))))
-	http.Handle("/js/", http.StripPrefix("/js", http.FileServer(http.Dir("./statics/js"))))
-	http.Handle("/fonts/", http.StripPrefix("/fonts", http.FileServer(http.Dir("./statics/fonts"))))
+	r.Handle("/css/", http.StripPrefix("/css", http.FileServer(http.Dir("./statics/css"))))
+	r.Handle("/img/", http.StripPrefix("/img", http.FileServer(http.Dir("./statics/img"))))
+	r.Handle("/js/", http.StripPrefix("/js", http.FileServer(http.Dir("./statics/js"))))
+	r.Handle("/fonts/", http.StripPrefix("/fonts", http.FileServer(http.Dir("./statics/fonts"))))
 
 	// Handle the routes
-	http.HandleFunc("/", pages.HomePage)
+	r.HandleFunc("/", pages.HomePage)
+
+	// Creating the session store
+	var store = f.SetupCookieStore()
+
+	// Initialize the OAuth keys and routes
+	f.InitOAuthKeys(finalPort, r, store)
 
 	// Initialize the mail configuration
 	f.InitMail("MailConfig.json")
 
 	// Launch the server
-	f.SuccessPrintf("Server started at -> http://localhost%s\n", finalPort)
-	if err := http.ListenAndServe(finalPort, nil); err != nil {
-		panic(err)
-	}
+	f.LaunchServer(r, finalPort)
 }
 
 // getPort returns the port number to use for the server.
@@ -44,14 +63,18 @@ func getPort() int {
 		f.ErrorPrintf("Error while getting the port value: %v\n", err)
 	}
 	f.InfoPrintf("Getting the port value: %v\n", strPort)
-	port, err2 := strPort.(int)
-	if !err2 { // If the port is not an int
-		f.ErrorPrintf("Error while converting the port value to int: %v\n", err2)
-		port = 8080
-	}
+	var port int
 	if strPort == nil { // If the port is not provided
 		port = 8080
+	} else {
+		portInt, isAnInt := strPort.(int)
+		if !isAnInt { // If the port is not an int
+			f.ErrorPrintf("Error while converting the port value to int: %v\n", err)
+			port = 8080
+		}
+		port = portInt
 	}
+
 	if port < 1 || port > 65535 {
 		f.ErrorPrintf("The port %d is not a valid port number, switching back to default port (8080). Please provide a valid port number. (1-65535)\n", port)
 		port = 8080
