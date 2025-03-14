@@ -44,9 +44,14 @@
 </header>
 <section id="user-dropdown">
     <ul>
+        {{ if .IsAuthenticated }}
         <li><a href="#">Profile</a></li>
         <li><a href="#">Settings</a></li>
         <li><a href="#">Logout</a></li>
+        {{ else }}
+        <li>Log in</li>
+        <li>Sign in</li>
+        {{ end }}
     </ul>
 </section>
 <main>

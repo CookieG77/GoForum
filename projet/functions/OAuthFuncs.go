@@ -14,26 +14,28 @@ import (
 
 // ConnectOAuth sets up the OAuth configuration.
 func ConnectOAuth(port string) {
+	// Adapt the scheme to the environment
+	var scheme string
+	if IsCertified() {
+		scheme = "https"
+	} else {
+		scheme = "http"
+	}
+
+	// Add the OAuth providers here
+	// TODO : add the other providers
 	goth.UseProviders(
 		google.New(
 			os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"),
-			fmt.Sprintf("http://localhost%s/auth/callback/google", port),
+			fmt.Sprintf("%s://localhost%s/auth/callback/google", scheme, port),
 			"email", "profile",
 		),
 		github.New(
 			os.Getenv("GITHUB_CLIENT_ID"), os.Getenv("GITHUB_CLIENT_SECRET"),
-			fmt.Sprintf("http://localhost%s/auth/callback/github", port),
+			fmt.Sprintf("%s://localhost%s/auth/callback/github", scheme, port),
 			"user:email",
 		),
-		/*twitter.New(
-			os.Getenv("TWITTER_CLIENT_ID"), os.Getenv("TWITTER_CLIENT_SECRET"),
-			fmt.Sprintf("http://localhost%s/auth/callback/twitter", port),
-			),
-		twitch.New(
-			os.Getenv("TWITCH_CLIENT_ID"), os.Getenv("TWITCH_CLIENT_SECRET"),
-			fmt.Sprintf("http://localhost%s/auth/callback/twitch", port),
-			),
-		*/
+		// Add other providers here
 	)
 }
 
@@ -63,7 +65,7 @@ func InitOAuthKeys(finalPort string, r *mux.Router, store *sessions.CookieStore)
 			return
 		}
 		// TODO : add the user to the database if we got enough information from the provider or redirect to a page to ask for more information.
-		SuccessPrintf("User connected !\n\t- Name : %v\n\t- Email : %v\n", user.Name, user.Email) // TODO : remove this line in production.
-		http.Redirect(w, r, "/", http.StatusSeeOther)                                             // TODO : redirect to the previous page instead of the home page.
+		SuccessPrintf("User connected !\n\t%v\n", user) // TODO : remove this line in production.
+		http.Redirect(w, r, "/", http.StatusSeeOther)   // TODO : redirect to the previous page instead of the home page.
 	})
 }
