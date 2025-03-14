@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"net/http"
-	"os"
 	"strconv"
 )
 
@@ -19,7 +18,7 @@ func LaunchWebApp() {
 	if err != nil {
 		f.ErrorPrintln("Error loading .env file")
 	}
-	
+
 	// Managing the program arguments
 	f.AddValueArg(f.ArgIntValue, "port", "p") // Argument to change the port
 	f.AddNoValueArg("debug", "d")             // Argument to enable the debug mode
@@ -54,20 +53,7 @@ func LaunchWebApp() {
 	f.InitMail("MailConfig.json")
 
 	// Launch the server
-	if os.Getenv("CERT_FILE") == "" || os.Getenv("CERT_KEY_FILE") == "" {
-		f.WarningPrintln("No certificate file or key file provided, the server will run in HTTP mode.")
-		f.SuccessPrintf("Server started at -> http://localhost%s\n", finalPort)
-		if err := http.ListenAndServe(finalPort, r); err != nil {
-			panic(err)
-		}
-	} else {
-		f.SuccessPrintln("Certificate file and key file provided, the server will run in HTTPS mode.")
-		f.SuccessPrintf("Server started at -> https://localhost%s\n", finalPort)
-		if err := http.ListenAndServeTLS(finalPort, os.Getenv("CERT_FILE"), os.Getenv("CERT_KEY_FILE"), r); err != nil {
-			panic(err)
-		}
-	}
-
+	f.LaunchServer(r, finalPort)
 }
 
 // getPort returns the port number to use for the server.

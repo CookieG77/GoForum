@@ -1,8 +1,10 @@
 package functions
 
 import (
+	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
+	"os"
 )
 
 // MakeTemplate create a template from one or more template files given as parameter in the form of their path in string.
@@ -89,4 +91,26 @@ func GetIP(r *http.Request) string {
 		ip = r.RemoteAddr
 	}
 	return ip
+}
+
+// LaunchServer launches the server with the given router and port.
+// If the CERT_FILE and CERT_KEY_FILE environment variables are not set, the server will run in HTTP mode.
+// If they are set, the server will run in HTTPS mode.
+// r is the router to use for the server.
+// port is the port to use for the server. It should be given as a string. (e.g. ":8080")
+func LaunchServer(r *mux.Router, port string) {
+	// Launch the server
+	if os.Getenv("CERT_FILE") == "" || os.Getenv("CERT_KEY_FILE") == "" {
+		WarningPrintln("No certificate file or key file provided, the server will run in HTTP mode.")
+		SuccessPrintf("Server started at -> http://localhost%s\n", port)
+		if err := http.ListenAndServe(port, r); err != nil {
+			panic(err)
+		}
+	} else {
+		SuccessPrintln("Certificate file and key file provided, the server will run in HTTPS mode.")
+		SuccessPrintf("Server started at -> https://localhost%s\n", port)
+		if err := http.ListenAndServeTLS(port, os.Getenv("CERT_FILE"), os.Getenv("CERT_KEY_FILE"), r); err != nil {
+			panic(err)
+		}
+	}
 }

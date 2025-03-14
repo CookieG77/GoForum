@@ -62,7 +62,8 @@ func InitOAuthKeys(finalPort string, r *mux.Router, store *sessions.CookieStore)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		SuccessPrintf("User connected !\n\t- Name : %v\n\t- Email : %v\n", user.Name, user.Email)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		// TODO : add the user to the database if we got enough information from the provider or redirect to a page to ask for more information.
+		SuccessPrintf("User connected !\n\t- Name : %v\n\t- Email : %v\n", user.Name, user.Email) // TODO : remove this line in production.
+		http.Redirect(w, r, "/", http.StatusSeeOther)                                             // TODO : redirect to the previous page instead of the home page.
 	})
 }
