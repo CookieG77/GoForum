@@ -27,5 +27,9 @@ go.work.sum
 # SMTP config file
 **/MailConfig.json
 
-# API Key file
-**/APIKey.json
+# Certificate files
+*.pem
+
+# Log files
+*.log
+logs*.zip
