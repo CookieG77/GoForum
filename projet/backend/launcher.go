@@ -35,10 +35,10 @@ func LaunchWebApp() {
 	r := mux.NewRouter()
 
 	// Handle the static files
-	r.Handle("/css/", http.StripPrefix("/css", http.FileServer(http.Dir("./statics/css"))))
-	r.Handle("/img/", http.StripPrefix("/img", http.FileServer(http.Dir("./statics/img"))))
-	r.Handle("/js/", http.StripPrefix("/js", http.FileServer(http.Dir("./statics/js"))))
-	r.Handle("/fonts/", http.StripPrefix("/fonts", http.FileServer(http.Dir("./statics/fonts"))))
+	r.PathPrefix("/css/").Handler(http.StripPrefix("/css", http.FileServer(http.Dir("./statics/css"))))
+	r.PathPrefix("/img/").Handler(http.StripPrefix("/img", http.FileServer(http.Dir("./statics/img"))))
+	r.PathPrefix("/js/").Handler(http.StripPrefix("/js", http.FileServer(http.Dir("./statics/js"))))
+	r.PathPrefix("/fonts/").Handler(http.StripPrefix("/fonts", http.FileServer(http.Dir("./statics/fonts"))))
 
 	// Handle the routes
 	r.HandleFunc("/", pages.HomePage)
