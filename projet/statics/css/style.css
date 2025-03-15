@@ -91,18 +91,172 @@ header{
 }
 
 #user-dropdown {
-    width: 300px;
-    height: 500px;
+    width: 12rem;
+    height: 30rem;
     position: fixed;
-    background-color: var(--headerBackground);
     right: 0;
-    margin-right: 10px;
-    margin-top: 10px;
-    display: none;
+    z-index: -1;
+    transition: transform 300ms ease-in-out, opacity 300ms ease-in-out;
+    transform: translate3d(0, -100%, 0) ;
+    opacity: 0;
 }
+
+#user-dropdown.active {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+}
+
+#user-dropdown-background {
+    width: 90%;
+    height: 90%;
+    background-color: var(--headerBackground);
+    position: relative;
+    padding: 1rem;
+    border-radius: 0 0 1rem 1rem;
+}
+
+#user-dropdown-background ul li {
+    list-style-type: none;
+    margin-top: 0.5rem;
+    border-radius: 0.5rem;
+    background-color: var(--searchBackground);
+    padding: 1rem;
+}
+
+
 
 .invisible {
     background: transparent;
     border: none;
 }
 
+/* Elements in the login popup */
+
+#login-popup {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    color: white; /* TODO: To remove once the color of the website is defined */
+}
+
+#login-popup.hidden {
+    display: none;
+}
+
+#login-popup-background {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+}
+
+#login-popup-box {
+    width: 30rem;
+    height: 40rem;
+    display: grid;
+    grid-template-rows: 2fr 0.1fr 6fr 2fr 16fr 2fr 16fr 4fr;
+    background-color: var(--headerBackground);
+    position: fixed;
+    border-radius: 1rem;
+    padding: 1rem;
+    z-index: 11;
+}
+
+#login-popup-title, #login-popup-box p {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#login-popup-box hr {
+    width: 30rem;
+    /* TODO: faire que la bar soit bien centré*/
+    border: 1px solid var(--searchBackground);
+    justify-self: center;
+}
+
+#login-popup-close-button-wrapper {
+    display: flex;
+    justify-content: flex-end;
+}
+
+#login-popup-close-button {
+    width: 2rem;
+    height: 2rem;
+    background-color: var(--searchBackground);
+    border-radius: 50%;
+    padding: 0.2rem;
+}
+
+#login-popup-close-button img {
+    width: 100%;
+    height: 100%;
+}
+
+#login-popup-connect-with {
+    /*display: flex;
+    justify-content: flex-start;
+    align-items: start;*/
+}
+
+#login-popup-connect-with div {
+    height: 3rem;
+    width: 40%;
+    margin: 0.5rem;
+    background-color: var(--searchBackground);
+    border-radius: 0.5rem;
+    padding: 0.2rem;
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr;
+    justify-content: center;
+}
+
+#login-popup-connect-with div img {
+    width: 80%;
+    height: auto;
+    margin: auto;
+
+}
+
+#login-popup-connect-with div p {
+    text-align: center;
+    margin: auto;
+}
+
+#login-popup-or {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#login-popup-or p {
+    padding: 0.5rem;
+}
+
+#login-popup-or::before, #login-popup-or::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid var(--searchBackground);
+}
+
+#login-popup-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* List of utils class for scripts */
+
+.hidden {
+    display: none;
+}

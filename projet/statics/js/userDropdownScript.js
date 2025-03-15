@@ -7,16 +7,16 @@ document.addEventListener("DOMContentLoaded", function () {
      **/
 
     function setupDropdown(triggerId, dropdownId) {
-        var trigger = document.getElementById(triggerId);
-        var dropdown = document.getElementById(dropdownId);
-        var timeout;
+        const trigger = document.getElementById(triggerId);
+        const dropdown = document.getElementById(dropdownId);
+        let timeout;
 
         /**
          * Display the dropdown element.
          **/
         function showDropdown() {
             clearTimeout(timeout);
-            dropdown.style.display = 'block';
+            dropdown.classList.add("active");
         }
 
         /**
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
             timeout = setTimeout(() => {
                 // Only hide if the mouse is not over either element
                 if (!trigger.matches(':hover') && !dropdown.matches(':hover')) {
-                    dropdown.style.display = 'none';
+                    dropdown.classList.remove("active");
                 }
             }, 200);
         }

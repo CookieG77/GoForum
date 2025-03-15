@@ -10,9 +10,18 @@ import (
 var isCertified bool = false
 var isInitialized bool = false
 
+// baseTemplates is a list of base templates to be used by the templates.
+var baseTemplates []string
+
+// AddBaseTemplate add a base template to the list of base templates.
+func AddBaseTemplate(templatePath ...string) {
+	baseTemplates = append(baseTemplates, templatePath...)
+}
+
 // MakeTemplate create a template from one or more template files given as parameter in the form of their path in string.
+// It will use the base templates defined in the baseTemplates variable.
 func MakeTemplate(w http.ResponseWriter, templatesDir ...string) *template.Template {
-	templatesDir = append(templatesDir, "templates/base.html")
+	templatesDir = append(templatesDir, baseTemplates...)
 	tmpl, err := template.New("base.html").ParseFiles(templatesDir...)
 	if err != nil {
 		ErrorPrintf("An error occurred while trying to parse the template -> %v\n", err)

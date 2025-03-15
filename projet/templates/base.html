@@ -7,54 +7,104 @@
     <link rel="icon" href="/img/icon.ico" type="image/x-icon">
     <!-- stylesheets -->
     <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="/css/loginAndRegister.css" type="text/css">
     <link rel="stylesheet" href="/css/basicColor.css" type="text/css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=search" />
     {{ range $_, $style := .AdditionalStyles }}
     <link href="{{ $style }}" rel="stylesheet" type="text/css">
     {{ end }}
     <!-- scripts -->
-    <script src="/js/script.js"></script>
+
+    {{ if not .bareboneBase }}
+        {{ if not .IsAuthenticated }}
+            <script src="/js/loginPopupScript.js"></script>
+        {{ else }}
+            <script src="/js/userDropdownScript.js"></script>
+        {{ end }}
+    {{ end }}
     {{ range $_, $script := .AdditionalScripts }}
     <script src="{{ $script }}"></script>
     {{ end }}
 </head>
 <body>
 <header>
-    <section class="logo header-sections">
+    <section class="logo header-sections" onclick="window.location.href = '/'">
         <img id="logo-image" class="minimized-image" src="https://media.makeameme.org/created/best-placeholder-ever.jpg" alt="logo icon">
         <span id="logo-title">Logo Title</span>
     </section>
-    <section class="search-box header-sections">
-        <div id="search-container">
-            <span class="material-symbols-outlined">search</span>
-            <form class="search-form" method="Post">
-                <input class="search-input" type="search" placeholder="Search...">
-                <button class="search-button" type="submit">Rechercher</button>
-            </form>
+    {{ if not .bareboneBase }}
+        <section class="search-box header-sections">
+            <div id="search-container">
+                <img id="search-icon" src="/img/search.svg" alt="search icon">
+                <form class="search-form" method="Post">
+                    <input class="search-input" type="search" placeholder="Search...">
+                    <button class="search-button" type="submit">Rechercher</button>
+                </form>
 
-        </div>
-    </section>
-    <nav class="options header-sections">
-        <button>Poster</button>
-        <button>Creer un compte</button>
-        <button>Se connecter</button>
-        <button id="user-profile-button" class="invisible">
-            <img id="user-profile-picture" class="minimized-image" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTK--BS2C9_TQHkmBXDrSd6JmLJzf99_ZcUWQ&s" alt="profile picture">
-        </button>
-    </nav>
+            </div>
+        </section>
+        <nav class="options header-sections">
+            {{ if .IsAuthenticated }}
+                <button>Poster</button>
+                <button id="user-profile-button" class="invisible">
+                    <img id="user-profile-picture" class="minimized-image" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTK--BS2C9_TQHkmBXDrSd6JmLJzf99_ZcUWQ&s" alt="profile picture">
+                </button>
+            {{ else }}
+                <button onclick="window.location.href = '/register'">Creer un compte</button>
+                <button id="login-popup-opener">Se connecter</button>
+            {{ end }}
+        </nav>
+    {{ end }}
 </header>
-<section id="user-dropdown">
-    <ul>
-        {{ if .IsAuthenticated }}
-        <li><a href="#">Profile</a></li>
-        <li><a href="#">Settings</a></li>
-        <li><a href="#">Logout</a></li>
-        {{ else }}
-        <li>Log in</li>
-        <li>Sign in</li>
-        {{ end }}
-    </ul>
-</section>
+{{ if not .bareboneBase }}
+    {{ if .IsAuthenticated }}
+        <section id="user-dropdown">
+            <div id="user-dropdown-background">
+                <ul>
+                    <li><a href="#">Profile</a></li>
+                    <li><a href="#">Settings</a></li>
+                    <li><a href="#">Logout</a></li>
+                </ul>
+            </div>
+        </section>
+    {{ end }}
+    <div id="login-popup" class="hidden">
+        <div id="login-popup-background"></div>
+        <div id="login-popup-box">
+            <div id="login-popup-close-button-wrapper">
+                <div id="login-popup-close-button"><img src="/img/close.svg" alt="close button"></div>
+            </div>
+            <hr>
+            <h1 id="login-popup-title">Se connecter</h1>
+            <p>Connectez vous avec :</p>
+            <div id="login-popup-connect-with">
+                <div>
+                    <img src="/img/google-icon.svg" alt="google icon">
+                    <span>Google</span>
+                </div>
+                <div>
+                    <img src="/img/github-icon.svg" alt="github icon">
+                    <span>GitHub</span>
+                </div>
+                <div>
+                    <img src="/img/x-icon.svg" alt="x/twitter icon">
+                    <span>X (Twitter)</span>
+                </div>
+            </div>
+            <div id="login-popup-or">
+                <p>ou</p>
+            </div>
+            <form id="login-popup-form" method="Post">
+                <label for="login-username">Username</label>
+                <input id="login-username" type="text" name="username" required>
+                <label for="login-password">Password</label>
+                <input id="login-password" type="password" name="password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p>Pas encore un membre ? <a href="/register">Inscris-toi</a></p>
+        </div>
+    </div>
+{{ end }}
 <main>
     {{ template "content" . }}
 </main>

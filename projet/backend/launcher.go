@@ -17,7 +17,12 @@ func LaunchWebApp() {
 	err := godotenv.Load()
 	if err != nil {
 		f.ErrorPrintln("Error loading .env file")
+	} else {
+		f.SuccessPrintln("Environment variables loaded")
 	}
+
+	// Initialize the database
+	f.InitDatabase()
 
 	// Managing the program arguments
 	f.AddValueArg(f.ArgIntValue, "port", "p") // Argument to change the port
@@ -40,8 +45,13 @@ func LaunchWebApp() {
 	r.PathPrefix("/js/").Handler(http.StripPrefix("/js", http.FileServer(http.Dir("./statics/js"))))
 	r.PathPrefix("/fonts/").Handler(http.StripPrefix("/fonts", http.FileServer(http.Dir("./statics/fonts"))))
 
+	// Set the base template
+	f.AddBaseTemplate("templates/base.html")
+
 	// Handle the routes
 	r.HandleFunc("/", pages.HomePage)
+	r.HandleFunc("/login", pages.LoginPage)
+	r.HandleFunc("/register", pages.RegisterPage)
 
 	// Creating the session store
 	var store = f.SetupCookieStore()
