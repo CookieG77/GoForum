@@ -33,3 +33,9 @@ go.work.sum
 # Log files
 *.log
 logs*.zip
+
+# Database files
+*.db
+
+# IntelliJ files
+/.idea

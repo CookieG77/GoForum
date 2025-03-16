@@ -6,9 +6,17 @@ import (
 )
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	f.InfoPrintf("Home page accessed by %s", f.GetIP(r))
 	PageInfo := f.NewContentInterface("home", w, r)
+	if f.IsAuthenticated(r) {
+		PageInfo["IsAuthenticated"] = true
+		f.InfoPrintf("Home page accessed at %s by %s\n", f.GetIP(r), f.GetUserEmail(r))
+	} else {
+		PageInfo["IsAuthenticated"] = false
+		f.InfoPrintf("Home page accessed at %s\n", f.GetIP(r))
+	}
+
+	// Handle the user logout
+	ConnectFromHeader(w, r, &PageInfo)
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/home.css")
-	PageInfo["IsAuthenticated"] = false // TODO: Change this to the actual value
 	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/home.html")
 }

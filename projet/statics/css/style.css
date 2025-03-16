@@ -10,11 +10,21 @@ button {
 }
 
 header{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     width: 100%;
-    height: 100px;
+    height: 6rem;
     background-color: var(--headerBackground);
     display: grid;
     grid-template-columns: 4fr 6fr 4fr;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    z-index: 100;
 }
 
 .header-sections {
@@ -22,9 +32,9 @@ header{
     height: 100%;
     border-radius: 30px;
     display: grid;
-    gap: 20px;
+    gap: 0.5rem;
     align-items: center;
-    padding: 0 10px;
+    padding: 0 0.25rem;
 }
 
 
@@ -95,35 +105,30 @@ header{
     height: 30rem;
     position: fixed;
     right: 0;
-    z-index: -1;
+    top: 6rem;
+    z-index: 90;
     transition: transform 300ms ease-in-out, opacity 300ms ease-in-out;
-    transform: translate3d(0, -100%, 0) ;
+    transform: translate3d(0, -150%, 0) ;
+    background-color: var(--headerBackground);
+    border-radius: 0 0 1rem 1rem;
+    padding: 1rem;
     opacity: 0;
 }
 
 #user-dropdown.active {
     transform: translate3d(0, 0, 0);
     opacity: 1;
+    z-index: 90;
 }
 
-#user-dropdown-background {
-    width: 90%;
-    height: 90%;
-    background-color: var(--headerBackground);
-    position: relative;
-    padding: 1rem;
-    border-radius: 0 0 1rem 1rem;
-}
-
-#user-dropdown-background ul li {
+#user-dropdown ul li {
     list-style-type: none;
     margin-top: 0.5rem;
     border-radius: 0.5rem;
     background-color: var(--searchBackground);
     padding: 1rem;
+    z-index: 90;
 }
-
-
 
 .invisible {
     background: transparent;
@@ -141,7 +146,13 @@ header{
     position: fixed;
     top: 0;
     left: 0;
+    z-index: 200;
     color: white; /* TODO: To remove once the color of the website is defined */
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
 }
 
 #login-popup.hidden {
@@ -155,19 +166,17 @@ header{
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 10;
 }
 
 #login-popup-box {
     width: 30rem;
     height: 40rem;
     display: grid;
-    grid-template-rows: 2fr 0.1fr 6fr 2fr 16fr 2fr 16fr 4fr;
+    grid-template-rows: 2fr 0.1fr 6fr 16fr 2fr 2fr 16fr 4fr;
     background-color: var(--headerBackground);
     position: fixed;
     border-radius: 1rem;
-    padding: 1rem;
-    z-index: 11;
+    z-index: 210;
 }
 
 #login-popup-title, #login-popup-box p {
@@ -178,14 +187,14 @@ header{
 
 #login-popup-box hr {
     width: 30rem;
-    /* TODO: faire que la bar soit bien centré*/
-    border: 1px solid var(--searchBackground);
+/*    border: 1px solid var(--searchBackground);*/
     justify-self: center;
 }
 
 #login-popup-close-button-wrapper {
     display: flex;
     justify-content: flex-end;
+    margin: 0.5rem;
 }
 
 #login-popup-close-button {
@@ -201,40 +210,15 @@ header{
     height: 100%;
 }
 
-#login-popup-connect-with {
-    /*display: flex;
-    justify-content: flex-start;
-    align-items: start;*/
-}
-
-#login-popup-connect-with div {
-    height: 3rem;
-    width: 40%;
-    margin: 0.5rem;
-    background-color: var(--searchBackground);
-    border-radius: 0.5rem;
-    padding: 0.2rem;
-    display: grid;
-    grid-template-columns: 1fr 4fr 1fr;
-    justify-content: center;
-}
-
-#login-popup-connect-with div img {
-    width: 80%;
-    height: auto;
-    margin: auto;
-
-}
-
-#login-popup-connect-with div p {
-    text-align: center;
-    margin: auto;
-}
-
-#login-popup-or {
+#login-popup-form {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+#login-popup-form * {
+    margin: 0.5rem;
 }
 
 #login-popup-or p {
@@ -247,11 +231,82 @@ header{
     border-bottom: 1px solid var(--searchBackground);
 }
 
-#login-popup-form {
+#login-popup-connect-with {
+    margin: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+#login-popup-connect-with div {
+    height: 3rem;
+    width: 100%;
+    background-color: var(--searchBackground);
+    border-radius: 0.5rem;
+    padding: 0.2rem;
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr;
+    justify-content: center;
+
+}
+
+#login-popup-connect-with div img {
+    width: 80%;
+    height: auto;
+    margin: auto;
+
+}
+
+#login-popup-connect-with div span {
+    text-align: center;
+    margin: auto;
+}
+
+#login-popup-or {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin: 1rem;
+}
+
+/* Error Popup */
+
+#error-popup {
+    position: fixed;
+    display: block;
+    top: 5%;
+    height: 15%;
+    left: 15%;
+    right: 15%;
+    background-color: red;
+    border-radius: 1rem;
+    padding: 1rem;
+    z-index: 1000;
+    font-size: x-large;
+    color: white; /* TODO: To remove once the color of the website is defined */
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+
+/* Elements in the main */
+
+main {
+    position: fixed;
+    top: 6rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+#main-content {
+    padding: 1rem;
+    overflow-y: scroll;
+    z-index: 0;
 }
 
 

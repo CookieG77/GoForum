@@ -54,13 +54,13 @@ func LaunchWebApp() {
 	r.HandleFunc("/register", pages.RegisterPage)
 
 	// Creating the session store
-	var store = f.SetupCookieStore()
+	f.SetupCookieStore()
 
 	// Initialize the certificate
 	f.InitServerCertification()
 
 	// Initialize the OAuth keys and routes
-	f.InitOAuthKeys(finalPort, r, store)
+	f.InitOAuthKeys(finalPort, r)
 
 	// Initialize the mail configuration
 	f.InitMail("MailConfig.json")

@@ -3,9 +3,9 @@ package functions
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/discord"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/google"
 	"net/http"
@@ -28,24 +28,23 @@ func ConnectOAuth(port string) {
 		google.New(
 			os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"),
 			fmt.Sprintf("%s://localhost%s/auth/callback/google", scheme, port),
-			"email", "profile",
+			"email",
 		),
 		github.New(
 			os.Getenv("GITHUB_CLIENT_ID"), os.Getenv("GITHUB_CLIENT_SECRET"),
 			fmt.Sprintf("%s://localhost%s/auth/callback/github", scheme, port),
 			"user:email",
 		),
-		// Add other providers here
+		discord.New(
+			os.Getenv("DISCORD_CLIENT_ID"), os.Getenv("DISCORD_CLIENT_SECRET"),
+			fmt.Sprintf("%s://localhost%s/auth/callback/discord", scheme, port),
+			"email",
+		),
 	)
 }
 
-// SetupCookieStore sets up the cookie store.
-func SetupCookieStore() *sessions.CookieStore {
-	return sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
-}
-
 // InitOAuthKeys initializes the OAuth keys and routes.
-func InitOAuthKeys(finalPort string, r *mux.Router, store *sessions.CookieStore) {
+func InitOAuthKeys(finalPort string, r *mux.Router) {
 
 	// Handle the OAuth routes
 	ConnectOAuth(finalPort)
@@ -54,6 +53,11 @@ func InitOAuthKeys(finalPort string, r *mux.Router, store *sessions.CookieStore)
 	})
 
 	// link the store to the gothic package
+	store, err := GetCookieStore()
+	if err != nil {
+		ErrorPrintf("Error getting the cookie store: %v\n", err)
+		return
+	}
 	gothic.Store = store
 
 	// Handle the OAuth callback routes
