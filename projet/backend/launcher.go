@@ -22,7 +22,7 @@ func LaunchWebApp() {
 	}
 
 	// Initialize the database
-	f.InitDatabase()
+	f.InitDatabaseConnection()
 
 	// Managing the program arguments
 	f.AddValueArg(f.ArgIntValue, "port", "p") // Argument to change the port

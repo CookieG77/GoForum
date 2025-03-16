@@ -12,8 +12,8 @@ import (
 var databaseInitialised = false
 var db *sql.DB
 
-// InitDatabase initialises the database connection
-func InitDatabase() {
+// InitDatabaseConnection initialises the database connection
+func InitDatabaseConnection() {
 	if !databaseInitialised {
 		if os.Getenv("DB_URL") == "" {
 			ErrorPrintf("DB_URL environment variable not set\n")
@@ -34,7 +34,7 @@ func InitDatabase() {
 		databaseInitialised = true
 
 		// Debug func call to fill the database with test data
-		FillDatabase()
+		InitDatabase()
 	}
 }
 
@@ -409,11 +409,13 @@ func IsAuthenticated(r *http.Request) bool {
 	return CheckIfEmailExists(session.Values["email"].(string))
 }
 
-func FillDatabase() {
+// InitDatabase initialises the database.
+// It creates the tables if they do not exist.
+func InitDatabase() {
 	UserTableSQL := `CREATE TABLE IF NOT EXISTS users (
     	id INTEGER PRIMARY KEY AUTOINCREMENT,
-    	email TEXT NOT NULL,
-    	username TEXT NOT NULL,
+    	email TEXT NOT NULL UNIQUE,
+    	username TEXT NOT NULL UNIQUE,
     	firstname TEXT NOT NULL,
     	lastname TEXT NOT NULL,
     	password_hash TEXT,
@@ -428,4 +430,9 @@ func FillDatabase() {
 		ErrorPrintf("Error creating users table: %v\n", err)
 		return
 	}
+}
+
+// FillDatabase fills the database with test data.
+func FillDatabase() {
+	// TODO : fill the database with test data for development testing and demonstration purposes
 }

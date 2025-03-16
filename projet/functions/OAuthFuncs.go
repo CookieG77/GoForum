@@ -38,7 +38,7 @@ func ConnectOAuth(port string) {
 		discord.New(
 			os.Getenv("DISCORD_CLIENT_ID"), os.Getenv("DISCORD_CLIENT_SECRET"),
 			fmt.Sprintf("%s://localhost%s/auth/callback/discord", scheme, port),
-			"email",
+			"email", "identify",
 		),
 	)
 }
