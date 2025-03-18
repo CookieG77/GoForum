@@ -23,6 +23,11 @@ func LaunchWebApp() {
 
 	// Initialize the database
 	f.InitDatabaseConnection()
+	err = f.AddUserToModeration("mcordonn9277@gmail.com", 2)
+	if err != nil {
+		f.ErrorPrintf("Error while adding the user to the moderation: %v\n", err)
+		return
+	}
 
 	// Managing the program arguments
 	f.AddValueArg(f.ArgIntValue, "port", "p") // Argument to change the port
@@ -52,6 +57,8 @@ func LaunchWebApp() {
 	r.HandleFunc("/", pages.HomePage)
 	r.HandleFunc("/login", pages.LoginPage)
 	r.HandleFunc("/register", pages.RegisterPage)
+	r.HandleFunc("/profile", pages.UserProfilePage)
+	r.HandleFunc("/settings", pages.UserSettingsPage)
 
 	// Creating the session store
 	f.SetupCookieStore()

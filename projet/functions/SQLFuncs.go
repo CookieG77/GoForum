@@ -97,6 +97,46 @@ func GetUserEmail(r *http.Request) string {
 	return email
 }
 
+// GetUserRank returns the rank of the user
+// 0 = user; 1 = moderator; 2 = admin
+func GetUserRank(r *http.Request) int {
+	email := GetUserEmail(r)
+	checkRights := "SELECT rights_level FROM Moderation WHERE id = (SELECT id FROM users WHERE email = ?)"
+	rows, err := db.Query(checkRights, email)
+	if err != nil {
+		ErrorPrintf("Error checking the user rights: %v\n", err)
+		return 0
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var rightsLevel int
+		err := rows.Scan(&rightsLevel)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows: %v\n", err)
+			return 0
+		}
+		return rightsLevel
+	}
+	return 0
+}
+
+// GetUserRankString returns the rank of the user as a string
+func GetUserRankString(r *http.Request) string {
+	switch GetUserRank(r) {
+	case 1:
+		return "moderator"
+	case 2:
+		return "admin"
+	default:
+		return "user"
+	}
+}
+
 // CheckIfEmailLinkedToOAuth checks if the email is already linked to an OAuth account
 // Returns a boolean and the OAuth provider if the email is linked
 func CheckIfEmailLinkedToOAuth(email string) (bool, string) {
@@ -405,8 +445,72 @@ func IsAuthenticated(r *http.Request) bool {
 	if session.Values["email"] == nil {
 		return false
 	}
-	DebugPrintf("IsAuthenticated: %v\n", session.Values["email"].(string))
 	return CheckIfEmailExists(session.Values["email"].(string))
+}
+
+// GiveUserHisRights gives the user his admin/moderator rights.
+func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
+	if IsAuthenticated(r) {
+		(*PageInfo)["IsAuthenticated"] = true
+		(*PageInfo)["IsAdmin"] = false
+		(*PageInfo)["IsModerator"] = false
+		email := GetUserEmail(r)
+		checkRights := "SELECT rights_level FROM Moderation WHERE id = (SELECT id FROM users WHERE email = ?)"
+		rows, err := db.Query(checkRights, email)
+		if err != nil {
+			ErrorPrintf("Error checking the user rights: %v\n", err)
+			return
+		}
+		defer func(rows *sql.Rows) {
+			err := rows.Close()
+			if err != nil {
+				ErrorPrintf("Error closing the rows: %v\n", err)
+			}
+		}(rows)
+		if rows.Next() {
+			var rightsLevel int
+			err := rows.Scan(&rightsLevel)
+			if err != nil {
+				ErrorPrintf("Error scanning the rows: %v\n", err)
+				return
+			}
+			if rightsLevel == 1 {
+				(*PageInfo)["IsModerator"] = true
+			} else if rightsLevel == 2 {
+				(*PageInfo)["IsAdmin"] = true
+			}
+		}
+	}
+	(*PageInfo)["IsAuthenticated"] = false
+}
+
+// AddUserToModeration adds the user to the Moderation table if he is not already in it.
+// The user is added with the rights level given as parameter.
+// Returns an error if there is one.
+func AddUserToModeration(email string, rightsLevel int) error {
+	checkIfAlreadyInDB := "SELECT id FROM Moderation WHERE id = (SELECT id FROM users WHERE email = ?)"
+	rows, err := db.Query(checkIfAlreadyInDB, email)
+	if err != nil {
+		ErrorPrintf("Error checking if the user is already in the Moderation table: %v\n", err)
+		return err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		DebugPrintf("User %s is already in the Moderation table\n", email)
+		return nil
+	}
+	insertUser := "INSERT INTO Moderation (id, rights_level) VALUES ((SELECT id FROM users WHERE email = ?), ?)"
+	_, err = db.Exec(insertUser, email, rightsLevel)
+	if err != nil {
+		ErrorPrintf("Error inserting the user into the Moderation table: %v\n", err)
+		return err
+	}
+	return nil
 }
 
 // InitDatabase initialises the database.
@@ -425,9 +529,23 @@ func InitDatabase() {
     	creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );`
 
+	// the 'Moderation' table only contains the id of the user who has admin/moderator rights
+	// the 'rights_level' column is used to determine the rights level of the user
+	// 0 = user; 1 = moderator; 2 = admin
+	ModerationTableSQL := `CREATE TABLE IF NOT EXISTS Moderation (
+    	id INTEGER PRIMARY KEY,
+    	rights_level INTEGER DEFAULT 0 NOT NULL,
+    	FOREIGN KEY (id) REFERENCES users(id)
+		);`
+
 	_, err := db.Exec(UserTableSQL)
 	if err != nil {
 		ErrorPrintf("Error creating users table: %v\n", err)
+		return
+	}
+	_, err = db.Exec(ModerationTableSQL)
+	if err != nil {
+		ErrorPrintf("Error creating Moderation table: %v\n", err)
 		return
 	}
 }

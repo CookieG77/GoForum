@@ -59,14 +59,12 @@ func LangListToStrList(langList []Lang) []string {
 }
 
 // GetAndResetUserLang return the language of the user if it exists
-// // Otherwise it will set it at its default value (En)
+// Otherwise it will set it at its default value (En)
 func GetAndResetUserLang(w http.ResponseWriter, r *http.Request) Lang {
 	cookie := GetCookie(w, r, "lang")
 	if cookie == nil {
 		SetCookie(w, "lang", string(En))
-		DebugPrintf("Resetting user language -> %v\n", En)
 		return En
 	}
-	DebugPrintf("User language -> %v\n", StrToLang(cookie.Value))
 	return StrToLang(cookie.Value)
 }
