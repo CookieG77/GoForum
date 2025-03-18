@@ -2,6 +2,17 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'VT323', monospace;
+    letter-spacing: 2px;
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: 'Win95Font';
+    src: url('../fonts/w95fa.woff2') format('woff2'),
+    url('../fonts/w95fa.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
 }
 
 button {
@@ -133,163 +144,6 @@ header{
 .invisible {
     background: transparent;
     border: none;
-}
-
-/* Elements in the login popup */
-
-#login-popup {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 200;
-    color: white; /* TODO: To remove once the color of the website is defined */
-    user-select: none;
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
-}
-
-#login-popup.hidden {
-    display: none;
-}
-
-#login-popup-background {
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    position: fixed;
-    top: 0;
-    left: 0;
-}
-
-#login-popup-box {
-    width: 30rem;
-    height: 40rem;
-    display: grid;
-    grid-template-rows: 2fr 0.1fr 6fr 16fr 2fr 2fr 16fr 4fr;
-    background-color: var(--headerBackground);
-    position: fixed;
-    border-radius: 1rem;
-    z-index: 210;
-}
-
-#login-popup-title, #login-popup-box p {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#login-popup-box hr {
-    width: 30rem;
-/*    border: 1px solid var(--searchBackground);*/
-    justify-self: center;
-}
-
-#login-popup-close-button-wrapper {
-    display: flex;
-    justify-content: flex-end;
-    margin: 0.5rem;
-}
-
-#login-popup-close-button {
-    width: 2rem;
-    height: 2rem;
-    background-color: var(--searchBackground);
-    border-radius: 50%;
-    padding: 0.2rem;
-}
-
-#login-popup-close-button img {
-    width: 100%;
-    height: 100%;
-}
-
-#login-popup-form {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-#login-popup-form * {
-    margin: 0.5rem;
-}
-
-#login-popup-or p {
-    padding: 0.5rem;
-}
-
-#login-popup-or::before, #login-popup-or::after {
-    content: "";
-    flex: 1;
-    border-bottom: 1px solid var(--searchBackground);
-}
-
-#login-popup-connect-with {
-    margin: 1rem;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 0.5rem;
-}
-
-#login-popup-connect-with div {
-    height: 3rem;
-    width: 100%;
-    background-color: var(--searchBackground);
-    border-radius: 0.5rem;
-    padding: 0.2rem;
-    display: grid;
-    grid-template-columns: 1fr 4fr 1fr;
-    justify-content: center;
-
-}
-
-#login-popup-connect-with div img {
-    width: 80%;
-    height: auto;
-    margin: auto;
-
-}
-
-#login-popup-connect-with div span {
-    text-align: center;
-    margin: auto;
-}
-
-#login-popup-or {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 1rem;
-}
-
-/* Error Popup */
-
-#error-popup {
-    position: fixed;
-    display: block;
-    top: 5%;
-    height: 15%;
-    left: 15%;
-    right: 15%;
-    background-color: red;
-    border-radius: 1rem;
-    padding: 1rem;
-    z-index: 1000;
-    font-size: x-large;
-    color: white; /* TODO: To remove once the color of the website is defined */
-    user-select: none;
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
 }
 
 /* Elements in the main */

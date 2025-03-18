@@ -1,0 +1,94 @@
+.win95-border {
+    border: 4px solid #fff;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    outline: 4px solid #808080;
+    outline-offset: -8px;
+    padding: 4px;
+}
+
+.win95-border-indent, .win95-input-indent {
+    border: 4px solid #fff;
+    border-left-color: #404040;
+    border-top-color: #404040;
+    padding: 4px;
+}
+
+.win95-border-indent {
+    margin: 8px;
+}
+
+.win95-input-indent {
+    outline: 1px solid #c0c0c0;
+    outline-offset: -5px;
+}
+
+.win95-checkbox {
+    width: 16px;
+    height: 16px;
+    appearance: none;
+    background: #c0c0c0;
+    border: 3px solid #fff;
+    border-left-color: #404040;
+    border-top-color: #404040;
+    position: relative;
+    cursor: pointer;
+
+
+}
+
+.win95-checkbox:checked::before {
+    content: "✔";
+    font-size: 14px;
+    font-weight: bold;
+    top: -5px;
+    position: absolute;
+    color: black;
+}
+
+.win95-header {
+    position: relative;
+    max-width: 100%;
+    background: #0000ff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font: bold 20px sans-serif;
+    padding: 0.3rem
+}
+
+.win95-button {
+    position: relative;
+    min-height: 30px;
+    min-width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 20px;
+    background: #c0c0c0;
+    border: 2px solid #fff;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    cursor: pointer;
+    box-shadow: inset -1px -1px 0px 0px #808080;
+    user-select: none;
+    padding: 3px;
+}
+
+.win95-button:active {
+    border-top-color: #404040;
+    border-left-color: #404040;
+    border-right-color: #ffffff;
+    border-bottom-color: #ffffff;
+    box-shadow: inset 1px 1px 0 0 #808080;
+}
+
+.win95-button-space {
+    margin-left: auto;
+    display: flex;
+    gap: 5px;
+}

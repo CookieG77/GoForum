@@ -8,7 +8,10 @@
     <!-- stylesheets -->
     <link rel="stylesheet" href="/css/style.css" type="text/css">
     <link rel="stylesheet" href="/css/loginAndRegister.css" type="text/css">
+    <link rel="stylesheet" href="/css/loginPopUp.css" type="text/css">
+    <link rel="stylesheet" href="/css/generalElementStyling.css" type="text/css">
     <link rel="stylesheet" href="/css/basicColor.css" type="text/css">
+    <link href="https://fonts.cdnfonts.com/css/vt323" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=search" />
     {{ range $_, $style := .AdditionalStyles }}
     <link href="{{ $style }}" rel="stylesheet" type="text/css">
@@ -79,80 +82,84 @@
     {{ end }}
     <div id="login-popup" {{ if not .ShowLoginPage }}class="hidden"{{ end }}>
         <div id="login-popup-background"></div>
-        <div id="login-popup-box">
-            <div id="login-popup-close-button-wrapper">
-                <div id="login-popup-close-button"><img src="/img/close.svg" alt="close button"></div>
+        <div id="login-popup-box" class="win95-border">
+            <div id="login-popup-close-button-wrapper" class="win95-header">
+                <h1 id="login-popup-title">Se Connecter</h1>
+                <div id="login-popup-close-button"  class="win95-button-space"><button class="win95-button">X</button></div>
             </div>
-            <hr>
-            <h1 id="login-popup-title">Se connecter</h1>
-            <form id="login-popup-form" method="Post">
-                {{ if eq .LoginError "serverError"}}
+            <section class="login-popup-section win95-border-indent">
+                <form id="login-popup-form" method="Post">
+                    {{ if eq .LoginError "serverError"}}
                     <p class="login-popup-error-message">Erreur du serveur</p>
-                {{ else if eq .LoginError "invalidCredentials"}}
+                    {{ else if eq .LoginError "invalidCredentials"}}
                     <p class="login-popup-error-message">Identifiants invalides</p>
-                {{ else if eq .LoginError "missingFields"}}
+                    {{ else if eq .LoginError "missingFields"}}
                     <p class="login-popup-error-message">Veuillez remplir tous les champs</p>
-                {{ else if eq .LoginError "userIsOAuth"}}
+                    {{ else if eq .LoginError "userIsOAuth"}}
                     {{ if eq .OAuthProvider "google" }}
-                        <p class="login-popup-error-message">Vous avez déjà un compte associé avec Google</p>
+                    <p class="login-popup-error-message">Vous avez déjà un compte associé avec Google</p>
                     {{ else if eq .OAuthProvider "github" }}
-                        <p class="login-popup-error-message">Vous avez déjà un compte associé avec GitHub</p>
+                    <p class="login-popup-error-message">Vous avez déjà un compte associé avec GitHub</p>
                     {{ else if eq .OAuthProvider "discord" }}
-                        <p class="login-popup-error-message">Vous avez déjà un compte associé avec Discord</p>
+                    <p class="login-popup-error-message">Vous avez déjà un compte associé avec Discord</p>
                     {{ end }}
-                {{ end }}
-                <input type="hidden" name="headerForm" value="login">
-                {{ range .LoginMissingField }}
+                    {{ end }}
+                    <input type="hidden" class="win95-input-indent" name="headerForm" value="login">
+                    {{ range .LoginMissingField }}
                     {{ if eq . "email" }}
-                        <p class="login-popup-error-message">Veuillez remplir le champ "Email / Username"</p>
+                    <p class="login-popup-error-message">Veuillez remplir le champ "Email / Username"</p>
                     {{ end }}
-                {{ end }}
-                <label for="login-popup-mail-or-username">Email / Username</label>
-                <input id="login-popup-mail-or-username" type="text" name="email_or_username" required>
-                {{ range .LoginMissingField }}
+                    {{ end }}
+                    <label for="login-popup-mail-or-username">Email / Username</label>
+                    <input id="login-popup-mail-or-username" type="text" class="win95-input-indent" name="email_or_username" required>
+                    {{ range .LoginMissingField }}
                     {{ if eq . "password" }}
-                        <p class="login-popup-error-message">Veuillez remplir le champ "Password"</p>
+                    <p class="login-popup-error-message">Veuillez remplir le champ "Password"</p>
                     {{ end }}
-                {{ end }}
-                <label for="login-popup-password">Password</label>
-                <input id="login-popup-password" type="password" name="password" required>
-                <label for="login-popup-remember-me">
-                    <span>Se rappeler de moi </span>
-                    <input type="checkbox" name="remember-me" id="login-popup-remember-me">
-                </label>
-                <button type="submit">Login</button>
-            </form>
+                    {{ end }}
+                    <label for="login-popup-password">Password</label>
+                    <input id="login-popup-password" type="password" class="win95-input-indent" name="password" required>
+                    <label for="login-popup-remember-me" id="login-popup-remember-me-label">
+                        <span>Se rappeler de moi </span>
+                        <input type="checkbox" name="remember-me" id="login-popup-remember-me" class="win95-checkbox">
+                    </label>
+                    <button type="submit" class="win95-button">Login</button>
+                </form>
+            </section>
 
             <div id="login-popup-or">
                 <p>ou</p>
             </div>
-            <p>Connectez vous avec :</p>
-            <div id="login-popup-connect-with">
-                <div onclick="document.location.href = '/auth/google'">
-                    <img src="/img/google-icon.svg" alt="google icon">
-                    <span>Google</span>
+
+            <section class="login-popup-section win95-border-indent">
+                <p>Connectez vous avec :</p>
+                <div id="login-popup-connect-with">
+                    <button onclick="document.location.href = '/auth/google'" class="win95-button">
+                        <img src="/img/googleIconMini.png" alt="google icon">
+                        <span>Google</span>
+                    </button>
+                    <button onclick="document.location.href = '/auth/github'" class="win95-button">
+                        <img src="/img/githubIconMini.png" alt="github icon">
+                        <span>GitHub</span>
+                    </button>
+                    <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                        <img src="/img/discordIconMini.png" alt="discord icon">
+                        <span>Discord</span>
+                    </button>
+                    <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                        <img src="/img/discordIconMini.png" alt="discord icon">
+                        <span>Discord</span>
+                    </button>
+                    <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                        <img src="/img/discordIconMini.png" alt="discord icon">
+                        <span>Discord</span>
+                    </button>
+                    <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                        <img src="/img/discordIconMini.png" alt="discord icon">
+                        <span>Discord</span>
+                    </button>
                 </div>
-                <div onclick="document.location.href = '/auth/github'">
-                    <img src="/img/github-icon.svg" alt="github icon">
-                    <span>GitHub</span>
-                </div>
-                <div onclick="document.location.href = '/auth/discord'">
-                    <img src="/img/discord-icon.svg" alt="discord icon">
-                    <span>Discord</span>
-                </div>
-                <div onclick="document.location.href = '/auth/discord'">
-                    <img src="/img/discord-icon.svg" alt="discord icon">
-                    <span>Discord</span>
-                </div>
-                <div onclick="document.location.href = '/auth/discord'">
-                    <img src="/img/discord-icon.svg" alt="discord icon">
-                    <span>Discord</span>
-                </div>
-                <div onclick="document.location.href = '/auth/discord'">
-                    <img src="/img/discord-icon.svg" alt="discord icon">
-                    <span>Discord</span>
-                </div>
-            </div>
+            </section>
             <p>Pas encore un membre ?&nbsp;<a href="/register">Inscris-toi</a></p>
         </div>
     </div>
