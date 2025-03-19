@@ -1,9 +1,5 @@
 .auth-container {
-    background-color: #444444;
-    padding: 20px;
-    border-radius: 60px;
-    color: white;
-    width: 90vw;
+    width: 50vw;
     max-width: 900px;
     display: flex;
     flex-direction: column;
@@ -12,9 +8,6 @@
 }
 
 .auth-form {
-    border: 2px #666666 solid;
-    border-radius: 20Px;
-    padding: 10px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -24,9 +17,7 @@
 
 .form-group, .form-group-checkbox {
     width: 80%;
-    background-color: #666666;
     display: flex;
-    padding: 5px;
 }
 .form-group {
     justify-content: space-evenly;
@@ -34,9 +25,8 @@
 .form-group-checkbox {
     justify-content: center;
 }
-.auth-input, .auth-label, .auth-label-checkbox, .register-redirect{
+.auth-input, .auth-label, .auth-label-checkbox{
     font-size: 20px;
-    padding: 5px 10px;
     width: 32ch;
 }
 
@@ -45,6 +35,35 @@
 }
 
 .auth-button {
-    padding: 5px 15px;
     font-size: 24px;
+}
+
+.img-button {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#register-connect-with {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+#register-connect-with button {
+    height: 3rem;
+    width: 100%;
+    padding: 0.2rem;
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr;
+    justify-content: center;
+}
+
+.register-paragraph {
+    width: 100%;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

@@ -31,7 +31,7 @@
 
 #login-popup-box {
     width: 30rem;
-    max-height: 42rem;
+    max-height: 45rem;
     display: grid;
     grid-template-rows: 2fr 0.1fr 6fr 16fr 2fr 2fr 16fr 4fr;
     background-color: var(--loginBackground);
@@ -109,6 +109,10 @@
     justify-content: center;
     align-items: center;
     margin: 1rem;
+}
+
+#ou {
+    font-size: 20px;
 }
 
 /* Error Popup */

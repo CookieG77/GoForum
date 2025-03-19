@@ -1,11 +1,12 @@
 {{ define "content" }}
 
-<div id="auth-register" class="auth-container hidden">
-    <h1>Register</h1>
+<div id="auth-register" class="auth-container win95-border hidden">
+    <div class="win95-header"><h1>Register</h1></div>
     {{ if .Error }}
         <p class="error-message">An error occurred, please try again, if it keeps happening contact the support !</p>
     {{ end }}
-    <form id="register-form" class="auth-form" method="POST" action="/register">
+    <form id="register-form" class="auth-form win95-border-indent" method="POST" action="/register">
+        <p class="register-paragraph">Entrez vos informations :</p>
         <div class="form-group">
             {{ if .MissingFields }}
                 {{ range .MissingFields }}
@@ -15,7 +16,7 @@
                 {{ end }}
             {{ end }}
             <label class="auth-label" for="first-name">First Name:</label>
-            <input class="auth-input" type="text" id="first-name" name="first_name" placeholder="First Name" required {{ if .ValueFirstName }}value="{{ .ValueFirstName }}"{{ end }}>
+            <input class="auth-input win95-input-indent" type="text" id="first-name" name="first_name" placeholder="First Name" required {{ if .ValueFirstName }}value="{{ .ValueFirstName }}"{{ end }}>
         </div>
         <div class="form-group">
             {{ if .MissingFields }}
@@ -26,7 +27,7 @@
                 {{ end }}
             {{ end }}
             <label class="auth-label" for="last-name">Last Name:</label>
-            <input class="auth-input" type="text" id="last-name" name="last_name" placeholder="Last Name" required {{ if .ValueLastName }} value="{{ .ValueLastName }}" {{ end }}>
+            <input class="auth-input win95-input-indent" type="text" id="last-name" name="last_name" placeholder="Last Name" required {{ if .ValueLastName }} value="{{ .ValueLastName }}" {{ end }}>
         </div>
         <div class="form-group">
             {{ if .MissingFields }}
@@ -43,7 +44,7 @@
                 <p class="error-missing-field">Invalid Username : Must be at least between 3 and 20 characters long and must be made only of letters, numbers, underscores and hyphens</p>
             {{ end }}
             <label class="auth-label" for="username">Username:</label>
-            <input class="auth-input" type="text" id="username" name="username" placeholder="Username" required {{ if .ValueUsername }} value="{{ .ValueUsername }}" {{ end }}>
+            <input class="auth-input win95-input-indent" type="text" id="username" name="username" placeholder="Username" required {{ if .ValueUsername }} value="{{ .ValueUsername }}" {{ end }}>
         </div>
         <div class="form-group">
             {{ if .MissingFields }}
@@ -71,7 +72,7 @@
                 <p class="error-missing-field">Invalid Email</p>
             {{ end }}
             <label class="auth-label" for="register-email">Email:</label>
-            <input class="auth-input" type="email" id="register-email" name="email" placeholder="Email" required {{ if .ValueEmail }} value="{{ .ValueEmail }}" {{ end }}>
+            <input class="auth-input win95-input-indent" type="email" id="register-email" name="email" placeholder="Email" required {{ if .ValueEmail }} value="{{ .ValueEmail }}" {{ end }}>
         </div>
         <div class="form-group">
             {{ if .MissingFields }}
@@ -88,7 +89,7 @@
                 <p class="error-missing-field">Invalid Password : Must be at least 8 characters long, under 64 characters long, contain at least one uppercase letter, one lowercase letter, one number and one special character</p>
             {{ end }}
             <label class="auth-label" for="register-password">Password:</label>
-            <input class="auth-input" type="password" id="register-password" name="password" placeholder="Password" required>
+            <input class="auth-input win95-input-indent" type="password" id="register-password" name="password" placeholder="Password" required>
         </div>
         <div class="form-group">
             {{ if .MissingFields }}
@@ -99,7 +100,7 @@
                 {{ end }}
             {{ end }}
             <label class="auth-label" for="register-confirm-password">Confirm Password:</label>
-            <input class="auth-input" type="password" id="register-confirm-password" name="confirm_password" placeholder="Confirm Password" required>
+            <input class="auth-input win95-input-indent" type="password" id="register-confirm-password" name="confirm_password" placeholder="Confirm Password" required>
         </div>
         <div class="form-group-checkbox">
             {{ if .MissingFields }}
@@ -109,12 +110,41 @@
                     {{ end }}
                 {{ end }}
             {{ end }}
-            <input type="checkbox" id="terms" name="terms" required>
+            <input type="checkbox" id="terms" class="win95-checkbox" name="terms" required>
             <label class="auth-label-checkbox" for="terms">I Agree to the Terms &amp; Conditions</label>
         </div>
-        <button type="submit" class="auth-button">Register</button>
+        <button type="submit" class="auth-button win95-button">Register</button>
     </form>
-    <p class="register-redirect">Already have an Account? <a href="#">Login</a></p>
+    <section class="login-popup-section win95-border-indent">
+        <p class="register-paragraph">Connectez vous avec :</p>
+        <div id="register-connect-with">
+            <button onclick="document.location.href = '/auth/google'" class="win95-button">
+                <img src="/img/googleIconMini.png" alt="google icon" class="img-button">
+                <span>Google</span>
+            </button>
+            <button onclick="document.location.href = '/auth/github'" class="win95-button">
+                <img src="/img/githubIconMini.png" alt="github icon" class="img-button">
+                <span>GitHub</span>
+            </button>
+            <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
+                <span>Discord</span>
+            </button>
+            <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
+                <span>Discord</span>
+            </button>
+            <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
+                <span>Discord</span>
+            </button>
+            <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
+                <span>Discord</span>
+            </button>
+        </div>
+    </section>
+    <p class="register-paragraph">Already have an Account? <a href="#">Login</a></p>
 </div>
 
 {{ end }}

@@ -5,6 +5,7 @@
     outline: 4px solid #808080;
     outline-offset: -8px;
     padding: 4px;
+    background-color: silver;
 }
 
 .win95-border-indent, .win95-input-indent {
@@ -33,38 +34,36 @@
     border-top-color: #404040;
     position: relative;
     cursor: pointer;
+    margin-left: 1em;
+    margin-right: 1em;
 
 
 }
 
 .win95-checkbox:checked::before {
-    content: "✔";
-    font-size: 14px;
+    content: "✓";
+    font-size: 15px;
     font-weight: bold;
-    top: -5px;
+    top: -6px;
     position: absolute;
     color: black;
 }
 
 .win95-header {
     position: relative;
-    max-width: 100%;
+    width: 100%;
     background: #0000ff;
     display: flex;
     align-items: center;
     justify-content: space-between;
     color: white;
     font: bold 20px sans-serif;
-    padding: 0.3rem
+    padding: 0.5em
 }
 
 .win95-button {
-    position: relative;
     min-height: 30px;
     min-width: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     color: #000;
     font-family: monospace;
     font-weight: bold;
