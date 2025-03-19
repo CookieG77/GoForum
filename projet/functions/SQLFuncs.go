@@ -51,16 +51,6 @@ func CloseDatabase() {
 	}
 }
 
-// GetDB returns the database connection
-func GetDB() *sql.DB {
-	return db
-}
-
-// IsDatabaseInitialised returns whether the database connection is initialised
-func IsDatabaseInitialised() bool {
-	return databaseInitialised
-}
-
 // IsEmailValid checks if the email is valid
 func IsEmailValid(email string) bool {
 	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
@@ -138,7 +128,8 @@ func GetUserRankString(r *http.Request) string {
 }
 
 // CheckIfEmailLinkedToOAuth checks if the email is already linked to an OAuth account
-// Returns a boolean and the OAuth provider if the email is linked
+// Returns true and the OAuth provider as a string if the email is linked to an OAuth provider
+// Returns false and an empty string otherwise
 func CheckIfEmailLinkedToOAuth(email string) (bool, string) {
 	checkIfLinkedToOAuth := "SELECT oauth_provider FROM users WHERE email = ?"
 	rows, err := db.Query(checkIfLinkedToOAuth, email)
@@ -385,55 +376,6 @@ func AddUser(email, username, firstname, lastname, password string) error {
 	return nil
 }
 
-// SetSessionCookie sets the session cookie for the user.
-// The session cookie is used to store the id of the user.
-// The cookie is stored in the session store.
-// Returns an error if there is one.
-func SetSessionCookie(w http.ResponseWriter, r *http.Request, email string) error {
-	session, err := GetSession(r)
-	if err != nil {
-		ErrorPrintf("Error getting the session: %v\n", err)
-		return err
-	}
-	session.Values["email"] = email
-	err = session.Save(r, w)
-	if err != nil {
-		ErrorPrintf("Error saving the session: %v\n", err)
-		return err
-	}
-	DebugPrintf("Setting the session cookie for email: %v\n", email)
-	return nil
-}
-
-// GetSessionCookie returns the session cookie for the user.
-// Returns the session cookie and an error if there is one.
-func GetSessionCookie(r *http.Request) (string, error) {
-	session, err := GetSession(r)
-	if err != nil {
-		ErrorPrintf("Error getting the session: %v\n", err)
-		return "", err
-	}
-	email := session.Values["email"].(string)
-	return email, nil
-}
-
-// EmptySessionCookie empties the session cookie for the user.
-// Returns an error if there is one.
-func EmptySessionCookie(w http.ResponseWriter, r *http.Request) error {
-	session, err := GetSession(r)
-	if err != nil {
-		ErrorPrintf("Error getting the session: %v\n", err)
-		return err
-	}
-	session.Values["email"] = ""
-	err = session.Save(r, w)
-	if err != nil {
-		ErrorPrintf("Error saving the session: %v\n", err)
-		return err
-	}
-	return nil
-}
-
 // IsAuthenticated checks if the user is authenticated.
 // Returns true if the user is authenticated and false otherwise.
 func IsAuthenticated(r *http.Request) bool {
@@ -480,6 +422,7 @@ func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
 				(*PageInfo)["IsAdmin"] = true
 			}
 		}
+		return
 	}
 	(*PageInfo)["IsAuthenticated"] = false
 }

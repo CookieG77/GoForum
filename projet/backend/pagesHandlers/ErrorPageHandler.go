@@ -1,4 +1,4 @@
-package pages
+package pagesHandlers
 
 import (
 	f "GoForum/functions"
@@ -35,4 +35,12 @@ func ErrorPage(w http.ResponseWriter, r *http.Request, status int) {
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/error.css")
 	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/error.html")
+}
+
+func ErrorPage404(w http.ResponseWriter, r *http.Request) {
+	ErrorPage(w, r, http.StatusNotFound)
+}
+
+func ErrorPage405(w http.ResponseWriter, r *http.Request) {
+	ErrorPage(w, r, http.StatusMethodNotAllowed)
 }

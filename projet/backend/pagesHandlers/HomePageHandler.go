@@ -1,11 +1,11 @@
-package pages
+package pagesHandlers
 
 import (
 	f "GoForum/functions"
 	"net/http"
 )
 
-func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
+func HomePage(w http.ResponseWriter, r *http.Request) {
 	PageInfo := f.NewContentInterface("home", w, r)
 	// Check the user rights
 	f.GiveUserHisRights(&PageInfo, r)
@@ -15,6 +15,10 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 		f.InfoPrintf("Home page accessed at %s\n", f.GetIP(r))
 	}
 
-	PageInfo["bareboneBase"] = true // This is a barebone page (no header or useless stuff)
+	// Handle the user logout/login
+	ConnectFromHeader(w, r, &PageInfo)
 
+	// Add additional styles to the content interface and make the template
+	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/home.css")
+	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/home.html")
 }

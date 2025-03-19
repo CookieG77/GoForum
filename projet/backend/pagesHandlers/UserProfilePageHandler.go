@@ -1,4 +1,4 @@
-package pages
+package pagesHandlers
 
 import (
 	f "GoForum/functions"
@@ -20,18 +20,16 @@ func UserProfilePage(w http.ResponseWriter, r *http.Request) {
 	user := r.URL.Query().Get("user")
 	if user != "" {
 		// Check if the user exists
+		f.DebugPrintf("ICI : '%s'\n", user)
 		if !f.CheckIfUsernameExists(user) { // If the user does not exist
 			ErrorPage(w, r, http.StatusNotFound)
 			return
 		}
-		f.DebugPrintf("Accessing the user profile of %s\n", user)
 		// TODO : Display the user profile of the 'user'
-	}
-	if PageInfo["IsAuthenticated"].(bool) {
-		f.DebugPrintf("Accessing the user profile of %s\n", f.GetUserRankString(r))
+	} else if PageInfo["IsAuthenticated"].(bool) {
+		f.DebugPrintf("Accessing the user profile of %s : %s\n", f.GetUserRankString(r), f.GetUserEmail(r))
 		// TODO : Display the user settings page of the user logged in
-	}
-	if user == "" {
+	} else {
 		ErrorPage(w, r, http.StatusBadRequest)
 		return
 	}

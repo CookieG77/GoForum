@@ -1,12 +1,14 @@
 package backend
 
 import (
-	"GoForum/backend/pages"
+	"GoForum/backend/pagesHandlers"
 	f "GoForum/functions"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
 )
 
@@ -28,6 +30,19 @@ func LaunchWebApp() {
 		f.ErrorPrintf("Error while adding the user to the moderation: %v\n", err)
 		return
 	}
+
+	// Gestion de l'arrêt de l'application web via le terminal
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for sig := range c {
+			if sig == os.Interrupt {
+				f.ClearCmd()
+				f.CloseDatabase()
+				os.Exit(1)
+			}
+		}
+	}()
 
 	// Managing the program arguments
 	f.AddValueArg(f.ArgIntValue, "port", "p") // Argument to change the port
@@ -54,11 +69,16 @@ func LaunchWebApp() {
 	f.AddBaseTemplate("templates/base.html")
 
 	// Handle the routes
-	r.HandleFunc("/", pages.HomePage)
-	r.HandleFunc("/login", pages.LoginPage)
-	r.HandleFunc("/register", pages.RegisterPage)
-	r.HandleFunc("/profile", pages.UserProfilePage)
-	r.HandleFunc("/settings", pages.UserSettingsPage)
+	r.HandleFunc("/", pagesHandlers.HomePage)
+	r.HandleFunc("/login", pagesHandlers.LoginPage)
+	r.HandleFunc("/register", pagesHandlers.RegisterPage)
+	r.HandleFunc("/profile", pagesHandlers.UserProfilePage)
+	r.HandleFunc("/settings", pagesHandlers.UserSettingsPage)
+	r.HandleFunc("/reset-password", pagesHandlers.ResetPasswordPage)
+
+	// Handle error 404 & 405
+	r.NotFoundHandler = http.HandlerFunc(pagesHandlers.ErrorPage404)
+	r.MethodNotAllowedHandler = http.HandlerFunc(pagesHandlers.ErrorPage405)
 
 	// Creating the session store
 	f.SetupCookieStore()

@@ -11,7 +11,7 @@ var cookieStore *sessions.CookieStore
 var isInitialised = false
 
 // GetCookie returns the cookie with the given name.
-func GetCookie(w http.ResponseWriter, r *http.Request, name string) *http.Cookie {
+func GetCookie(r *http.Request, name string) *http.Cookie {
 	cookie, err := r.Cookie(name)
 	if err != nil {
 		return nil
@@ -58,18 +58,47 @@ func GetSession(r *http.Request) (*sessions.Session, error) {
 	return cookieStore.Get(r, "session")
 }
 
-// ClearSessionCookie empties the session cookie for the user.
-func ClearSessionCookie(w http.ResponseWriter, r *http.Request) error {
-	if !isInitialised {
-		// If the cookie store is not initialised, return an error
-		return errors.New("session store not initialised")
-	}
+// SetSessionCookie sets the session cookie for the user.
+// The session cookie is used to store the id of the user.
+// The cookie is stored in the session store.
+// Returns an error if there is one.
+func SetSessionCookie(w http.ResponseWriter, r *http.Request, email string) error {
 	session, err := GetSession(r)
 	if err != nil {
 		ErrorPrintf("Error getting the session: %v\n", err)
 		return err
 	}
-	delete(session.Values, "session")
+	session.Values["email"] = email
+	err = session.Save(r, w)
+	if err != nil {
+		ErrorPrintf("Error saving the session: %v\n", err)
+		return err
+	}
+	DebugPrintf("Setting the session cookie for email: %v\n", email)
+	return nil
+}
+
+// GetSessionCookie returns the session cookie for the user.
+// Returns the session cookie and an error if there is one.
+func GetSessionCookie(r *http.Request) (string, error) {
+	session, err := GetSession(r)
+	if err != nil {
+		ErrorPrintf("Error getting the session: %v\n", err)
+		return "", err
+	}
+	email := session.Values["email"].(string)
+	return email, nil
+}
+
+// EmptySessionCookie empties the session cookie for the user.
+// Returns an error if there is one.
+func EmptySessionCookie(w http.ResponseWriter, r *http.Request) error {
+	session, err := GetSession(r)
+	if err != nil {
+		ErrorPrintf("Error getting the session: %v\n", err)
+		return err
+	}
+	session.Values["email"] = ""
 	err = session.Save(r, w)
 	if err != nil {
 		ErrorPrintf("Error saving the session: %v\n", err)

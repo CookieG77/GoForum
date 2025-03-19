@@ -1,4 +1,4 @@
-package pages
+package pagesHandlers
 
 import (
 	f "GoForum/functions"

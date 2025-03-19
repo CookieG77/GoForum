@@ -1,6 +1,7 @@
 package functions
 
 import (
+	"bytes"
 	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
@@ -44,10 +45,28 @@ func ExecuteTemplate(w http.ResponseWriter, tmpl *template.Template, content int
 	}
 }
 
-// MakeTemplateAndExecute is to be used for pages that do not require any particular processing
+// MakeTemplateAndExecute is to be used for pagesHandlers that do not require any particular processing
 func MakeTemplateAndExecute(w http.ResponseWriter, r *http.Request, content interface{}, templatesDir ...string) {
 	tmpl := MakeTemplate(w, templatesDir...)
 	ExecuteTemplate(w, tmpl, content)
+}
+
+// TemplateToText execute a template and return the result as a string.
+func TemplateToText(tmpl *template.Template, content interface{}) string {
+	// Check if the template is nil
+	if tmpl == nil {
+		ErrorPrintln("An error occurred while trying to execute a template -> Template is nil")
+		return ""
+	}
+	// Create a buffer to store the content
+	var contentBuffer bytes.Buffer
+
+	// Execute the template
+	if err := tmpl.Execute(&contentBuffer, content); err != nil {
+		ErrorPrintf("An error occurred while trying to execute a template in TemplateToText -> %v\n", err)
+		return ""
+	}
+	return contentBuffer.String()
 }
 
 // NewContentInterface return a map[string]interface{} with a title given as parameter

@@ -26,7 +26,7 @@ func StrToTheme(s string) Theme {
 // GetAndResetUserTheme return the theme of the user if it exists
 // Otherwise it will set it at its default value (Light)
 func GetAndResetUserTheme(w http.ResponseWriter, r *http.Request) Theme {
-	cookie := GetCookie(w, r, "theme")
+	cookie := GetCookie(r, "theme")
 	if cookie == nil {
 		SetCookie(w, "theme", string(Light))
 		return Light
