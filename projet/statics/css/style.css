@@ -5,6 +5,12 @@
     font-family: 'VT323', monospace;
     letter-spacing: 2px;
     font-weight: 500;
+
+}
+
+
+body {
+    cursor: url('../img/arrow95.cur'), auto;
 }
 
 @font-face {
@@ -15,8 +21,12 @@
     font-style: normal;
 }
 
+a {
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+
 button {
-    cursor: pointer;
+    cursor: url('../img/pointer95.cur'), pointer;
     padding: 5px;
 }
 
