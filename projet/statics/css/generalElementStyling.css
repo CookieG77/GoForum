@@ -5,7 +5,6 @@
     outline: 4px solid #808080;
     outline-offset: -8px;
     padding: 4px;
-    background-color: silver;
 }
 
 .win95-border-indent, .win95-input-indent {
@@ -73,7 +72,6 @@
     cursor: url('../img/pointer95.cur'), pointer;
     box-shadow: inset -1px -1px 0px 0px #808080;
     user-select: none;
-    padding: 3px;
 }
 
 .win95-button:active {
@@ -88,4 +86,19 @@
     margin-left: auto;
     display: flex;
     gap: 5px;
+}
+
+.win95-menu-button {
+    background-color: silver;
+    border: none;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.win95-menu-button::first-letter {
+    text-decoration: underline;
+}
+
+.win95-menu-button:hover {
+    background-color: white;
 }

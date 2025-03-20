@@ -30,55 +30,57 @@
     {{ end }}
 </head>
 <body>
-<header>
+<div id="page-container" class="win95-border">
+    <header>
     <section class="logo header-sections" onclick="window.location.href = '/'">
         <img id="logo-image" class="minimized-image" src="https://media.makeameme.org/created/best-placeholder-ever.jpg" alt="logo icon">
         <span id="logo-title">Logo Title</span>
     </section>
     {{ if not .bareboneBase }}
-        <section class="search-box header-sections">
-            <div id="search-container">
-                <img id="search-icon" src="/img/search.svg" alt="search icon">
-                <form class="search-form" method="Post">
-                    <input class="search-input" type="search" placeholder="Search...">
-                    <button class="search-button" type="submit">Rechercher</button>
-                </form>
-
-            </div>
-        </section>
         <nav class="options header-sections">
             {{ if .IsAuthenticated }}
-                <button>Poster</button>
-                <button id="user-profile-button" class="invisible">
-                    <img id="user-profile-picture" class="minimized-image" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTK--BS2C9_TQHkmBXDrSd6JmLJzf99_ZcUWQ&s" alt="profile picture">
-                </button>
+            <button>Poster</button>
+            <button id="user-profile-button" class="invisible">
+                <img id="user-profile-picture" class="minimized-image" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTK--BS2C9_TQHkmBXDrSd6JmLJzf99_ZcUWQ&s" alt="profile picture">
+            </button>
             {{ else }}
-                <button onclick="window.location.href = '/register'">Creer un compte</button>
-                <button id="login-popup-opener">Se connecter</button>
+            <button onclick="window.location.href = '/register'" class="win95-menu-button">Creer un compte</button>
+            <button id="login-popup-opener" class="win95-menu-button">Se connecter</button>
             {{ end }}
         </nav>
+    <section class="search-box header-sections">
+        <div id="search-container">
+            <img id="search-icon" src="/img/search.svg" alt="search icon">
+            <form class="search-form" method="Post">
+                <input class="search-input win95-input-indent" type="search" placeholder="Search...">
+                <button class="search-button win95-button" type="submit">Rechercher</button>
+            </form>
+
+        </div>
+    </section>
+
     {{ end }}
     {{ if not .bareboneBase }}
-        {{ if eq .Error "serverError" }}
-            <div id="error-popup" onclick="document.getElementById('error-popup').display='none'">
-                <p>Erreur du serveur !</p>
-            </div>
-        {{ end }}
+    {{ if eq .Error "serverError" }}
+    <div id="error-popup" onclick="document.getElementById('error-popup').display='none'">
+        <p>Erreur du serveur !</p>
+    </div>
+    {{ end }}
     {{ end }}
 
 </header>
-{{ if not .bareboneBase }}
+    {{ if not .bareboneBase }}
     {{ if .IsAuthenticated }}
-        <section id="user-dropdown">
-            <form name="logoutForm" method="POST" class="hidden" action="/">
-                <input type="hidden" name="headerForm" value="logout">
-            </form>
-            <ul>
-                <li onclick="document.location.href='/profile'">Profile</li>
-                <li onclick="document.location.href='/settings'">Settings</li>
-                <li onclick="document.logoutForm.submit()">Logout</li>
-            </ul>
-        </section>
+    <section id="user-dropdown">
+        <form name="logoutForm" method="POST" class="hidden" action="/">
+            <input type="hidden" name="headerForm" value="logout">
+        </form>
+        <ul>
+            <li onclick="document.location.href='/profile'">Profile</li>
+            <li onclick="document.location.href='/settings'">Settings</li>
+            <li onclick="document.logoutForm.submit()">Logout</li>
+        </ul>
+    </section>
     {{ end }}
     <div id="login-popup" {{ if not .ShowLoginPage }}class="hidden"{{ end }}>
         <div id="login-popup-background"></div>
@@ -163,11 +165,13 @@
             <p>Pas encore un membre ?&nbsp;<a href="/register">Inscris-toi</a></p>
         </div>
     </div>
-{{ end }}
-<main>
-    <div id="main-content">
-        {{ template "content" . }}
-    </div>
-</main>
+    {{ end }}
+    <main class="win95-border-indent win95-input-indent">
+        <div id="main-content">
+            {{ template "content" . }}
+        </div>
+    </main>
+</div>
+
 </body>
 </html>
