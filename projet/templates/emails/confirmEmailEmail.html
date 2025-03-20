@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirm your Email</title>
+    <style>
+        body {
+            background: #1d364e;
+            color: #efefef;
+        }
+    </style>
+</head>
+<body>
+    <h1>Please confirm your email.</h1>
+    <p>Click on the following link to confirm your email:</p>
+    <a href="{{ .Url }}">{{ .UrlSimplified }}</a>
+    <p>If you didn't create an account on GoForum with this address, you can ignore this email.</p>
+    <p>Thanks</p>
+    <p>The GoForum team</p>
+</body>
+</html>
