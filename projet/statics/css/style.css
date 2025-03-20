@@ -179,6 +179,7 @@ main {
 }
 
 #main-content {
+    position: relative;
     padding: 5px;
     overflow-y: scroll;
     z-index: 0;

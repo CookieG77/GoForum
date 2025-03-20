@@ -6,6 +6,7 @@
     justify-content: center;
     align-items: center;
     background-color: silver;
+    margin: 1rem;
 }
 
 .auth-form {
