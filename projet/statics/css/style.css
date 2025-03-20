@@ -84,6 +84,10 @@ header{
     height: 1.25em;
 }
 
+#logo-image:hover {
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+
 .search-box {
     align-self: center;
     padding-left: 50px;
