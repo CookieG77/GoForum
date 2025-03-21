@@ -47,6 +47,38 @@
     },
     "home" : {
       "test" : "This is a test !"
+    },
+    "register" : {
+      "title"                          : "Register",
+      "error_message"                  : "An error occurred while trying to register. Please try again later. If the problem persists, please contact the support.",
+      "enter_information_message"      : "Please enter your information below.",
+      "missing_field_first_name"       : "Please fill the 'first name' field.",
+      "missing_field_last_name"        : "Please fill the 'last name' field.",
+      "missing_field_username"         : "Please fill the 'username' field.",
+      "missing_field_email"            : "Please fill the 'email' field.",
+      "missing_field_password"         : "Please fill the 'password' field.",
+      "missing_field_password_confirm" : "Please fill the 'confirm password' field.",
+      "missing_field_terms"            : "Please accept the terms of use.",
+      "field_first_name_label"         : "First name",
+      "field_last_name_label"          : "Last name",
+      "username_error_already_exists"  : "This username is already taken.",
+      "username_error_invalid"         : "Invalid Username : Must be at least between 3 and 20 characters long and must be made only of letters, numbers, underscores and hyphens",
+      "field_username_label"           : "Username",
+      "email_error_is_google"          : "This email is already associated with a Google account.",
+      "email_error_is_github"          : "This email is already associated with a GitHub account.",
+      "email_error_is_discord"         : "This email is already associated with a Discord account.",
+      "email_error_already_exists"     : "This email is already taken.",
+      "email_error_invalid"            : "Invalid email.",
+      "field_email_label"              : "Email",
+      "password_error_mismatch"        : "Passwords do not match.",
+      "password_error_invalid"         : "Invalid Password : Must be at least 8 characters long, under 64 characters long, contain at least one uppercase letter, one lowercase letter, one number and one special character",
+      "password_field_label"           : "Password",
+      "password_confirm_field_label"   : "Confirm password",
+      "terms_checkbox_label"           : "I agree to the terms of use",
+      "register_button"                : "Register",
+      "register_with"                  : "Register with",
+      "login_instead"                  : "Already a member ?",
+      "login_instead_button"           : "Login"
     }
   }
 }

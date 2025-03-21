@@ -24,6 +24,11 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	// Handle the user logout/login
 	ConnectFromHeader(w, r, &PageInfo)
 
+	// If we come from the register page with the value "openlogin" in the URL, we open the login popup
+	if r.URL.Query().Get("openlogin") == "true" {
+		PageInfo["ShowLoginPage"] = true
+	}
+
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/home.css")
 	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/home.html")

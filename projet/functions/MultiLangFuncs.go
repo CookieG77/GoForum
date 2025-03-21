@@ -19,7 +19,19 @@ const (
 // langList is a list of all the languages
 var langList = []Lang{En, Fr}
 
-const DefaultLang = En
+var DefaultLang Lang
+
+// InitDefaultLangConfig set up the default language
+func InitDefaultLangConfig() {
+	defaultLang := os.Getenv("DEFAULT_LANG")
+	if defaultLang == "" {
+		DefaultLang = En
+		WarningPrintf("No default language was given switching to : %s\n", DefaultLang)
+		return
+	}
+	DefaultLang = StrToLang(defaultLang)
+	SuccessPrintf("Default Language set to : %s\n", DefaultLang)
+}
 
 // GetLangContent returns the map[string]string containing each field text adapted to the given language
 // In case some fields are missing we first load the default version and overwrite it with the given language

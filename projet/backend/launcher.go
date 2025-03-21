@@ -25,6 +25,7 @@ func LaunchWebApp() {
 
 	// Initialize the database
 	f.InitDatabaseConnection()
+	// TODO : Remove me from the moderation, this is just for testing
 	err = f.AddUserToModeration("mcordonn9277@gmail.com", 2)
 	if err != nil {
 		f.ErrorPrintf("Error while adding the user to the moderation: %v\n", err)
@@ -70,7 +71,6 @@ func LaunchWebApp() {
 
 	// Handle the routes
 	r.HandleFunc("/", pagesHandlers.HomePage)
-	r.HandleFunc("/login", pagesHandlers.LoginPage)
 	r.HandleFunc("/register", pagesHandlers.RegisterPage)
 	r.HandleFunc("/profile", pagesHandlers.UserProfilePage)
 	r.HandleFunc("/settings", pagesHandlers.UserSettingsPage)
@@ -92,6 +92,9 @@ func LaunchWebApp() {
 
 	// Initialize the mail configuration
 	f.InitMail("MailConfig.json")
+
+	// Initialize the default language
+	f.InitDefaultLangConfig()
 
 	// Launch the server
 	f.LaunchServer(r, finalPort)
