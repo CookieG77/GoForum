@@ -130,14 +130,6 @@ func ConnectFromHeader(w http.ResponseWriter, r *http.Request, PageInfo *map[str
 					f.InfoPrintf("User %s logged in\n", emailOrUsername)
 					return false
 				}
-			default:
-				{
-					f.DebugPrintf("Unknown connection method: '%s\n'", connectionMethod)
-				}
-			}
-		default:
-			{
-				f.DebugPrintf("Unknown connection method: '%s\n'", r.Form.Get("headerForm"))
 			}
 		}
 	}

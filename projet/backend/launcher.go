@@ -75,6 +75,7 @@ func LaunchWebApp() {
 	r.HandleFunc("/profile", pagesHandlers.UserProfilePage)
 	r.HandleFunc("/settings", pagesHandlers.UserSettingsPage)
 	r.HandleFunc("/reset-password", pagesHandlers.ResetPasswordPage)
+	r.HandleFunc("/confirm-email-address", pagesHandlers.ConfirmMailPage)
 
 	// Handle error 404 & 405
 	r.NotFoundHandler = http.HandlerFunc(pagesHandlers.ErrorPage404)

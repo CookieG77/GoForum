@@ -54,7 +54,7 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 						PageInfo["Provider"] = provider
 					} else {
 						f.DebugPrintf("Sending a reset password mail to %s\n", email)
-						m.SendResetPasswordMail(email)
+						m.SendConfirmEmail(email)
 					}
 				}
 				// We don't tell the user if the email address is invalid
@@ -92,7 +92,7 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 					PageInfo["Error"] = "errorChangingPassword"
 				} else {
 					PageInfo["Success"] = true
-					err := f.RemoveEmailIdentification(id)
+					err := f.RemoveEmailIdentificationWithID(id)
 					if err != nil {
 						f.ErrorPrintf("Error while removing the email identification: %s\n", err)
 					} else {
@@ -105,21 +105,21 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else if r.Method == "GET" {
-		// If it's a GET request, we should have an id parameter in the URL
+		// If it's a GET request, we should have a token parameter in the URL
 		// If it's not a GET request, we should not have any parameter in the URL
 		f.DebugPrintf("Accessing the reset password page with a GET request\n")
-		id := r.URL.Query().Get("id")
-		if id != "" {
-			f.DebugPrintf("An id was found in the URL: %s\n", id)
-			if !f.CheckEmailIdentification(id, f.ResetPasswordEmail) {
-				// The id from the URL is not valid
+		token := r.URL.Query().Get("token")
+		if token != "" {
+			f.DebugPrintf("An token was found in the URL: %s\n", token)
+			if !f.CheckEmailIdentification(token, f.ResetPasswordEmail) {
+				// The token from the URL is not valid
 				ErrorPage(w, r, http.StatusBadRequest)
 				return
 			}
 			PageInfo["ComingFromMail"] = true
-			PageInfo["MailId"] = id
+			PageInfo["MailId"] = token
 		} else {
-			f.DebugPrintf("No id was found in the URL\n")
+			f.DebugPrintf("No token was found in the URL\n")
 		}
 	}
 

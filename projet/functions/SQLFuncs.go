@@ -102,11 +102,20 @@ func GetUserEmail(r *http.Request) string {
 	return email
 }
 
+// GetUserUsername returns the username of the user
+func GetUserUsername(r *http.Request) string {
+	username := GetUsernameFromEmail(GetUserEmail(r))
+	if username == "" {
+		ErrorPrintf("Error getting the username of the user\n")
+	}
+	return username
+}
+
 // GetUserRank returns the rank of the user
 // 0 = user; 1 = moderator; 2 = admin
 func GetUserRank(r *http.Request) int {
 	email := GetUserEmail(r)
-	checkRights := "SELECT rights_level FROM Moderation WHERE id = (SELECT id FROM users WHERE email = ?)"
+	checkRights := "SELECT rights_level FROM Moderation WHERE user_id = (SELECT user_id FROM users WHERE email = ?)"
 	rows, err := db.Query(checkRights, email)
 	if err != nil {
 		ErrorPrintf("Error checking the user rights: %v\n", err)
@@ -159,13 +168,16 @@ func CheckIfEmailLinkedToOAuth(email string) (bool, string) {
 		}
 	}(rows)
 	if rows.Next() {
-		var provider string
+		var provider sql.NullString
 		err := rows.Scan(&provider)
 		if err != nil {
 			ErrorPrintf("Error scanning the rows: %v\n", err)
 			return false, ""
 		}
-		return true, provider
+		if provider.Valid {
+			return true, provider.String
+		}
+		return false, ""
 	}
 	return false, ""
 }
@@ -249,6 +261,46 @@ func GetEmailFromUsername(username string) string {
 		return email
 	}
 	return ""
+}
+
+// IsUserVerified checks if the user is verified, i.e. if the email is verified.
+// Returns true if the user is verified and false otherwise.
+func IsUserVerified(r *http.Request) bool {
+	email := GetUserEmail(r)
+	checkEmailVerified := "SELECT email_verified FROM users WHERE email = ?"
+	rows, err := db.Query(checkEmailVerified, email)
+	if err != nil {
+		ErrorPrintf("Error checking if the email is verified: %v\n", err)
+		return false
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var emailVerified bool
+		err := rows.Scan(&emailVerified)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows: %v\n", err)
+			return false
+		}
+		return emailVerified
+	}
+	return false
+}
+
+// VerifyEmail verifies the email of the user.
+// Returns an error if there is one.
+func VerifyEmail(email string) error {
+	verifyEmail := "UPDATE users SET email_verified = TRUE WHERE email = ?"
+	_, err := db.Exec(verifyEmail, email)
+	if err != nil {
+		ErrorPrintf("Error verifying the email: %v\n", err)
+		return err
+	}
+	return nil
 }
 
 // CheckPasswordStrength checks if the password is strong enough
@@ -436,10 +488,13 @@ func IsAuthenticated(r *http.Request) bool {
 func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
 	if IsAuthenticated(r) {
 		(*PageInfo)["IsAuthenticated"] = true
+		(*PageInfo)["IsAddressVerified"] = false
 		(*PageInfo)["IsAdmin"] = false
 		(*PageInfo)["IsModerator"] = false
+
+		// Check if the user is an admin or a moderator
 		email := GetUserEmail(r)
-		checkRights := "SELECT rights_level FROM Moderation WHERE id = (SELECT id FROM users WHERE email = ?)"
+		checkRights := "SELECT rights_level FROM Moderation WHERE user_id = (SELECT user_id FROM users WHERE email = ?)"
 		rows, err := db.Query(checkRights, email)
 		if err != nil {
 			ErrorPrintf("Error checking the user rights: %v\n", err)
@@ -464,16 +519,44 @@ func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
 				(*PageInfo)["IsAdmin"] = true
 			}
 		}
+
+		// Check if the email is verified
+		checkEmailVerified := "SELECT email_verified FROM users WHERE email = ?"
+		rows, err = db.Query(checkEmailVerified, email)
+		if err != nil {
+			ErrorPrintf("Error checking if the email is verified: %v\n", err)
+			return
+		}
+		defer func(rows *sql.Rows) {
+			err := rows.Close()
+			if err != nil {
+				ErrorPrintf("Error closing the rows: %v\n", err)
+			}
+		}(rows)
+		if rows.Next() {
+			var emailVerified bool
+			err := rows.Scan(&emailVerified)
+			if err != nil {
+				ErrorPrintf("Error scanning the rows: %v\n", err)
+				return
+			}
+			if emailVerified {
+				(*PageInfo)["IsAddressVerified"] = true
+				DebugPrintln("Email verified is true")
+			}
+		}
 		return
 	}
 	(*PageInfo)["IsAuthenticated"] = false
+	(*PageInfo)["IsAddressVerified"] = false
 }
 
 // AddUserToModeration adds the user to the Moderation table if he is not already in it.
 // The user is added with the rights level given as parameter.
 // Returns an error if there is one.
 func AddUserToModeration(email string, rightsLevel int) error {
-	checkIfAlreadyInDB := "SELECT id FROM Moderation WHERE id = (SELECT id FROM users WHERE email = ?)"
+	InfoPrintf("Adding user %s with email %s to moderation: %d\n", GetUsernameFromEmail(email), email, rightsLevel)
+	checkIfAlreadyInDB := "SELECT user_id FROM Moderation WHERE user_id = (SELECT user_id FROM users WHERE email = ?)"
 	rows, err := db.Query(checkIfAlreadyInDB, email)
 	if err != nil {
 		ErrorPrintf("Error checking if the user is already in the Moderation table: %v\n", err)
@@ -489,7 +572,7 @@ func AddUserToModeration(email string, rightsLevel int) error {
 		DebugPrintf("User %s is already in the Moderation table\n", email)
 		return nil
 	}
-	insertUser := "INSERT INTO Moderation (user_id, rights_level) VALUES ((SELECT id FROM users WHERE email = ?), ?)"
+	insertUser := "INSERT INTO Moderation (user_id, rights_level) VALUES ((SELECT user_id FROM users WHERE email = ?), ?)"
 	_, err = db.Exec(insertUser, email, rightsLevel)
 	if err != nil {
 		ErrorPrintf("Error inserting the user into the Moderation table: %v\n", err)
@@ -523,7 +606,7 @@ func CreateEmailIdentificationLink(email string, emailType EmailType) (string, e
 		ErrorPrintf("Error generating the email id: %v\n", err)
 		return "", err
 	}
-	insertEmailIdentification := "INSERT INTO EmailIdentification (email_id, user_id, email_type) VALUES (?, (SELECT id FROM users WHERE email = ?), ?)"
+	insertEmailIdentification := "INSERT INTO EmailIdentification (email_id, user_id, email_type) VALUES (?, (SELECT user_id FROM users WHERE email = ?), ?)"
 	_, err = db.Exec(insertEmailIdentification, emailID, email, string(emailType))
 	if err != nil {
 		ErrorPrintf("Error inserting the email identification into the database: %v\n", err)
@@ -532,13 +615,37 @@ func CreateEmailIdentificationLink(email string, emailType EmailType) (string, e
 	return emailID, nil
 }
 
-// RemoveEmailIdentification removes the email identification with the given id from the database.
+// RemoveEmailIdentificationWithID removes the email identification with the given user_id from the database.
 // Returns an error if there is one.
-func RemoveEmailIdentification(emailID string) error {
+func RemoveEmailIdentificationWithID(emailID string) error {
 	removeEmailIdentification := "DELETE FROM EmailIdentification WHERE email_id = ?"
 	_, err := db.Exec(removeEmailIdentification, emailID)
 	if err != nil {
 		ErrorPrintf("Error removing the email identification from the database: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// RemoveEmailIdentificationForUser removes the email identification for the user with the given email and type from the database.
+// Returns an error if there is one.
+func RemoveEmailIdentificationForUser(email string, emailType EmailType) error {
+	removeEmailIdentification := "DELETE FROM EmailIdentification WHERE user_id = (SELECT user_id FROM users WHERE email = ?) AND email_type = ?"
+	_, err := db.Exec(removeEmailIdentification, email, string(emailType))
+	if err != nil {
+		ErrorPrintf("Error removing the email identification from the database: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// RemoveOldEmailIdentifications removes the old email identifications from the database.
+// Returns an error if there is one.
+func RemoveOldEmailIdentifications() error {
+	removeOldEmailIdentifications := "DELETE FROM EmailIdentification WHERE creation_date < datetime('now', '-1 day')"
+	_, err := db.Exec(removeOldEmailIdentifications)
+	if err != nil {
+		ErrorPrintf("Error removing the old email identifications from the database: %v\n", err)
 		return err
 	}
 	return nil
@@ -567,7 +674,7 @@ func CheckEmailIdentification(emailID string, emailType EmailType) bool {
 
 // GetEmailFromEmailIdentification returns the email from the email id.
 func GetEmailFromEmailIdentification(emailID string) string {
-	getEmail := "SELECT email FROM users WHERE id = (SELECT user_id FROM EmailIdentification WHERE email_id = ?)"
+	getEmail := "SELECT email FROM users WHERE user_id = (SELECT user_id FROM EmailIdentification WHERE email_id = ?)"
 	rows, err := db.Query(getEmail, emailID)
 	if err != nil {
 		ErrorPrintf("Error getting the email from the email identification: %v\n", err)
@@ -595,7 +702,7 @@ func GetEmailFromEmailIdentification(emailID string) string {
 // It creates the tables if they do not exist.
 func InitDatabase() {
 	UserTableSQL := `CREATE TABLE IF NOT EXISTS users (
-    	id INTEGER PRIMARY KEY AUTOINCREMENT,
+    	user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     	email TEXT NOT NULL UNIQUE,
     	username TEXT NOT NULL UNIQUE,
     	firstname TEXT NOT NULL,
@@ -620,7 +727,7 @@ func InitDatabase() {
 	ModerationTableSQL := `CREATE TABLE IF NOT EXISTS Moderation (
     	user_id INTEGER PRIMARY KEY,
     	rights_level INTEGER DEFAULT 0 NOT NULL,
-    	FOREIGN KEY (user_id) REFERENCES users(id)
+    	FOREIGN KEY (user_id) REFERENCES users(user_id)
 		);`
 
 	// the 'EmailIdentificationTable' table only contains the id of a user and the id of a link from an email
@@ -631,7 +738,8 @@ func InitDatabase() {
     	email_id TEXT PRIMARY KEY UNIQUE,
     	user_id INTEGER NOT NULL,
     	email_type TEXT NOT NULL,
-    	FOREIGN KEY (user_id) REFERENCES users(id)
+    	creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    	FOREIGN KEY (user_id) REFERENCES users(user_id)
 		);`
 
 	_, err := db.Exec(UserTableSQL)
