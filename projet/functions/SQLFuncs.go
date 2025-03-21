@@ -10,10 +10,32 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"time"
 )
 
 var databaseInitialised = false
 var db *sql.DB
+
+// User is a struct used to represent a user
+type User struct {
+	UserID        int
+	Email         string
+	Username      string
+	Firstname     string
+	Lastname      string
+	PasswordHash  sql.NullString
+	EmailVerified bool
+	OAuthProvider sql.NullString
+	OAuthID       sql.NullString
+	CreatedAt     time.Time
+}
+
+// UserConfigs is a struct used to represent the user configs
+type UserConfigs struct {
+	UserID int
+	Lang   string
+	Theme  string
+}
 
 // EmailType is a type used to determine the type of the email
 type EmailType string
@@ -42,7 +64,7 @@ func InitDatabaseConnection() {
 			return
 		}
 		db = testDB
-		InfoPrintf("Database initialised\n")
+		InfoPrintf("Database connection initialised\n")
 		databaseInitialised = true
 
 		// Initialise the database (create the tables if they do not exist and repair the database if needed)
@@ -102,13 +124,31 @@ func GetUserEmail(r *http.Request) string {
 	return email
 }
 
-// GetUserUsername returns the username of the user
-func GetUserUsername(r *http.Request) string {
-	username := GetUsernameFromEmail(GetUserEmail(r))
-	if username == "" {
-		ErrorPrintf("Error getting the username of the user\n")
+// GetUser returns the user configs
+func GetUser(r *http.Request) User {
+	email := GetUserEmail(r)
+	getUser := "SELECT * FROM users WHERE email = ?"
+	rows, err := db.Query(getUser, email)
+	if err != nil {
+		ErrorPrintf("Error getting the user: %v\n", err)
+		return User{}
 	}
-	return username
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var user User
+		err := rows.Scan(&user.UserID, &user.Email, &user.Username, &user.Firstname, &user.Lastname, &user.PasswordHash, &user.EmailVerified, &user.OAuthProvider, &user.OAuthID, &user.CreatedAt)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows: %v\n", err)
+			return User{}
+		}
+		return user
+	}
+	return User{}
 }
 
 // GetUserRank returns the rank of the user
@@ -149,6 +189,33 @@ func GetUserRankString(r *http.Request) string {
 	default:
 		return "user"
 	}
+}
+
+// GetUserConfig returns the user configs
+func GetUserConfig(r *http.Request) UserConfigs {
+	email := GetUserEmail(r)
+	getUserConfig := "SELECT * FROM user_configs WHERE user_id = (SELECT user_id FROM users WHERE email = ?)"
+	rows, err := db.Query(getUserConfig, email)
+	if err != nil {
+		ErrorPrintf("Error getting the user configs: %v\n", err)
+		return UserConfigs{}
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var userConfigs UserConfigs
+		err := rows.Scan(&userConfigs.UserID, &userConfigs.Lang, &userConfigs.Theme)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows: %v\n", err)
+			return UserConfigs{}
+		}
+		return userConfigs
+	}
+	return UserConfigs{}
 }
 
 // CheckIfEmailLinkedToOAuth checks if the email is already linked to an OAuth account
@@ -444,7 +511,7 @@ func AddUser(email, username, firstname, lastname, password string) error {
 		ErrorPrintf("Error inserting the user into the 'users' database: %v\n", err)
 		return err
 	}
-	insertUserConfigs := "INSERT INTO user_configs (user_id) VALUES ((SELECT id FROM users WHERE email = ?))"
+	insertUserConfigs := "INSERT INTO user_configs (user_id) VALUES ((SELECT user_id FROM users WHERE email = ?))"
 	_, err = db.Exec(insertUserConfigs, email)
 	if err != nil {
 		ErrorPrintf("Error inserting the user into the 'user_configs' table: %v\n", err)
@@ -588,14 +655,14 @@ func RandomHexString(n int) (string, error) {
 		return "", fmt.Errorf("la longueur doit être supérieure à zéro")
 	}
 
-	bytes := make([]byte, (n+1)/2) // On prend n/2 bytes pour obtenir n caractères hex
+	bytes := make([]byte, (n+1)/2)
 	_, err := rand.Read(bytes)
 	if err != nil {
 		return "", err
 	}
 
 	hexStr := hex.EncodeToString(bytes)
-	return hexStr[:n], nil // Tronquer à la longueur exacte demandée
+	return hexStr[:n], nil // trim any excess
 }
 
 // CreateEmailIdentificationLink creates a link between an email and an email id.
@@ -701,7 +768,8 @@ func GetEmailFromEmailIdentification(emailID string) string {
 // InitDatabase initialises the database.
 // It creates the tables if they do not exist.
 func InitDatabase() {
-	UserTableSQL := `CREATE TABLE IF NOT EXISTS users (
+	UserTableSQL := `
+		CREATE TABLE IF NOT EXISTS users (
     	user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     	email TEXT NOT NULL UNIQUE,
     	username TEXT NOT NULL UNIQUE,
@@ -712,35 +780,42 @@ func InitDatabase() {
     	oauth_provider TEXT,
     	oauth_id TEXT,
     	creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );`
+        );
+		`
 
-	UserConfigsSQL := `CREATE TABLE IF NOT EXISTS user_configs (
+	UserConfigsSQL := `
+		CREATE TABLE IF NOT EXISTS user_configs (
     	user_id INTEGER PRIMARY KEY,
-    	lang TEXT DEFAULT 'en',
-    	style TEXT DEFAULT 'light',
+    	lang TEXT DEFAULT 'en' NOT NULL,
+    	style TEXT DEFAULT 'light' NOT NULL,
     	FOREIGN KEY (user_id) REFERENCES users(id)
-		);`
+		);
+		`
 
 	// the 'Moderation' table only contains the id of the user who has admin/moderator rights
 	// the 'rights_level' column is used to determine the rights level of the user
 	// 0 = user; 1 = moderator; 2 = admin
-	ModerationTableSQL := `CREATE TABLE IF NOT EXISTS Moderation (
+	ModerationTableSQL := `
+		CREATE TABLE IF NOT EXISTS Moderation (
     	user_id INTEGER PRIMARY KEY,
     	rights_level INTEGER DEFAULT 0 NOT NULL,
     	FOREIGN KEY (user_id) REFERENCES users(user_id)
-		);`
+		);
+		`
 
 	// the 'EmailIdentificationTable' table only contains the id of a user and the id of a link from an email
 	// the 'email_id' column is used to determine the email id (it's a unique identifier, it's a 64 characters long hexadecimal string)
 	// the 'email_type' column is used to determine the type of the email (it can be 'reset_password', 'verify_email' or 'other')
 	// the 'user_id' column is used to determine the user id of the user who has this email (it's a foreign key to the 'users' table)
-	EmailIdentificationTableSQL := `CREATE TABLE EmailIdentification (
+	EmailIdentificationTableSQL := `
+		CREATE TABLE EmailIdentification (
     	email_id TEXT PRIMARY KEY UNIQUE,
     	user_id INTEGER NOT NULL,
     	email_type TEXT NOT NULL,
     	creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     	FOREIGN KEY (user_id) REFERENCES users(user_id)
-		);`
+		);
+		`
 
 	_, err := db.Exec(UserTableSQL)
 	if err != nil {
@@ -772,51 +847,24 @@ func InitDatabase() {
 
 	// Repairing the database just in case
 	// If a user doesn't have a row in user_configs, we add it
-
-	// Get all the users
-	getAllUsers := "SELECT id FROM users"
-	rows, err := db.Query(getAllUsers)
+	insertMissingUserConfigs := `
+		INSERT INTO user_configs (user_id)
+		SELECT user_id FROM users
+		WHERE user_id NOT IN (SELECT user_id FROM user_configs)
+		`
+	_, err = db.Exec(insertMissingUserConfigs)
 	if err != nil {
-		ErrorPrintf("Error getting all the users: %v\n", err)
+		ErrorPrintf("Error inserting missing user configs: %v\n", err)
 		return
 	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			ErrorPrintf("Error closing the rows: %v\n", err)
-		}
-	}(rows)
 
-	// For each user, we check if he has a row in user_configs
-	// If he doesn't, we add it
-	for rows.Next() {
-		var id int
-		err := rows.Scan(&id)
-		if err != nil {
-			ErrorPrintf("Error scanning the rows: %v\n", err)
-			return
-		}
-		checkUserConfigs := "SELECT user_id FROM user_configs WHERE user_id = ?"
-		rowsUserConfigs, err := db.Query(checkUserConfigs, id)
-		if err != nil {
-			ErrorPrintf("Error checking the user configs: %v\n", err)
-			return
-		}
-		defer func(rows *sql.Rows) {
-			err := rows.Close()
-			if err != nil {
-				ErrorPrintf("Error closing the rows: %v\n", err)
-			}
-		}(rowsUserConfigs)
-		if !rowsUserConfigs.Next() {
-			insertUserConfigs := "INSERT INTO user_configs (user_id) VALUES (?)"
-			_, err = db.Exec(insertUserConfigs, id)
-			if err != nil {
-				ErrorPrintf("Error inserting the user into the 'user_configs' table: %v\n", err)
-				return
-			}
-		}
+	// Remove the old email identifications from the database
+	err = RemoveOldEmailIdentifications()
+	if err != nil {
+		ErrorPrintf("Error removing old email identifications: %v\n", err)
+		return
 	}
+
 	InfoPrintln("Database initialised")
 }
 

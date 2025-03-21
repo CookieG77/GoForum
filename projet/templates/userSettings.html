@@ -1,5 +1,43 @@
 {{ define "content" }}
 
+<br><br><br><br><br><br><br><!--TODO: Remove this line once the header is fixed (when a user is connected it overlaps the body hiding content)-->
 <p>Welcome to the user settings page !</p>
+<div id="current-settings">
+    <p> User lang :<span>
+        {{ range $key, $value := .Lang.langs }}
+            {{ if eq (interfaceToString $key) $.UserLang }}
+                {{ $value }}
+            {{ end }}
+        {{ end }}
+    </span></p>
+    <p> User theme :<span>
+        {{ range $key, $value := .Lang.themes }}
+            {{ if eq (interfaceToString $key) $.UserTheme }}
+                {{ $value }}
+            {{ end }}
+        {{ end }}
+    </span></p>
+</div>
+<div id="change-settings">
+    <form action="/userSettings" method="post">
+        <label for="lang">Choose a language:</label>
+        <select name="lang" id="lang">
+            <option value="{{ .UserLang }}">
+                {{ range $key, $value := .Lang.langs }}
+                    {{ if eq (interfaceToString $key) $.UserLang }}
+                        {{ $value }}
+                    {{ end }}
+                {{ end }}
+            </option>
+        </select>
+        <br>
+        <label for="theme">Choose a theme:</label>
+        <select name="theme" id="theme">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+        </select>
+        <input type="submit" value="Submit">
 
+    </form>
+</div>
 {{ end }}

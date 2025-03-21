@@ -25,11 +25,14 @@ func ConfirmMailPage(w http.ResponseWriter, r *http.Request) {
 	// Handle the user logout/login
 	ConnectFromHeader(w, r, &PageInfo)
 
+	// Getting the user
+	user := f.GetUser(r)
+
 	// Setting the pages values to default
 	PageInfo["Error"] = ""
 	PageInfo["Success"] = false
-	PageInfo["UserMail"] = f.GetUserEmail(r)
-	PageInfo["UserUsername"] = f.GetUserUsername(r)
+	PageInfo["UserMail"] = user.Email
+	PageInfo["UserUsername"] = user.Username
 
 	// If we receive a POST request, we resend the email
 	if r.Method == "POST" {
@@ -39,7 +42,7 @@ func ConfirmMailPage(w http.ResponseWriter, r *http.Request) {
 		} else {
 			// Send the email
 			PageInfo["Success"] = true
-			m.SendConfirmEmail(PageInfo["UserMail"].(string))
+			m.SendConfirmEmail(user.Email)
 
 		}
 	} else if r.Method == "GET" {
@@ -56,7 +59,7 @@ func ConfirmMailPage(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				// The token is valid
-				err := f.VerifyEmail(PageInfo["UserMail"].(string))
+				err := f.VerifyEmail(user.Email)
 				if err != nil {
 					f.ErrorPrintf("Error while verifying the email address: %s\n", err)
 					ErrorPage(w, r, http.StatusInternalServerError)

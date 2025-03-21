@@ -1,4 +1,12 @@
 {
+  "langs" : {
+    "en" : "Anglais",
+    "fr" : "Français"
+  },
+  "themes" : {
+    "light" : "Clair",
+    "dark"  : "Sombre"
+  },
   "pageNames" : {
     "home" : "Accueil"
   },

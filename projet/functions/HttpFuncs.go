@@ -23,7 +23,9 @@ func AddBaseTemplate(templatePath ...string) {
 // It will use the base templates defined in the baseTemplates variable.
 func MakeTemplate(w http.ResponseWriter, templatesDir ...string) *template.Template {
 	templatesDir = append(templatesDir, baseTemplates...)
-	tmpl, err := template.New("base.html").ParseFiles(templatesDir...)
+	tmpl, err := template.New("base.html").Funcs(template.FuncMap{
+		"interfaceToString": interfaceToString,
+	}).ParseFiles(templatesDir...)
 	if err != nil {
 		ErrorPrintf("An error occurred while trying to parse the template -> %v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -166,4 +168,13 @@ func LaunchServer(r *mux.Router, port string) {
 // IsCertified returns true if the server is running in HTTPS mode, false otherwise.
 func IsCertified() bool {
 	return isCertified
+}
+
+// ================================
+// |Functions for inside the pages|
+// ================================
+
+// interfaceToString is a function to convert an interface to a string.
+func interfaceToString(i interface{}) string {
+	return i.(string)
 }

@@ -68,3 +68,8 @@ func GetAndResetUserLang(w http.ResponseWriter, r *http.Request) Lang {
 	}
 	return StrToLang(cookie.Value)
 }
+
+// GetLangList return the list of all the languages
+func GetLangList() []Lang {
+	return langList
+}
