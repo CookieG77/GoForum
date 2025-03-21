@@ -76,10 +76,10 @@ func TemplateToText(tmpl *template.Template, content interface{}) string {
 func NewContentInterface(pageTitleKey string, w http.ResponseWriter, r *http.Request) map[string]interface{} {
 	ContentInterface := make(map[string]interface{})
 	// Getting the user language
-	currentLang := GetAndResetUserLang(w, r)
+	currentLang := GetUserLang(r)
 	langText, err := GetLangContent(currentLang)
 	if err != nil {
-		ErrorPrintf("An error occurred while trying to get the language content -> %v/n", err)
+		ErrorPrintf("An error occurred while trying to get the language content -> %v\n", err)
 	} else {
 		ContentInterface["Lang"] = langText
 		ContentInterface["Title"] = langText["pageNames"].(map[string]interface{})[pageTitleKey]

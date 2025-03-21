@@ -10,7 +10,43 @@
   "pageNames" : {
     "home" : "Home"
   },
-  "home" : {
-    "test" : "This is a test"
+  "pages" : {
+    "base" : {
+      "header" : {
+        "logo_alt"                     : "Logo icon",
+        "website_name"                 : "GoForum",
+        "post_button"                  : "Post",
+        "register_account_button"      : "Register an account",
+        "login_button"                 : "Login",
+        "search_bar_placeholder"       : "Search...",
+        "search_button"                : "Search",
+        "profile_button"               : "Profile",
+        "settings_button"              : "Settings",
+        "logout_button"                : "Logout"
+      },
+      "connection_popup" : {
+        "title"                        : "Connection",
+        "login_server_error"           : "An error occurred while trying to login. Please try again later.",
+        "login_invalid_credentials"    : "Invalid credentials.",
+        "login_missing_fields"         : "Please fill all the fields.",
+        "login_account_is_google"      : "This account is a Google account. Please login with Google.",
+        "login_account_is_github"      : "This account is a GitHub account. Please login with GitHub.",
+        "login_account_is_discord"     : "This account is a Discord account. Please login with Discord.",
+        "login_missing_field_email"    : "Please fill the 'email' field.",
+        "login_missing_field_password" : "Please fill the 'password' field.",
+        "email_field_label"            : "Email",
+        "password_field_label"         : "Password",
+        "forgot_password_button"       : "Forgot password ?",
+        "remember_me_checkbox"         : "Remember me",
+        "login_button"                 : "Login",
+        "separator_or"                 : "or",
+        "login_with"                   : "Login with",
+        "register_instead"             : "Not a member yet ?",
+        "register_instead_button"      : "Register an account!"
+      }
+    },
+    "home" : {
+      "test" : "This is a test !"
+    }
   }
 }

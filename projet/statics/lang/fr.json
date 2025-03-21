@@ -10,7 +10,43 @@
   "pageNames" : {
     "home" : "Accueil"
   },
-  "home" : {
-    "test" : "Ceci est un test"
+  "pages" : {
+    "base" : {
+      "header" : {
+        "logo_alt"                     : "Icône du logo",
+        "website_name"                 : "GoForum",
+        "post_button"                  : "Publier",
+        "register_account_button"      : "Créer un compte",
+        "login_button"                 : "Connexion",
+        "search_bar_placeholder"       : "Rechercher...",
+        "search_button"                : "Rechercher",
+        "profile_button"               : "Profil",
+        "settings_button"              : "Paramètres",
+        "logout_button"                : "Déconnexion"
+      },
+      "connection_popup" : {
+        "title"                        : "Connexion",
+        "login_server_error"           : "Une erreur est survenue lors de la tentative de connexion. Veuillez réessayer plus tard.",
+        "login_invalid_credentials"    : "Identifiants invalides.",
+        "login_missing_fields"         : "Veuillez remplir tous les champs.",
+        "login_account_is_google"      : "Ce compte est un compte Google. Veuillez vous connecter avec Google.",
+        "login_account_is_github"      : "Ce compte est un compte GitHub. Veuillez vous connecter avec GitHub.",
+        "login_account_is_discord"     : "Ce compte est un compte Discord. Veuillez vous connecter avec Discord.",
+        "login_missing_field_email"    : "Veuillez remplir le champ 'email'.",
+        "login_missing_field_password" : "Veuillez remplir le champ 'mot de passe'.",
+        "email_field_label"            : "Email",
+        "password_field_label"         : "Mot de passe",
+        "forgot_password_button"       : "Mot de passe oublié ?",
+        "remember_me_checkbox"         : "Se souvenir de moi",
+        "login_button"                 : "Connexion",
+        "separator_or"                 : "ou",
+        "login_with"                   : "Se connecter avec",
+        "register_instead"             : "Pas encore membre ?",
+        "register_instead_button"      : "Créer un compte !"
+      }
+    },
+    "home" : {
+      "test" : "Ceci est un test !"
+    }
   }
 }

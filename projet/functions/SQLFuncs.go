@@ -786,7 +786,7 @@ func InitDatabase() {
 	UserConfigsSQL := `
 		CREATE TABLE IF NOT EXISTS user_configs (
     	user_id INTEGER PRIMARY KEY,
-    	lang TEXT DEFAULT 'en' NOT NULL,
+    	lang TEXT DEFAULT ? NOT NULL,
     	style TEXT DEFAULT 'light' NOT NULL,
     	FOREIGN KEY (user_id) REFERENCES users(id)
 		);
@@ -822,7 +822,7 @@ func InitDatabase() {
 		ErrorPrintf("Error creating users table: %v\n", err)
 		return
 	}
-	_, err = db.Exec(UserConfigsSQL)
+	_, err = db.Exec(UserConfigsSQL, string(DefaultLang))
 	if err != nil {
 		ErrorPrintf("Error creating user_configs table: %v\n", err)
 		return
