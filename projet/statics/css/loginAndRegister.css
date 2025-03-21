@@ -1,6 +1,7 @@
 .auth-container {
-    width: 50vw;
+    width: 40vw;
     max-width: 900px;
+    min-width: 560px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -11,6 +12,7 @@
 
 .auth-form {
     display: flex;
+    position: relative;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -18,7 +20,7 @@
 }
 
 .form-group, .form-group-checkbox {
-    width: 80%;
+    width: 90%;
     display: flex;
 }
 .form-group {
@@ -68,4 +70,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.register-section {
+    width: calc(100% - 16px);
 }

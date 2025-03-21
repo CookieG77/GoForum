@@ -5,117 +5,120 @@
     {{ if .Error }}
         <p class="error-message">An error occurred, please try again, if it keeps happening contact the support !</p>
     {{ end }}
-    <form id="register-form" class="auth-form win95-border-indent" method="POST" action="/register">
-        <p class="register-paragraph">Entrez vos informations :</p>
-        <div class="form-group">
-            {{ if .MissingFields }}
+    <section class="register-section win95-border-indent">
+        <form id="register-form" class="auth-form" method="POST" action="/register">
+            <p class="register-paragraph">Entrez vos informations :</p>
+            <div class="form-group">
+                {{ if .MissingFields }}
                 {{ range .MissingFields }}
-                    {{ if eq . "firstName" }}
-                        <p class="error-missing-field">First Name is required</p>
-                    {{ end }}
+                {{ if eq . "firstName" }}
+                <p class="error-missing-field">First Name is required</p>
                 {{ end }}
-            {{ end }}
-            <label class="auth-label" for="first-name">First Name:</label>
-            <input class="auth-input win95-input-indent" type="text" id="first-name" name="first_name" placeholder="First Name" required {{ if .ValueFirstName }}value="{{ .ValueFirstName }}"{{ end }}>
-        </div>
-        <div class="form-group">
-            {{ if .MissingFields }}
+                {{ end }}
+                {{ end }}
+                <label class="auth-label" for="first-name">First Name:</label>
+                <input class="auth-input win95-input-indent" type="text" id="first-name" name="first_name" placeholder="First Name" required {{ if .ValueFirstName }}value="{{ .ValueFirstName }}"{{ end }}>
+            </div>
+            <div class="form-group">
+                {{ if .MissingFields }}
                 {{ range .MissingFields }}
-                    {{ if eq . "lastName" }}
-                        <p class="error-missing-field">Last Name is required</p>
-                    {{ end }}
+                {{ if eq . "lastName" }}
+                <p class="error-missing-field">Last Name is required</p>
                 {{ end }}
-            {{ end }}
-            <label class="auth-label" for="last-name">Last Name:</label>
-            <input class="auth-input win95-input-indent" type="text" id="last-name" name="last_name" placeholder="Last Name" required {{ if .ValueLastName }} value="{{ .ValueLastName }}" {{ end }}>
-        </div>
-        <div class="form-group">
-            {{ if .MissingFields }}
+                {{ end }}
+                {{ end }}
+                <label class="auth-label" for="last-name">Last Name:</label>
+                <input class="auth-input win95-input-indent" type="text" id="last-name" name="last_name" placeholder="Last Name" required {{ if .ValueLastName }} value="{{ .ValueLastName }}" {{ end }}>
+            </div>
+            <div class="form-group">
+                {{ if .MissingFields }}
                 {{ range .MissingFields }}
-                    {{ if eq . "username" }}
-                        <p class="error-missing-field">Username is required</p>
-                    {{ end }}
+                {{ if eq . "username" }}
+                <p class="error-missing-field">Username is required</p>
                 {{ end }}
-            {{ end }}
-            {{ if eq .UsernameError "alreadyInUse" }}
+                {{ end }}
+                {{ end }}
+                {{ if eq .UsernameError "alreadyInUse" }}
                 <p class="error-missing-field">Username already in use</p>
-            {{ end }}
-            {{ if eq .UsernameError "invalid" }}
-                <p class="error-missing-field">Invalid Username : Must be at least between 3 and 20 characters long and must be made only of letters, numbers, underscores and hyphens</p>
-            {{ end }}
-            <label class="auth-label" for="username">Username:</label>
-            <input class="auth-input win95-input-indent" type="text" id="username" name="username" placeholder="Username" required {{ if .ValueUsername }} value="{{ .ValueUsername }}" {{ end }}>
-        </div>
-        <div class="form-group">
-            {{ if .MissingFields }}
-                {{ range .MissingFields }}
-                    {{ if eq . "email" }}
-                        <p class="error-missing-field">Email is required</p>
-                    {{ end }}
                 {{ end }}
-            {{ end }}
-            {{ if eq .EmailError "alreadyInUseOAuth" }}
+                {{ if eq .UsernameError "invalid" }}
+                <p class="error-missing-field">Invalid Username : Must be at least between 3 and 20 characters long and must be made only of letters, numbers, underscores and hyphens</p>
+                {{ end }}
+                <label class="auth-label" for="username">Username:</label>
+                <input class="auth-input win95-input-indent" type="text" id="username" name="username" placeholder="Username" required {{ if .ValueUsername }} value="{{ .ValueUsername }}" {{ end }}>
+            </div>
+            <div class="form-group">
+                {{ if .MissingFields }}
+                {{ range .MissingFields }}
+                {{ if eq . "email" }}
+                <p class="error-missing-field">Email is required</p>
+                {{ end }}
+                {{ end }}
+                {{ end }}
+                {{ if eq .EmailError "alreadyInUseOAuth" }}
                 {{ if eq .Provider "google" }}
-                    <p class="error-missing-field">Email already in use with Google</p>
+                <p class="error-missing-field">Email already in use with Google</p>
                 {{ end }}
                 {{ if eq .Provider "github" }}
-                    <p class="error-missing-field">Email already in use with GitHub</p>
+                <p class="error-missing-field">Email already in use with GitHub</p>
                 {{ end }}
                 {{ if eq .Provider "discord" }}
-                    <p class="error-missing-field">Email already in use with Discord</p>
+                <p class="error-missing-field">Email already in use with Discord</p>
                 {{ end }}
-            {{ end }}
-            {{ if eq .EmailError "alreadyInUse" }}
+                {{ end }}
+                {{ if eq .EmailError "alreadyInUse" }}
                 <p class="error-missing-field">Email already in use</p>
-            {{ end }}
-            {{ if eq .EmailError "invalid" }}
+                {{ end }}
+                {{ if eq .EmailError "invalid" }}
                 <p class="error-missing-field">Invalid Email</p>
-            {{ end }}
-            <label class="auth-label" for="register-email">Email:</label>
-            <input class="auth-input win95-input-indent" type="email" id="register-email" name="email" placeholder="Email" required {{ if .ValueEmail }} value="{{ .ValueEmail }}" {{ end }}>
-        </div>
-        <div class="form-group">
-            {{ if .MissingFields }}
-                {{ range .MissingFields }}
-                    {{ if eq . "password" }}
-                        <p class="error-missing-field">Password is required</p>
-                    {{ end }}
                 {{ end }}
-            {{ end }}
-            {{ if eq .PasswordError "different" }}
+                <label class="auth-label" for="register-email">Email:</label>
+                <input class="auth-input win95-input-indent" type="email" id="register-email" name="email" placeholder="Email" required {{ if .ValueEmail }} value="{{ .ValueEmail }}" {{ end }}>
+            </div>
+            <div class="form-group">
+                {{ if .MissingFields }}
+                {{ range .MissingFields }}
+                {{ if eq . "password" }}
+                <p class="error-missing-field">Password is required</p>
+                {{ end }}
+                {{ end }}
+                {{ end }}
+                {{ if eq .PasswordError "different" }}
                 <p class="error-missing-field">Passwords do not match</p>
-            {{ end }}
-            {{ if eq .PasswordError "invalid" }}
+                {{ end }}
+                {{ if eq .PasswordError "invalid" }}
                 <p class="error-missing-field">Invalid Password : Must be at least 8 characters long, under 64 characters long, contain at least one uppercase letter, one lowercase letter, one number and one special character</p>
-            {{ end }}
-            <label class="auth-label" for="register-password">Password:</label>
-            <input class="auth-input win95-input-indent" type="password" id="register-password" name="password" placeholder="Password" required>
-        </div>
-        <div class="form-group">
-            {{ if .MissingFields }}
-                {{ range .MissingFields }}
-                    {{ if eq . "confirm_password" }}
-                        <p class="error-missing-field">Confirm Password is required</p>
-                    {{ end }}
                 {{ end }}
-            {{ end }}
-            <label class="auth-label" for="register-confirm-password">Confirm Password:</label>
-            <input class="auth-input win95-input-indent" type="password" id="register-confirm-password" name="confirm_password" placeholder="Confirm Password" required>
-        </div>
-        <div class="form-group-checkbox">
-            {{ if .MissingFields }}
+                <label class="auth-label" for="register-password">Password:</label>
+                <input class="auth-input win95-input-indent" type="password" id="register-password" name="password" placeholder="Password" required>
+            </div>
+            <div class="form-group">
+                {{ if .MissingFields }}
                 {{ range .MissingFields }}
-                    {{ if eq . "terms" }}
-                        <p class="error-missing-field">You must agree to the Terms &amp; Conditions</p>
-                    {{ end }}
+                {{ if eq . "confirm_password" }}
+                <p class="error-missing-field">Confirm Password is required</p>
                 {{ end }}
-            {{ end }}
-            <input type="checkbox" id="terms" class="win95-checkbox" name="terms" required>
-            <label class="auth-label-checkbox" for="terms">I Agree to the Terms &amp; Conditions</label>
-        </div>
-        <button type="submit" class="auth-button win95-button">Register</button>
-    </form>
-    <section class="login-popup-section win95-border-indent">
+                {{ end }}
+                {{ end }}
+                <label class="auth-label" for="register-confirm-password">Confirm Password:</label>
+                <input class="auth-input win95-input-indent" type="password" id="register-confirm-password" name="confirm_password" placeholder="Confirm Password" required>
+            </div>
+            <div class="form-group-checkbox">
+                {{ if .MissingFields }}
+                {{ range .MissingFields }}
+                {{ if eq . "terms" }}
+                <p class="error-missing-field">You must agree to the Terms &amp; Conditions</p>
+                {{ end }}
+                {{ end }}
+                {{ end }}
+                <input type="checkbox" id="terms" class="win95-checkbox" name="terms" required>
+                <label class="auth-label-checkbox" for="terms">I Agree to the Terms &amp; Conditions</label>
+            </div>
+            <button type="submit" class="auth-button win95-button">Register</button>
+        </form>
+    </section>
+
+    <section class="register-section win95-border-indent">
         <p class="register-paragraph">Connectez vous avec :</p>
         <div id="register-connect-with">
             <button onclick="document.location.href = '/auth/google'" class="win95-button">
