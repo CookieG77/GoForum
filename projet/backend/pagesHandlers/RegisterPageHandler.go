@@ -1,6 +1,7 @@
 package pagesHandlers
 
 import (
+	m "GoForum/backend/emailsHandlers"
 	f "GoForum/functions"
 	"net/http"
 )
@@ -153,6 +154,8 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 			"New user added to the database:\n\t- email : %s\n\t- username : %s\n\t- firstName : %s\n\t- lastName : %s\n",
 			email, username, firstName, lastName,
 		)
+		// Send the confirmation email
+		m.SendConfirmEmail(email)
 		// Set the session cookie
 		err = f.SetSessionCookie(w, r, email)
 		if err != nil {
@@ -162,8 +165,8 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Redirect to the home page
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		// Redirect to the mail confirmation page
+		http.Redirect(w, r, "/confirm-email-address", http.StatusSeeOther)
 
 	}
 	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")

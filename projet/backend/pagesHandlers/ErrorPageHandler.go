@@ -10,9 +10,15 @@ func ErrorPage(w http.ResponseWriter, r *http.Request, status int) {
 	// Check the user rights
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {
-		f.InfoPrintf("Error page accessed at %s by %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+		// If the user is not verified, redirect him to the verify page
+		if !PageInfo["IsAddressVerified"].(bool) {
+			f.InfoPrintf("Home page accessed at %s by unverified %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+			http.Redirect(w, r, "/confirm-email-address", http.StatusFound)
+			return
+		}
+		f.InfoPrintf("Home page accessed at %s by verified %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
 	} else {
-		f.InfoPrintf("Error page accessed at %s\n", f.GetIP(r))
+		f.InfoPrintf("Home page accessed at %s\n", f.GetIP(r))
 	}
 
 	// Handle the user logout/login
