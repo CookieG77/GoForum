@@ -23,13 +23,13 @@ func LaunchWebApp() {
 		f.SuccessPrintln("Environment variables loaded")
 	}
 
-	// Initialize the database
+	/* // Initialize the database
 	f.InitDatabaseConnection()
 	err = f.AddUserToModeration("mcordonn9277@gmail.com", 2)
 	if err != nil {
 		f.ErrorPrintf("Error while adding the user to the moderation: %v\n", err)
 		return
-	}
+	} */
 
 	// Gestion de l'arrêt de l'application web via le terminal
 	c := make(chan os.Signal, 1)
