@@ -8,10 +8,14 @@
 
 }
 
+.scroll-content::-webkit-scrollbar {
+    display: none;
+}
+
 #page-container {
+    position: fixed;
     width: 100vw;
     height: 100vh;
-    position: absolute;
     top: 0;
     left: 0;
     background-color: silver;
@@ -170,6 +174,7 @@ header{
 
 main {
     position: fixed;
+    overflow: hidden;
     background-color: white;
     top: 7rem;
     left: 8px;
@@ -178,7 +183,7 @@ main {
     z-index: 0;
 }
 
-#main-content {
+.main-content {
     position: relative;
     padding: 5px;
     overflow-y: auto;

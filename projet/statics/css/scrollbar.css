@@ -1,0 +1,54 @@
+.scroll-content {
+    padding-right: 20px;
+}
+
+.custom-scrollbar {
+    z-index: 2;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 18px;
+    height: 100%;
+    background: #c0c0c0;
+}
+
+.scrollbar-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 18px;
+    background: #c0c0c0;
+    line-height: 18px;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+    border-left: 4px solid #7f7f7f;
+    border-top: 4px solid #7f7f7f;
+    border-right: 4px solid #ffffff;
+    border-bottom: 4px solid #ffffff;
+}
+
+.scrollbar-arrow.up {
+    position: absolute;
+    top: 0;
+}
+
+.scrollbar-arrow.down {
+    position: absolute;
+    bottom: 0;
+}
+
+.scrollbar-thumb {
+    position: absolute;
+    top: 18px;
+    right: 0;
+    width: 18px;
+    background: #c0c0c0;
+    cursor: pointer;
+    border-left: 4px solid #808080;
+    border-top: 4px solid #808080;
+    border-right: 4px solid #ffffff;
+    border-bottom: 4px solid #ffffff;
+}
