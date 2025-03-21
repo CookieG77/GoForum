@@ -45,8 +45,11 @@ func InitDatabaseConnection() {
 		InfoPrintf("Database initialised\n")
 		databaseInitialised = true
 
-		// Debug func call to fill the database with test data
+		// Initialise the database (create the tables if they do not exist and repair the database if needed)
 		InitDatabase()
+
+		// Debug func call to fill the database with test data
+		FillDatabase()
 	}
 }
 
@@ -375,6 +378,7 @@ func GetConnectionMethod(emailOrUsername string) (string, string) {
 }
 
 // AddUser adds a user to the database.
+// As well as in the 'user_configs' table.
 // Returns an error if there is one.
 func AddUser(email, username, firstname, lastname, password string) error {
 	hashedPassword, err := HashPassword(password)
@@ -385,7 +389,13 @@ func AddUser(email, username, firstname, lastname, password string) error {
 	insertUser := "INSERT INTO users (email, username, firstname, lastname, password_hash) VALUES (?, ?, ?, ?, ?)"
 	_, err = db.Exec(insertUser, email, username, firstname, lastname, hashedPassword)
 	if err != nil {
-		ErrorPrintf("Error inserting the user into the database: %v\n", err)
+		ErrorPrintf("Error inserting the user into the 'users' database: %v\n", err)
+		return err
+	}
+	insertUserConfigs := "INSERT INTO user_configs (user_id) VALUES ((SELECT id FROM users WHERE email = ?))"
+	_, err = db.Exec(insertUserConfigs, email)
+	if err != nil {
+		ErrorPrintf("Error inserting the user into the 'user_configs' table: %v\n", err)
 		return err
 	}
 	return nil
@@ -597,6 +607,13 @@ func InitDatabase() {
     	creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );`
 
+	UserConfigsSQL := `CREATE TABLE IF NOT EXISTS user_configs (
+    	user_id INTEGER PRIMARY KEY,
+    	lang TEXT DEFAULT 'en',
+    	style TEXT DEFAULT 'light',
+    	FOREIGN KEY (user_id) REFERENCES users(id)
+		);`
+
 	// the 'Moderation' table only contains the id of the user who has admin/moderator rights
 	// the 'rights_level' column is used to determine the rights level of the user
 	// 0 = user; 1 = moderator; 2 = admin
@@ -622,6 +639,11 @@ func InitDatabase() {
 		ErrorPrintf("Error creating users table: %v\n", err)
 		return
 	}
+	_, err = db.Exec(UserConfigsSQL)
+	if err != nil {
+		ErrorPrintf("Error creating user_configs table: %v\n", err)
+		return
+	}
 	_, err = db.Exec(ModerationTableSQL)
 	if err != nil {
 		ErrorPrintf("Error creating Moderation table: %v\n", err)
@@ -639,6 +661,55 @@ func InitDatabase() {
 		ErrorPrintf("Error creating EmailIdentification table: %v\n", err)
 		return
 	}
+
+	// Repairing the database just in case
+	// If a user doesn't have a row in user_configs, we add it
+
+	// Get all the users
+	getAllUsers := "SELECT id FROM users"
+	rows, err := db.Query(getAllUsers)
+	if err != nil {
+		ErrorPrintf("Error getting all the users: %v\n", err)
+		return
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+
+	// For each user, we check if he has a row in user_configs
+	// If he doesn't, we add it
+	for rows.Next() {
+		var id int
+		err := rows.Scan(&id)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows: %v\n", err)
+			return
+		}
+		checkUserConfigs := "SELECT user_id FROM user_configs WHERE user_id = ?"
+		rowsUserConfigs, err := db.Query(checkUserConfigs, id)
+		if err != nil {
+			ErrorPrintf("Error checking the user configs: %v\n", err)
+			return
+		}
+		defer func(rows *sql.Rows) {
+			err := rows.Close()
+			if err != nil {
+				ErrorPrintf("Error closing the rows: %v\n", err)
+			}
+		}(rowsUserConfigs)
+		if !rowsUserConfigs.Next() {
+			insertUserConfigs := "INSERT INTO user_configs (user_id) VALUES (?)"
+			_, err = db.Exec(insertUserConfigs, id)
+			if err != nil {
+				ErrorPrintf("Error inserting the user into the 'user_configs' table: %v\n", err)
+				return
+			}
+		}
+	}
+	InfoPrintln("Database initialised")
 }
 
 // FillDatabase fills the database with test data.
