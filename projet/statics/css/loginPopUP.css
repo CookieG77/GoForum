@@ -4,7 +4,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     z-index: 200;
@@ -14,6 +14,7 @@
     -webkit-user-select: none;
     -o-user-select: none;
     -webkit-font-smoothing: none;
+    overflow-y: auto;
 }
 
 #login-popup.hidden {
@@ -31,11 +32,10 @@
 
 #login-popup-box {
     width: 30rem;
-    max-height: 45rem;
+    height: 47rem;
     display: grid;
     grid-template-rows: 2fr 0.1fr 6fr 16fr 2fr 2fr 16fr 4fr;
     background-color: var(--loginBackground);
-    position: fixed;
     z-index: 210;
 }
 

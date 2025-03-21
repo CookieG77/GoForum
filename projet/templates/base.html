@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/img/icon.ico" type="image/x-icon">
     <!-- stylesheets -->
+    <link rel="stylesheet" href="/css/scrollbar.css" type="text/css">
     <link rel="stylesheet" href="/css/style.css" type="text/css">
     <link rel="stylesheet" href="/css/loginPopUp.css" type="text/css">
     <link rel="stylesheet" href="/css/generalElementStyling.css" type="text/css">
@@ -16,6 +17,7 @@
     <link href="{{ $style }}" rel="stylesheet" type="text/css">
     {{ end }}
     <!-- scripts -->
+    <script src="../js/scrollbar.js"></script>
 
     {{ if not .bareboneBase }}
         {{ if not .IsAuthenticated }}
@@ -167,9 +169,14 @@
             </div>
         {{ end }}
     {{ end }}
-    <main class="win95-border-indent win95-input-indent">
-        <div id="main-content">
+    <main class="win95-border-indent win95-input-indent scroll-container">
+        <div id="main-container" class="main-content scroll-content">
             {{ template "content" . }}
+        </div>
+        <div class="custom-scrollbar">
+            <div class="scrollbar-arrow up">&#9650;</div>
+            <div class="scrollbar-thumb"></div>
+            <div class="scrollbar-arrow down">&#9660;</div>
         </div>
     </main>
 </div>
