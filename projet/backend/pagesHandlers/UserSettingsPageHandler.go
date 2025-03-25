@@ -21,7 +21,8 @@ func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		f.InfoPrintf("User Settings page accessed at %s\n", f.GetIP(r))
 		// If the user is not authenticated, show him a forbidden page
-		ErrorPage(w, r, http.StatusForbidden)
+		http.Redirect(w, r, "/?openlogin=true", http.StatusSeeOther)
+		return
 	}
 
 	userConfig := f.GetUserConfig(r)

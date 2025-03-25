@@ -42,7 +42,7 @@
             {{ if .IsAuthenticated }}
             <button>{{ .Lang.pages.base.header.post_button }}</button>
             <button id="user-profile-button" class="invisible">
-                <img id="user-profile-picture" class="minimized-image" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTK--BS2C9_TQHkmBXDrSd6JmLJzf99_ZcUWQ&s" alt="profile picture">
+                <img id="user-profile-picture" class="minimized-image" src="{{ .UserPfpPath }}" alt="profile picture">
             </button>
             {{ else }}
             <button onclick="window.location.href = '/register'" class="win95-menu-button">{{ .Lang.pages.base.header.register_account_button }}</button>

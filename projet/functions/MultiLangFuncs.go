@@ -19,6 +19,7 @@ const (
 // langList is a list of all the languages
 var langList = []Lang{En, Fr}
 
+// DefaultLang is the default language
 var DefaultLang Lang
 
 // InitDefaultLangConfig set up the default language

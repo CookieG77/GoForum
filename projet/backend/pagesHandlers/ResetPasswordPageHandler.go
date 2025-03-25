@@ -25,7 +25,7 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 	PageInfo["Provider"] = ""          // No provider message by default
 	PageInfo["Success"] = false        // No success message by default
 	PageInfo["ComingFromMail"] = false // Not coming from a mail by default
-	PageInfo["MailId"] = ""            // No mail id by default
+	PageInfo["MailToken"] = ""         // No mail id by default
 	// If the request is a POST request, we try to reset the password
 	if r.Method == "POST" {
 		f.DebugPrintf("Accessing the reset password page with a POST request\n")
@@ -54,7 +54,7 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 						PageInfo["Provider"] = provider
 					} else {
 						f.DebugPrintf("Sending a reset password mail to %s\n", email)
-						m.SendConfirmEmail(email)
+						m.SendResetPasswordMail(email)
 					}
 				}
 				// We don't tell the user if the email address is invalid
@@ -65,24 +65,24 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 
 			f.DebugPrintf("The formType is submitPassword\n")
 			// If the formType is submitPassword, we try to change the password
-			id := r.FormValue("id")
+			token := r.FormValue("token")
 			password := r.FormValue("password")
 			passwordConfirm := r.FormValue("passwordConfirm")
 
 			PageInfo["ComingFromMail"] = true
-			PageInfo["MailId"] = id
+			PageInfo["MailToken"] = token
 
-			if id == "" || password == "" || passwordConfirm == "" { // Check if the fields are empty
+			if token == "" || password == "" || passwordConfirm == "" { // Check if the fields are empty
 				PageInfo["Error"] = "emptyFields"
 			} else if password != passwordConfirm { // Check if the passwords match
 				PageInfo["Error"] = "passwordsMismatch"
-			} else if !f.CheckEmailIdentification(id, f.ResetPasswordEmail) {
-				ErrorPage(w, r, 400) // The id from the URL is not valid (The user tried to change the id in the HTML code)
+			} else if !f.CheckEmailIdentification(token, f.ResetPasswordEmail) {
+				ErrorPage(w, r, 400) // The token from the URL is not valid (The user tried to change the token in the HTML code)
 				return
 			} else if !f.CheckPasswordStrength(password) { // Check if the password is valid
 				PageInfo["Error"] = "passwordIncorrect"
 			} else {
-				userMail := f.GetEmailFromEmailIdentification(id)
+				userMail := f.GetEmailFromEmailIdentification(token)
 				if userMail == "" {
 					ErrorPage(w, r, 500)
 					return
@@ -92,7 +92,7 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 					PageInfo["Error"] = "errorChangingPassword"
 				} else {
 					PageInfo["Success"] = true
-					err := f.RemoveEmailIdentificationWithID(id)
+					err := f.RemoveEmailIdentificationWithID(token)
 					if err != nil {
 						f.ErrorPrintf("Error while removing the email identification: %s\n", err)
 					} else {
@@ -117,7 +117,7 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			PageInfo["ComingFromMail"] = true
-			PageInfo["MailId"] = token
+			PageInfo["MailToken"] = token
 		} else {
 			f.DebugPrintf("No token was found in the URL\n")
 		}

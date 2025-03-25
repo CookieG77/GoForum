@@ -157,7 +157,7 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 		// Send the confirmation email
 		m.SendConfirmEmail(email)
 		// Set the session cookie
-		err = f.SetSessionCookie(w, r, email)
+		err = f.SetSessionCookie(w, r, email, 86400)
 		if err != nil {
 			f.ErrorPrintf("Error setting the session cookie: %v\n", err)
 			// Since the user is already in the database, we can still redirect him to the login page if the session cookie is not set

@@ -23,6 +23,12 @@ func LaunchWebApp() {
 		f.SuccessPrintln("Environment variables loaded")
 	}
 
+	// Initialize the default language
+	f.InitDefaultLangConfig()
+
+	// Initialize the default theme
+	f.InitDefaultThemeConfig()
+
 	// Initialize the database
 	f.InitDatabaseConnection()
 	// TODO : Remove me from the moderation, this is just for testing
@@ -92,9 +98,6 @@ func LaunchWebApp() {
 
 	// Initialize the mail configuration
 	f.InitMail("MailConfig.json")
-
-	// Initialize the default language
-	f.InitDefaultLangConfig()
 
 	// Launch the server
 	f.LaunchServer(r, finalPort)

@@ -88,8 +88,12 @@ func ConnectFromHeader(w http.ResponseWriter, r *http.Request, PageInfo *map[str
 						(*PageInfo)["ShowLoginPage"] = true
 						return true
 					}
+					cookieMaxAge := 86400 // 1 day
+					if r.Form.Get("rememberMe") == "on" {
+						cookieMaxAge = 2592000 // 30 days
+					}
 					// Set the session cookie
-					err = f.SetSessionCookie(w, r, emailOrUsername)
+					err = f.SetSessionCookie(w, r, emailOrUsername, cookieMaxAge)
 					if err != nil {
 						f.ErrorPrintf("Error setting the session cookie: %v\n", err)
 						(*PageInfo)["LoginError"] = "serverError"
@@ -118,8 +122,12 @@ func ConnectFromHeader(w http.ResponseWriter, r *http.Request, PageInfo *map[str
 						return true
 					}
 					email := f.GetEmailFromUsername(emailOrUsername)
+					cookieMaxAge := 86400 // 1 day
+					if r.Form.Get("rememberMe") == "on" {
+						cookieMaxAge = 2592000 // 30 days
+					}
 					// Set the session cookie
-					err = f.SetSessionCookie(w, r, email)
+					err = f.SetSessionCookie(w, r, email, cookieMaxAge)
 					if err != nil {
 						f.ErrorPrintf("Error setting the session cookie: %v\n", err)
 						(*PageInfo)["LoginError"] = "serverError"

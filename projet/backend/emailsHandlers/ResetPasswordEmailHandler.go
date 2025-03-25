@@ -4,6 +4,7 @@ import (
 	f "GoForum/functions"
 	"fmt"
 	"html/template"
+	"os"
 )
 
 func SendResetPasswordMail(email string) {
@@ -19,10 +20,19 @@ func SendResetPasswordMail(email string) {
 	}
 	interfaceContent := make(map[string]interface{})
 	if f.IsCertified() {
-		interfaceContent["Url"] = fmt.Sprintf("https://localhost/reset-password?id=%s", emailLinkID)
+		interfaceContent["Url"] = fmt.Sprintf("https://localhost/reset-password?token=%s", emailLinkID)
 	} else {
-		interfaceContent["Url"] = fmt.Sprintf("http://localhost/reset-password?id=%s", emailLinkID)
+		interfaceContent["Url"] = fmt.Sprintf("http://localhost/reset-password?token=%s", emailLinkID)
 	}
+	linkLifeTime := 10
+	if os.Getenv("AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS_INTERVAL") != "" {
+		_, err := fmt.Sscanf(os.Getenv("AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS_INTERVAL"), "%d", &linkLifeTime)
+		if err != nil {
+			f.ErrorPrintf("Error parsing the linkLifeTime AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS_INTERVAL : %v\n", err)
+			linkLifeTime = 10
+		}
+	}
+	interfaceContent["linkLifeTime"] = linkLifeTime
 	mailContent := f.TemplateToText(tmpl, interfaceContent)
 	if mailContent == "" {
 		// No need to resent an error email, the error is already logged

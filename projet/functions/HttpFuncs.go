@@ -94,7 +94,7 @@ func NewContentInterface(pageTitleKey string, w http.ResponseWriter, r *http.Req
 	ContentInterface["CurrentLang"] = string(currentLang)
 
 	// Setting the theme
-	currentTheme := GetAndResetUserTheme(w, r)
+	currentTheme := GetUserTheme(r)
 	ContentInterface["CurrentTheme"] = string(currentTheme)
 
 	return ContentInterface

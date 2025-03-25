@@ -4,6 +4,7 @@ import (
 	f "GoForum/functions"
 	"fmt"
 	"html/template"
+	"os"
 )
 
 func SendConfirmEmail(email string) {
@@ -30,6 +31,15 @@ func SendConfirmEmail(email string) {
 	} else {
 		interfaceContent["Url"] = fmt.Sprintf("http://localhost/confirm-email-address?token=%s", emailLinkID)
 	}
+	linkLifeTime := 10
+	if os.Getenv("AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS_INTERVAL") != "" {
+		_, err := fmt.Sscanf(os.Getenv("AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS_INTERVAL"), "%d", &linkLifeTime)
+		if err != nil {
+			f.ErrorPrintf("Error parsing the linkLifeTime AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS_INTERVAL : %v\n", err)
+			linkLifeTime = 10
+		}
+	}
+	interfaceContent["linkLifeTime"] = linkLifeTime
 	mailContent := f.TemplateToText(tmpl, interfaceContent)
 	if mailContent == "" {
 		// No need to resent an error email, the error is already logged

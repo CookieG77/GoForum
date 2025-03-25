@@ -32,9 +32,10 @@ type User struct {
 
 // UserConfigs is a struct used to represent the user configs
 type UserConfigs struct {
-	UserID int
-	Lang   string
-	Theme  string
+	UserID  int
+	Lang    string
+	Theme   string
+	PfpPath string
 }
 
 // EmailType is a type used to determine the type of the email
@@ -208,7 +209,7 @@ func GetUserConfig(r *http.Request) UserConfigs {
 	}(rows)
 	if rows.Next() {
 		var userConfigs UserConfigs
-		err := rows.Scan(&userConfigs.UserID, &userConfigs.Lang, &userConfigs.Theme)
+		err := rows.Scan(&userConfigs.UserID, &userConfigs.Lang, &userConfigs.Theme, &userConfigs.PfpPath)
 		if err != nil {
 			ErrorPrintf("Error scanning the rows: %v\n", err)
 			return UserConfigs{}
@@ -552,6 +553,7 @@ func IsAuthenticated(r *http.Request) bool {
 }
 
 // GiveUserHisRights gives the user his admin/moderator rights.
+// Also gives the user his pfp and check if he is verified.
 func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
 	if IsAuthenticated(r) {
 		(*PageInfo)["IsAuthenticated"] = true
@@ -612,6 +614,9 @@ func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
 				DebugPrintln("Email verified is true")
 			}
 		}
+
+		// Give the user his Pfp
+		(*PageInfo)["UserPfpPath"] = GetUserConfig(r).PfpPath
 		return
 	}
 	(*PageInfo)["IsAuthenticated"] = false
@@ -706,13 +711,13 @@ func RemoveEmailIdentificationForUser(email string, emailType EmailType) error {
 	return nil
 }
 
-// RemoveOldEmailIdentifications removes the old email identifications from the database.
+// RemoveEmailIdentificationsOlderThan removes the email identification older than the given interval (in minutes) from the database.
 // Returns an error if there is one.
-func RemoveOldEmailIdentifications() error {
-	removeOldEmailIdentifications := "DELETE FROM EmailIdentification WHERE creation_date < datetime('now', '-1 day')"
-	_, err := db.Exec(removeOldEmailIdentifications)
+func RemoveEmailIdentificationsOlderThan(lifetime int) error {
+	removeEmailIdentification := "DELETE FROM EmailIdentification WHERE creation_date < datetime('now', '-%d minutes')"
+	_, err := db.Exec(fmt.Sprintf(removeEmailIdentification, lifetime))
 	if err != nil {
-		ErrorPrintf("Error removing the old email identifications from the database: %v\n", err)
+		ErrorPrintf("Error removing the email identification from the database: %v\n", err)
 		return err
 	}
 	return nil
@@ -765,41 +770,80 @@ func GetEmailFromEmailIdentification(emailID string) string {
 	return ""
 }
 
+// AutoDeleteOldEmailIdentification remove the old email identifications from the database every 1 minutes by default
+// To disable it, set the environment variable 'AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS' to 'false'
+// To change the interval, set the environment variable 'AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS_INTERVAL' to the desired interval in minutes
+// To change the max age of the email identifications, set the environment variable 'EMAIL_IDENTIFICATIONS_MAX_AGE' to the desired max age in minutes
+func AutoDeleteOldEmailIdentification() {
+	if os.Getenv("AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS") == "false" {
+		InfoPrintln("Auto delete old email identifications was disabled")
+		return
+	}
+	interval := 1
+	if os.Getenv("AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS_INTERVAL") != "" {
+		_, err := fmt.Sscanf(os.Getenv("AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS_INTERVAL"), "%d", &interval)
+		if err != nil {
+			ErrorPrintf("Error parsing the interval AUTO_DELETE_OLD_EMAIL_IDENTIFICATIONS_INTERVAL : %v\n", err)
+			interval = 1
+		}
+	}
+	emailMaxAge := 10
+	if os.Getenv("EMAIL_IDENTIFICATIONS_MAX_AGE") != "" {
+		_, err := fmt.Sscanf(os.Getenv("EMAIL_IDENTIFICATIONS_MAX_AGE"), "%d", &emailMaxAge)
+		if err != nil {
+			ErrorPrintf("Error parsing the interval EMAIL_IDENTIFICATIONS_MAX_AGE : %v\n", err)
+			emailMaxAge = 1
+		}
+	}
+	InfoPrintf("Auto delete old email identifications interval is set %d minute(s) with a lifetime of %d minute(s)\n", interval, emailMaxAge)
+	for {
+		err := RemoveEmailIdentificationsOlderThan(emailMaxAge)
+		if err != nil {
+			ErrorPrintf("Error removing old email identifications: %v\n", err)
+			return
+		}
+		DebugPrintln("Old email identifications removed")
+		time.Sleep(time.Duration(interval) * time.Minute)
+	}
+}
+
 // InitDatabase initialises the database.
 // It creates the tables if they do not exist.
 func InitDatabase() {
 	UserTableSQL := `
 		CREATE TABLE IF NOT EXISTS users (
-    	user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    	email TEXT NOT NULL UNIQUE,
-    	username TEXT NOT NULL UNIQUE,
-    	firstname TEXT NOT NULL,
-    	lastname TEXT NOT NULL,
-    	password_hash TEXT,
-    	email_verified BOOLEAN DEFAULT FALSE,
-    	oauth_provider TEXT,
-    	oauth_id TEXT,
-    	creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			email TEXT NOT NULL UNIQUE,
+			username TEXT NOT NULL UNIQUE,
+			firstname TEXT NOT NULL,
+			lastname TEXT NOT NULL,
+			password_hash TEXT,
+			email_verified BOOLEAN DEFAULT FALSE,
+			oauth_provider TEXT,
+			oauth_id TEXT,
+			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 		`
 
-	UserConfigsSQL := `
+	UserConfigsSQL := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS user_configs (
-    	user_id INTEGER PRIMARY KEY,
-    	lang TEXT DEFAULT ? NOT NULL,
-    	style TEXT DEFAULT 'light' NOT NULL,
-    	FOREIGN KEY (user_id) REFERENCES users(id)
+			user_id INTEGER PRIMARY KEY,
+			lang TEXT DEFAULT '%s' NOT NULL,
+			theme TEXT DEFAULT '%s' NOT NULL,
+			pfp_path TEXT DEFAULT 'img/default_user_icon.png' NOT NULL,
+			FOREIGN KEY (user_id) REFERENCES users(id)
 		);
-		`
+		`, string(DefaultLang),
+		string(DefaultTheme))
 
 	// the 'Moderation' table only contains the id of the user who has admin/moderator rights
 	// the 'rights_level' column is used to determine the rights level of the user
 	// 0 = user; 1 = moderator; 2 = admin
 	ModerationTableSQL := `
 		CREATE TABLE IF NOT EXISTS Moderation (
-    	user_id INTEGER PRIMARY KEY,
-    	rights_level INTEGER DEFAULT 0 NOT NULL,
-    	FOREIGN KEY (user_id) REFERENCES users(user_id)
+			user_id INTEGER PRIMARY KEY,
+			rights_level INTEGER DEFAULT 0 NOT NULL,
+			FOREIGN KEY (user_id) REFERENCES users(user_id)
 		);
 		`
 
@@ -809,11 +853,11 @@ func InitDatabase() {
 	// the 'user_id' column is used to determine the user id of the user who has this email (it's a foreign key to the 'users' table)
 	EmailIdentificationTableSQL := `
 		CREATE TABLE EmailIdentification (
-    	email_id TEXT PRIMARY KEY UNIQUE,
-    	user_id INTEGER NOT NULL,
-    	email_type TEXT NOT NULL,
-    	creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    	FOREIGN KEY (user_id) REFERENCES users(user_id)
+			email_id TEXT PRIMARY KEY UNIQUE,
+			user_id INTEGER NOT NULL,
+			email_type TEXT NOT NULL,
+			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (user_id) REFERENCES users(user_id)
 		);
 		`
 
@@ -822,7 +866,7 @@ func InitDatabase() {
 		ErrorPrintf("Error creating users table: %v\n", err)
 		return
 	}
-	_, err = db.Exec(UserConfigsSQL, string(DefaultLang))
+	_, err = db.Exec(UserConfigsSQL)
 	if err != nil {
 		ErrorPrintf("Error creating user_configs table: %v\n", err)
 		return
@@ -858,12 +902,8 @@ func InitDatabase() {
 		return
 	}
 
-	// Remove the old email identifications from the database
-	err = RemoveOldEmailIdentifications()
-	if err != nil {
-		ErrorPrintf("Error removing old email identifications: %v\n", err)
-		return
-	}
+	// Starting the auto delete of the old email identifications
+	go AutoDeleteOldEmailIdentification()
 
 	InfoPrintln("Database initialised")
 }

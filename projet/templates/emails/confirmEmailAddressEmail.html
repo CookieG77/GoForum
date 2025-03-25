@@ -12,7 +12,8 @@
 </head>
 <body>
     <h1>Please confirm your email.</h1>
-    <p>Click on the following link to confirm your email: <a href="{{ .Url }}">Confirm Email Address</a></p>
+    <p>Click on the following link to confirm your email: <a href="{{ .Url }}">Confirm Email Address</a>.</p>
+    <p>This link will expire in {{ .linkLifeTime }} minutes.</p>
     <p>If you didn't create an account on GoForum with this address, you can ignore this email.</p>
     <p>Thanks</p>
     <p>The GoForum team</p>

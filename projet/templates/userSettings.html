@@ -29,6 +29,17 @@
                     {{ end }}
                 {{ end }}
             </option>
+            {{ range $lang := .LangList }}
+                {{ if ne $lang $.UserLang }}
+                <option value="{{ $lang }}">
+                    {{ range $key, $value := $.Lang.langs }}
+                        {{ if eq (interfaceToString $key) $lang }}
+                            {{ $value }}
+                        {{ end }}
+                    {{ end }}
+                </option>
+                {{ end }}
+            {{ end }}
         </select>
         <br>
         <label for="theme">Choose a theme:</label>
