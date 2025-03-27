@@ -31,12 +31,6 @@ func LaunchWebApp() {
 
 	// Initialize the database
 	f.InitDatabaseConnection()
-	// TODO : Remove me from the moderation, this is just for testing
-	err = f.AddUserToModeration("mcordonn9277@gmail.com", 2)
-	if err != nil {
-		f.ErrorPrintf("Error while adding the user to the moderation: %v\n", err)
-		return
-	}
 
 	// Gestion de l'arrêt de l'application web via le terminal
 	c := make(chan os.Signal, 1)

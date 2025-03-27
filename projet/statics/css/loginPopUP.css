@@ -32,7 +32,7 @@
 
 #login-popup-box {
     width: 30rem;
-    height: 47rem;
+    height: 52rem;
     display: grid;
     grid-template-rows: 2fr 0.1fr 6fr 16fr 2fr 2fr 16fr 4fr;
     background-color: var(--loginBackground);
@@ -113,28 +113,6 @@
 
 #ou {
     font-size: 20px;
-}
-
-/* Error Popup */
-
-#error-popup {
-    position: fixed;
-    display: block;
-    top: 5%;
-    height: 15%;
-    left: 15%;
-    right: 15%;
-    background-color: red;
-    border-radius: 1rem;
-    padding: 1rem;
-    z-index: 1000;
-    font-size: x-large;
-    color: white; /* TODO: To remove once the color of the website is defined */
-    user-select: none;
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
 }
 
 #login-popup-remember-me-label {
