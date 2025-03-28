@@ -32,6 +32,20 @@ func InitDefaultThemeConfig() {
 	SuccessPrintf("Default theme set to : %s\n", DefaultTheme)
 }
 
+// ThemeListToStrList convert a list of Theme to a list of string
+func ThemeListToStrList(l []Theme) []string {
+	var res []string
+	for _, v := range l {
+		res = append(res, string(v))
+	}
+	return res
+}
+
+// GetThemeList return the list of all the theme
+func GetThemeList() []Theme {
+	return themeList
+}
+
 // StrToTheme convert a string to a Theme.
 // If the string is not a valid theme, it returns the default theme (DefaultTheme).
 func StrToTheme(s string) Theme {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ .CurrentLang }}">
 <head>
     <meta charset="UTF-8">
     <title>{{ .Title }} | GoForum</title>
@@ -30,7 +30,7 @@
     <script src="{{ $script }}"></script>
     {{ end }}
 </head>
-<body>
+<body class="{{ .CurrentTheme }}">
 <div id="page-container" class="win95-border">
     <header>
     <section class="logo header-sections" onclick="window.location.href = '/'">

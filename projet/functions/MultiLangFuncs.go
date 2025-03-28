@@ -74,7 +74,6 @@ func GetLangContent(language Lang) (map[string]interface{}, error) {
 	// Since both defaultContent and content are map[string]interface{} that may also contain map[string]interface{} that may contain map[string]interface{} and so on...
 	// We need to use a recursive function to merge the two maps
 	mergedContent := mergeMap(defaultContent, content)
-	fmt.Println(mergedContent)
 	return mergedContent, nil
 }
 
