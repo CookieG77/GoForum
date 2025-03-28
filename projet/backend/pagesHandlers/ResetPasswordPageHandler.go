@@ -7,7 +7,7 @@ import (
 )
 
 func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
-	PageInfo := f.NewContentInterface("home", w, r)
+	PageInfo := f.NewContentInterface("home", r)
 	// Check the user rights
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {
@@ -77,8 +77,7 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 			} else if password != passwordConfirm { // Check if the passwords match
 				PageInfo["Error"] = "passwordsMismatch"
 			} else if !f.CheckEmailIdentification(token, f.ResetPasswordEmail) {
-				ErrorPage(w, r, 400) // The token from the URL is not valid (The user tried to change the token in the HTML code)
-				return
+				PageInfo["Error"] = "invalidToken"
 			} else if !f.CheckPasswordStrength(password) { // Check if the password is valid
 				PageInfo["Error"] = "passwordIncorrect"
 			} else {
@@ -110,16 +109,17 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 		f.DebugPrintf("Accessing the reset password page with a GET request\n")
 		token := r.URL.Query().Get("token")
 		if token != "" {
-			f.DebugPrintf("An token was found in the URL: %s\n", token)
+			f.DebugPrintf("A token was found in the URL: %s\n", token)
 			if !f.CheckEmailIdentification(token, f.ResetPasswordEmail) {
 				// The token from the URL is not valid
-				ErrorPage(w, r, http.StatusBadRequest)
-				return
+				PageInfo["Error"] = "invalidToken"
+				f.DebugPrintln("Given token is invalid")
+			} else {
+				PageInfo["ComingFromMail"] = true
+				PageInfo["MailToken"] = token
 			}
-			PageInfo["ComingFromMail"] = true
-			PageInfo["MailToken"] = token
 		} else {
-			f.DebugPrintf("No token was found in the URL\n")
+			f.DebugPrintln("No token was found in the URL")
 		}
 	}
 

@@ -1,153 +1,152 @@
 {{ define "content" }}
 
-<div id="auth-register" class="auth-container win95-border hidden">
-    <div class="win95-header"><h1>{{ .Lang.pages.register.title }}</h1></div>
-    {{ if .Error }}
-        <p class="error-message win95-border-outdent"><img class="win95-minor-logo" scr="/img/warningIcon.png"> {{ .Lang.pages.register.error_message }}</p>
-    {{ end }}
-    <section class="register-section win95-border-indent">
-        <form id="register-form" class="auth-form" method="POST" action="/register">
-            <p class="register-paragraph">{{ .Lang.pages.register.enter_information_message }}</p>
-            {{ if .MissingFields }}
-                {{ range .MissingFields }}
-                    {{ if eq . "firstName" }}
-                        <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_first_name }}</p>
+    <div id="auth-register" class="auth-container win95-border hidden">
+        <div class="win95-header"><h1>{{ .Lang.pages.register.title }}</h1></div>
+        {{ if .Error }}
+            <p class="error-message win95-border-outdent"><img class="win95-minor-logo" scr="/img/warningIcon.png"> {{ .Lang.pages.register.error_message }}</p>
+        {{ end }}
+        <section class="register-section win95-border-indent">
+            <form id="register-form" class="auth-form" method="POST" action="/register">
+                <p class="register-paragraph">{{ .Lang.pages.register.enter_information_message }}</p>
+                {{ if .MissingFields }}
+                    {{ range .MissingFields }}
+                        {{ if eq . "firstName" }}
+                            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_first_name }}</p>
+                        {{ end }}
                     {{ end }}
                 {{ end }}
-            {{ end }}
-            <div class="form-group">
-                <label class="auth-label" for="first-name">{{ .Lang.pages.register.field_first_name_label }} :</label>
-                <input class="auth-input win95-input-indent" type="text" id="first-name" name="first_name" placeholder="{{ .Lang.pages.register.field_first_name_label }}" required {{ if .ValueFirstName }}value="{{ .ValueFirstName }}"{{ end }}>
-            </div>
-            {{ if .MissingFields }}
-                {{ range .MissingFields }}
-                    {{ if eq . "lastName" }}
-                        <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_last_name }}</p>
+                <div class="form-group">
+                    <label class="auth-label" for="first-name">{{ .Lang.pages.register.field_first_name_label }} :</label>
+                    <input class="auth-input win95-input-indent" type="text" id="first-name" name="first_name" placeholder="{{ .Lang.pages.register.field_first_name_label }}" required {{ if .ValueFirstName }}value="{{ .ValueFirstName }}"{{ end }}>
+                </div>
+                {{ if .MissingFields }}
+                    {{ range .MissingFields }}
+                        {{ if eq . "lastName" }}
+                            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_last_name }}</p>
+                        {{ end }}
                     {{ end }}
                 {{ end }}
-            {{ end }}
-            <div class="form-group">
-                <label class="auth-label" for="last-name">{{ .Lang.pages.register.field_last_name_label }} :</label>
-                <input class="auth-input win95-input-indent" type="text" id="last-name" name="last_name" placeholder="{{ .Lang.pages.register.field_last_name_label }}" required {{ if .ValueLastName }} value="{{ .ValueLastName }}" {{ end }}>
-            </div>
-            {{ if .MissingFields }}
-                {{ range .MissingFields }}
-                    {{ if eq . "username" }}
-                        <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_username }}</p>
+                <div class="form-group">
+                    <label class="auth-label" for="last-name">{{ .Lang.pages.register.field_last_name_label }} :</label>
+                    <input class="auth-input win95-input-indent" type="text" id="last-name" name="last_name" placeholder="{{ .Lang.pages.register.field_last_name_label }}" required {{ if .ValueLastName }} value="{{ .ValueLastName }}" {{ end }}>
+                </div>
+                {{ if .MissingFields }}
+                    {{ range .MissingFields }}
+                        {{ if eq . "username" }}
+                            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_username }}</p>
+                        {{ end }}
                     {{ end }}
                 {{ end }}
-            {{ end }}
-            {{ if eq .UsernameError "alreadyInUse" }}
-                <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.username_error_already_exists }}</p>
-            {{ end }}
-            {{ if eq .UsernameError "invalid" }}
-                <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.username_error_invalid }}</p>
-            {{ end }}
-            <div class="form-group">
-                <label class="auth-label" for="username">{{ .Lang.pages.register.field_username_label }} :</label>
-                <input class="auth-input win95-input-indent" type="text" id="username" name="username" placeholder="{{ .Lang.pages.register.field_username_label }}" required {{ if .ValueUsername }} value="{{ .ValueUsername }}" {{ end }}>
-            </div>
-            {{ if .MissingFields }}
-                {{ range .MissingFields }}
-                    {{ if eq . "email" }}
-                        <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_email }}</p>
+                {{ if eq .UsernameError "alreadyInUse" }}
+                    <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.username_error_already_exists }}</p>
+                {{ end }}
+                {{ if eq .UsernameError "invalid" }}
+                    <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.username_error_invalid }}</p>
+                {{ end }}
+                <div class="form-group">
+                    <label class="auth-label" for="username">{{ .Lang.pages.register.field_username_label }} :</label>
+                    <input class="auth-input win95-input-indent" type="text" id="username" name="username" placeholder="{{ .Lang.pages.register.field_username_label }}" required {{ if .ValueUsername }} value="{{ .ValueUsername }}" {{ end }}>
+                </div>
+                {{ if .MissingFields }}
+                    {{ range .MissingFields }}
+                        {{ if eq . "email" }}
+                            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_email }}</p>
+                        {{ end }}
                     {{ end }}
                 {{ end }}
-            {{ end }}
-            {{ if eq .EmailError "alreadyInUseOAuth" }}
-                {{ if eq .Provider "google" }}
-                    <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_is_google }}</p>
+                {{ if eq .EmailError "alreadyInUseOAuth" }}
+                    {{ if eq .Provider "google" }}
+                        <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_is_google }}</p>
+                    {{ end }}
+                {{ if eq .Provider "github" }}
+                    <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_is_github }}</p>
                 {{ end }}
-            {{ if eq .Provider "github" }}
-                <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_is_github }}</p>
-            {{ end }}
-            {{ if eq .Provider "discord" }}
-                <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_is_discord }}</p>
-            {{ end }}
-            {{ end }}
-            {{ if eq .EmailError "alreadyInUse" }}
-                <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_already_exists }}</p>
-            {{ end }}
-            {{ if eq .EmailError "invalid" }}
-                <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_invalid }}</p>
-            {{ end }}
-            <div class="form-group">
-                <label class="auth-label" for="register-email">{{ .Lang.pages.register.field_email_label }} :</label>
-                <input class="auth-input win95-input-indent" type="email" id="register-email" name="email" placeholder="{{ .Lang.pages.register.field_email_label }}" required {{ if .ValueEmail }} value="{{ .ValueEmail }}" {{ end }}>
-            </div>
-            {{ if .MissingFields }}
-                {{ range .MissingFields }}
-                    {{ if eq . "password" }}
-                        <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_password }}</p>
+                {{ if eq .Provider "discord" }}
+                    <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_is_discord }}</p>
+                {{ end }}
+                {{ end }}
+                {{ if eq .EmailError "alreadyInUse" }}
+                    <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_already_exists }}</p>
+                {{ end }}
+                {{ if eq .EmailError "invalid" }}
+                    <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_invalid }}</p>
+                {{ end }}
+                <div class="form-group">
+                    <label class="auth-label" for="register-email">{{ .Lang.pages.register.field_email_label }} :</label>
+                    <input class="auth-input win95-input-indent" type="email" id="register-email" name="email" placeholder="{{ .Lang.pages.register.field_email_label }}" required {{ if .ValueEmail }} value="{{ .ValueEmail }}" {{ end }}>
+                </div>
+                {{ if .MissingFields }}
+                    {{ range .MissingFields }}
+                        {{ if eq . "password" }}
+                            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_password }}</p>
+                        {{ end }}
                     {{ end }}
                 {{ end }}
-            {{ end }}
-            {{ if eq .PasswordError "different" }}
-                <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.password_error_mismatch }}</p>
-            {{ end }}
-            {{ if eq .PasswordError "invalid" }}
-                <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.password_error_invalid }}</p>
-            {{ end }}
-            <div class="form-group">
-                <label class="auth-label" for="register-password">{{ .Lang.pages.register.password_field_label }} :</label>
-                <input class="auth-input win95-input-indent" type="password" id="register-password" name="password" placeholder="{{ .Lang.pages.register.password_field_label }}" required>
-            </div>
-            {{ if .MissingFields }}
-                {{ range .MissingFields }}
-                    {{ if eq . "confirm_password" }}
-                        <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_password_confirm }}</p>
+                {{ if eq .PasswordError "different" }}
+                    <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.password_error_mismatch }}</p>
+                {{ end }}
+                {{ if eq .PasswordError "invalid" }}
+                    <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.password_error_invalid }}</p>
+                {{ end }}
+                <div class="form-group">
+                    <label class="auth-label" for="register-password">{{ .Lang.pages.register.password_field_label }} :</label>
+                    <input class="auth-input win95-input-indent" type="password" id="register-password" name="password" placeholder="{{ .Lang.pages.register.password_field_label }}" required>
+                </div>
+                {{ if .MissingFields }}
+                    {{ range .MissingFields }}
+                        {{ if eq . "confirm_password" }}
+                            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_password_confirm }}</p>
+                        {{ end }}
                     {{ end }}
                 {{ end }}
-            {{ end }}
-            <div class="form-group">
-                <label class="auth-label" for="register-confirm-password">{{ .Lang.pages.register.password_confirm_field_label }} :</label>
-                <input class="auth-input win95-input-indent" type="password" id="register-confirm-password" name="confirm_password" placeholder="{{ .Lang.pages.register.password_confirm_field_label }}" required>
-            </div>
-            {{ if .MissingFields }}
-                {{ range .MissingFields }}
-                    {{ if eq . "terms" }}
-                        <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_terms }}</p>
+                <div class="form-group">
+                    <label class="auth-label" for="register-confirm-password">{{ .Lang.pages.register.password_confirm_field_label }} :</label>
+                    <input class="auth-input win95-input-indent" type="password" id="register-confirm-password" name="confirm_password" placeholder="{{ .Lang.pages.register.password_confirm_field_label }}" required>
+                </div>
+                {{ if .MissingFields }}
+                    {{ range .MissingFields }}
+                        {{ if eq . "terms" }}
+                            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_terms }}</p>
+                        {{ end }}
                     {{ end }}
                 {{ end }}
-            {{ end }}
-            <div class="form-group-checkbox">
-                <input type="checkbox" id="terms" class="win95-checkbox" name="terms" required>
-                <label class="auth-label-checkbox" for="terms">{{ .Lang.pages.register.terms_checkbox_label }}</label>
-            </div>
-            <button type="submit" class="auth-button win95-button">{{ .Lang.pages.register.register_button }}</button>
-        </form>
-    </section>
+                <div class="form-group-checkbox">
+                    <input type="checkbox" id="terms" class="win95-checkbox" name="terms" required>
+                    <label class="auth-label-checkbox" for="terms">{{ .Lang.pages.register.terms_checkbox_label }}</label>
+                </div>
+                <button type="submit" class="auth-button win95-button">{{ .Lang.pages.register.register_button }}</button>
+            </form>
+        </section>
 
-    <section class="register-section win95-border-indent">
-        <p class="register-paragraph">{{ .Lang.pages.register.register_with }} :</p>
-        <div id="register-connect-with">
-            <button onclick="document.location.href = '/auth/google'" class="win95-button">
-                <img src="/img/googleIconMini.png" alt="google icon" class="img-button">
-                <span>Google</span>
-            </button>
-            <button onclick="document.location.href = '/auth/github'" class="win95-button">
-                <img src="/img/githubIconMini.png" alt="github icon" class="img-button">
-                <span>GitHub</span>
-            </button>
-            <button onclick="document.location.href = '/auth/discord'" class="win95-button">
-                <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
-                <span>Discord</span>
-            </button>
-            <button onclick="document.location.href = '/auth/discord'" class="win95-button">
-                <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
-                <span>Discord</span>
-            </button>
-            <button onclick="document.location.href = '/auth/discord'" class="win95-button">
-                <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
-                <span>Discord</span>
-            </button>
-            <button onclick="document.location.href = '/auth/discord'" class="win95-button">
-                <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
-                <span>Discord</span>
-            </button>
+            <section class="register-section win95-border-indent">
+                <p class="register-paragraph">{{ .Lang.pages.register.register_with }} :</p>
+                <div id="register-connect-with">
+                    <button onclick="document.location.href = '/auth/google'" class="win95-button">
+                        <img src="/img/googleIconMini.png" alt="google icon" class="img-button">
+                        <span>Google</span>
+                    </button>
+                    <button onclick="document.location.href = '/auth/github'" class="win95-button">
+                        <img src="/img/githubIconMini.png" alt="github icon" class="img-button">
+                        <span>GitHub</span>
+                    </button>
+                    <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                        <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
+                        <span>Discord</span>
+                    </button>
+                    <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                        <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
+                        <span>Discord</span>
+                    </button>
+                    <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                        <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
+                        <span>Discord</span>
+                    </button>
+                    <button onclick="document.location.href = '/auth/discord'" class="win95-button">
+                        <img src="/img/discordIconMini.png" alt="discord icon" class="img-button">
+                        <span>Discord</span>
+                    </button>
+                </div>
+            </section>
+            <p class="register-paragraph">{{ .Lang.pages.register.login_instead }}&nbsp;<a href="/?openlogin=true">{{ .Lang.pages.register.login_instead_button }}</a></p>
         </div>
-    </section>
-    <p class="register-paragraph">{{ .Lang.pages.register.login_instead }}&nbsp;<a href="/?openlogin=true">{{ .Lang.pages.register.login_instead_button }}</a></p>
-</div>
-
-{{ end }}
+    {{ end }}

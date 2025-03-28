@@ -7,7 +7,7 @@ import (
 )
 
 func RegisterPage(w http.ResponseWriter, r *http.Request) {
-	PageInfo := f.NewContentInterface("register", w, r)
+	PageInfo := f.NewContentInterface("register", r)
 	if f.IsAuthenticated(r) {
 		PageInfo["IsAuthenticated"] = true
 		f.InfoPrintf("Register page accessed at %s by %s\n", f.GetIP(r), f.GetUserEmail(r))
