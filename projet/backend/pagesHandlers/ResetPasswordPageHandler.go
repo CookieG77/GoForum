@@ -46,9 +46,9 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 			}
 			if PageInfo["Error"] == "" {
 
-				// Check if the email address is valid
-				if f.IsEmailValid(email) {
-					// We only send a mail if the email address is valid and not associated with an OAuth provider
+				// Check if the email address exists in the database
+				if f.CheckIfEmailExists(email) {
+					// We only send a mail if the email address exists in the database and is not associated with an OAuth provider
 					if b, provider := f.CheckIfEmailLinkedToOAuth(email); b {
 						PageInfo["Error"] = "linkedToOAuth"
 						PageInfo["Provider"] = provider

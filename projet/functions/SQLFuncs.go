@@ -125,7 +125,7 @@ func GetUserEmail(r *http.Request) string {
 	return email
 }
 
-// GetUser returns the user configs
+// GetUser returns the user
 func GetUser(r *http.Request) User {
 	email := GetUserEmail(r)
 	getUser := "SELECT * FROM users WHERE email = ?"
@@ -217,6 +217,19 @@ func GetUserConfig(r *http.Request) UserConfigs {
 		return userConfigs
 	}
 	return UserConfigs{}
+}
+
+// SaveUserConfig saves the user configs
+// Returns an error if there is one
+func SaveUserConfig(userConfigs UserConfigs) error {
+	email := GetEmailFromID(userConfigs.UserID)
+	saveUserConfig := "UPDATE user_configs SET lang = ?, theme = ?, pfp_path = ? WHERE user_id = (SELECT user_id FROM users WHERE email = ?)"
+	_, err := db.Exec(saveUserConfig, userConfigs.Lang, userConfigs.Theme, userConfigs.PfpPath, email)
+	if err != nil {
+		ErrorPrintf("Error saving the user configs: %v\n", err)
+		return err
+	}
+	return nil
 }
 
 // CheckIfEmailLinkedToOAuth checks if the email is already linked to an OAuth account
@@ -311,6 +324,32 @@ func GetEmailFromUsername(username string) string {
 	rows, err := db.Query(getEmail, username)
 	if err != nil {
 		ErrorPrintf("Error getting the email from the username: %v\n", err)
+		return ""
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var email string
+		err := rows.Scan(&email)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows: %v\n", err)
+			return ""
+		}
+		return email
+	}
+	return ""
+}
+
+// GetEmailFromID returns the email from the user id
+func GetEmailFromID(userID int) string {
+	getEmail := "SELECT email FROM users WHERE user_id = ?"
+	rows, err := db.Query(getEmail, userID)
+	if err != nil {
+		ErrorPrintf("Error getting the email from the user id: %v\n", err)
 		return ""
 	}
 	defer func(rows *sql.Rows) {
@@ -711,7 +750,7 @@ func RemoveEmailIdentificationForUser(email string, emailType EmailType) error {
 	return nil
 }
 
-// RemoveEmailIdentificationsOlderThan removes the email identification older than the given interval (in minutes) from the database.
+// RemoveEmailIdentificationsOlderThan removes the email identification older than the given time (in minutes) from the database.
 // Returns an error if there is one.
 func RemoveEmailIdentificationsOlderThan(lifetime int) error {
 	removeEmailIdentification := "DELETE FROM EmailIdentification WHERE creation_date < datetime('now', '-%d minutes')"

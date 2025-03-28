@@ -90,7 +90,6 @@ func NewContentInterface(pageTitleKey string, w http.ResponseWriter, r *http.Req
 	ContentInterface["AdditionalScripts"] = []string{}
 
 	// Setting the language
-	ContentInterface["LangList"] = LangListToStrList(langList)
 	ContentInterface["CurrentLang"] = string(currentLang)
 
 	// Setting the theme

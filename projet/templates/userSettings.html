@@ -17,9 +17,10 @@
             {{ end }}
         {{ end }}
     </span></p>
+    <button id="change-settings-button">Change settings</button>
 </div>
-<div id="change-settings">
-    <form action="/userSettings" method="post">
+<div id="change-settings" class="hidden">
+    <form action="/settings" method="post">
         <label for="lang">Choose a language:</label>
         <select name="lang" id="lang">
             <option value="{{ .UserLang }}">
@@ -50,5 +51,6 @@
         <input type="submit" value="Submit">
 
     </form>
+    <button id="close-change-settings-button">Close</button>
 </div>
 {{ end }}

@@ -3,6 +3,7 @@ package pagesHandlers
 import (
 	f "GoForum/functions"
 	"net/http"
+	"slices"
 )
 
 func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +28,46 @@ func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
 
 	userConfig := f.GetUserConfig(r)
 
+	// Check if the user is changing his settings
+	if r.Method == "POST" {
+		err := r.ParseForm()
+		if err != nil {
+			f.ErrorPrintf("Error while parsing the user settings form : %s\n", err)
+			ErrorPage(w, r, http.StatusInternalServerError)
+			return
+		}
+		lang := r.Form.Get("lang")
+		theme := r.Form.Get("theme")
+		if lang == "" || theme == "" {
+			f.ErrorPrintf("User settings form is missing fields\n")
+			ErrorPage(w, r, http.StatusBadRequest)
+			return
+		}
+		if !slices.Contains(f.LangListToStrList(f.GetLangList()), lang) {
+			f.ErrorPrintf("User settings form has an invalid lang field\n")
+			ErrorPage(w, r, http.StatusBadRequest)
+			return
+		}
+		if !slices.Contains(f.ThemeListToStrList(f.GetThemeList()), theme) {
+			f.ErrorPrintf("User settings form has an invalid theme field\n")
+			ErrorPage(w, r, http.StatusBadRequest)
+			return
+		}
+		userConfig.Lang = lang
+		userConfig.Theme = theme
+		err = f.SaveUserConfig(userConfig)
+		if err != nil {
+			f.ErrorPrintf("Error while saving the user settings : %s\n", err)
+			ErrorPage(w, r, http.StatusInternalServerError)
+			return
+		}
+
+		// We need to update the PageInfo with the new userConfig values
+		PageInfo = f.NewContentInterface("home", w, r)
+		// Check the user rights
+		f.GiveUserHisRights(&PageInfo, r)
+	}
+
 	PageInfo["LangList"] = f.LangListToStrList(f.GetLangList())
 	PageInfo["UserLang"] = userConfig.Lang
 	PageInfo["UserTheme"] = userConfig.Theme
@@ -36,5 +77,6 @@ func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
 
 	// Add additional styles to the content interface
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/userSettings.css")
+	f.AddAdditionalScriptsToContentInterface(&PageInfo, "js/userSettingsScript.js")
 	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/userSettings.html")
 }
