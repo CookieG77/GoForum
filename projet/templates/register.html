@@ -3,114 +3,114 @@
 <div id="auth-register" class="auth-container win95-border hidden">
     <div class="win95-header"><h1>{{ .Lang.pages.register.title }}</h1></div>
     {{ if .Error }}
-        <p class="error-message">{{ .Lang.pages.register.error_message }}</p>
+        <p class="error-message win95-border-outdent"><img scr="/img/warningIcon.png"> {{ .Lang.pages.register.error_message }}</p>
     {{ end }}
     <section class="register-section win95-border-indent">
         <form id="register-form" class="auth-form" method="POST" action="/register">
             <p class="register-paragraph">{{ .Lang.pages.register.enter_information_message }}</p>
-            <div class="form-group">
-                {{ if .MissingFields }}
-                    {{ range .MissingFields }}
-                        {{ if eq . "firstName" }}
-                            <p class="error-missing-field">{{ .Lang.pages.register.missing_field_first_name }}</p>
-                        {{ end }}
+            {{ if .MissingFields }}
+                {{ range .MissingFields }}
+                    {{ if eq . "firstName" }}
+                        <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_first_name }}</p>
                     {{ end }}
                 {{ end }}
+            {{ end }}
+            <div class="form-group">
                 <label class="auth-label" for="first-name">{{ .Lang.pages.register.field_first_name_label }} :</label>
                 <input class="auth-input win95-input-indent" type="text" id="first-name" name="first_name" placeholder="{{ .Lang.pages.register.field_first_name_label }}" required {{ if .ValueFirstName }}value="{{ .ValueFirstName }}"{{ end }}>
             </div>
-            <div class="form-group">
-                {{ if .MissingFields }}
-                    {{ range .MissingFields }}
-                        {{ if eq . "lastName" }}
-                            <p class="error-missing-field">{{ .Lang.pages.register.missing_field_last_name }}</p>
-                        {{ end }}
+            {{ if .MissingFields }}
+                {{ range .MissingFields }}
+                    {{ if eq . "lastName" }}
+                        <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_last_name }}</p>
                     {{ end }}
                 {{ end }}
+            {{ end }}
+            <div class="form-group">
                 <label class="auth-label" for="last-name">{{ .Lang.pages.register.field_last_name_label }} :</label>
                 <input class="auth-input win95-input-indent" type="text" id="last-name" name="last_name" placeholder="{{ .Lang.pages.register.field_last_name_label }}" required {{ if .ValueLastName }} value="{{ .ValueLastName }}" {{ end }}>
             </div>
-            <div class="form-group">
-                {{ if .MissingFields }}
-                    {{ range .MissingFields }}
-                        {{ if eq . "username" }}
-                            <p class="error-missing-field">{{ .Lang.pages.register.missing_field_username }}</p>
-                        {{ end }}
+            {{ if .MissingFields }}
+                {{ range .MissingFields }}
+                    {{ if eq . "username" }}
+                        <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_username }}</p>
                     {{ end }}
                 {{ end }}
-                {{ if eq .UsernameError "alreadyInUse" }}
-                    <p class="error-missing-field">{{ .Lang.pages.register.username_error_already_exists }}</p>
-                {{ end }}
-                {{ if eq .UsernameError "invalid" }}
-                    <p class="error-missing-field">{{ .Lang.pages.register.username_error_invalid }}</p>
-                {{ end }}
+            {{ end }}
+            {{ if eq .UsernameError "alreadyInUse" }}
+                <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.username_error_already_exists }}</p>
+            {{ end }}
+            {{ if eq .UsernameError "invalid" }}
+                <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.username_error_invalid }}</p>
+            {{ end }}
+            <div class="form-group">
                 <label class="auth-label" for="username">{{ .Lang.pages.register.field_username_label }} :</label>
                 <input class="auth-input win95-input-indent" type="text" id="username" name="username" placeholder="{{ .Lang.pages.register.field_username_label }}" required {{ if .ValueUsername }} value="{{ .ValueUsername }}" {{ end }}>
             </div>
+            {{ if .MissingFields }}
+                {{ range .MissingFields }}
+                    {{ if eq . "email" }}
+                        <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_email }}</p>
+                    {{ end }}
+                {{ end }}
+            {{ end }}
+            {{ if eq .EmailError "alreadyInUseOAuth" }}
+                {{ if eq .Provider "google" }}
+                    <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_is_google }}</p>
+                {{ end }}
+            {{ if eq .Provider "github" }}
+                <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_is_github }}</p>
+            {{ end }}
+            {{ if eq .Provider "discord" }}
+                <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_is_discord }}</p>
+            {{ end }}
+            {{ end }}
+            {{ if eq .EmailError "alreadyInUse" }}
+                <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_already_exists }}</p>
+            {{ end }}
+            {{ if eq .EmailError "invalid" }}
+                <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.email_error_invalid }}</p>
+            {{ end }}
             <div class="form-group">
-                {{ if .MissingFields }}
-                    {{ range .MissingFields }}
-                        {{ if eq . "email" }}
-                            <p class="error-missing-field">{{ .Lang.pages.register.missing_field_email }}</p>
-                        {{ end }}
-                    {{ end }}
-                {{ end }}
-                {{ if eq .EmailError "alreadyInUseOAuth" }}
-                    {{ if eq .Provider "google" }}
-                        <p class="error-missing-field">{{ .Lang.pages.register.email_error_is_google }}</p>
-                    {{ end }}
-                    {{ if eq .Provider "github" }}
-                        <p class="error-missing-field">{{ .Lang.pages.register.email_error_is_github }}</p>
-                    {{ end }}
-                    {{ if eq .Provider "discord" }}
-                        <p class="error-missing-field">{{ .Lang.pages.register.email_error_is_discord }}</p>
-                    {{ end }}
-                {{ end }}
-                {{ if eq .EmailError "alreadyInUse" }}
-                    <p class="error-missing-field">{{ .Lang.pages.register.email_error_already_exists }}</p>
-                {{ end }}
-                {{ if eq .EmailError "invalid" }}
-                    <p class="error-missing-field">{{ .Lang.pages.register.email_error_invalid }}</p>
-                {{ end }}
                 <label class="auth-label" for="register-email">{{ .Lang.pages.register.field_email_label }} :</label>
                 <input class="auth-input win95-input-indent" type="email" id="register-email" name="email" placeholder="{{ .Lang.pages.register.field_email_label }}" required {{ if .ValueEmail }} value="{{ .ValueEmail }}" {{ end }}>
             </div>
-            <div class="form-group">
-                {{ if .MissingFields }}
-                    {{ range .MissingFields }}
-                        {{ if eq . "password" }}
-                            <p class="error-missing-field">{{ .Lang.pages.register.missing_field_password }}</p>
-                        {{ end }}
+            {{ if .MissingFields }}
+                {{ range .MissingFields }}
+                    {{ if eq . "password" }}
+                        <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_password }}</p>
                     {{ end }}
                 {{ end }}
-                {{ if eq .PasswordError "different" }}
-                    <p class="error-missing-field">{{ .Lang.pages.register.password_error_mismatch }}</p>
-                {{ end }}
-                {{ if eq .PasswordError "invalid" }}
-                    <p class="error-missing-field">{{ .Lang.pages.register.password_error_invalid }}</p>
-                {{ end }}
+            {{ end }}
+            {{ if eq .PasswordError "different" }}
+                <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.password_error_mismatch }}</p>
+            {{ end }}
+            {{ if eq .PasswordError "invalid" }}
+                <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.password_error_invalid }}</p>
+            {{ end }}
+            <div class="form-group">
                 <label class="auth-label" for="register-password">{{ .Lang.pages.register.password_field_label }} :</label>
                 <input class="auth-input win95-input-indent" type="password" id="register-password" name="password" placeholder="{{ .Lang.pages.register.password_field_label }}" required>
             </div>
-            <div class="form-group">
-                {{ if .MissingFields }}
-                    {{ range .MissingFields }}
-                        {{ if eq . "confirm_password" }}
-                            <p class="error-missing-field">{{ .Lang.pages.register.missing_field_password_confirm }}</p>
-                        {{ end }}
+            {{ if .MissingFields }}
+                {{ range .MissingFields }}
+                    {{ if eq . "confirm_password" }}
+                        <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_password_confirm }}</p>
                     {{ end }}
                 {{ end }}
+            {{ end }}
+            <div class="form-group">
                 <label class="auth-label" for="register-confirm-password">{{ .Lang.pages.register.password_confirm_field_label }} :</label>
                 <input class="auth-input win95-input-indent" type="password" id="register-confirm-password" name="confirm_password" placeholder="{{ .Lang.pages.register.password_confirm_field_label }}" required>
             </div>
-            <div class="form-group-checkbox">
-                {{ if .MissingFields }}
-                    {{ range .MissingFields }}
-                        {{ if eq . "terms" }}
-                            <p class="error-missing-field">{{ .Lang.pages.register.missing_field_terms }}</p>
-                        {{ end }}
+            {{ if .MissingFields }}
+                {{ range .MissingFields }}
+                    {{ if eq . "terms" }}
+                        <p class="error-missing-field error-message win95-border-outdent"><img src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_terms }}</p>
                     {{ end }}
                 {{ end }}
+            {{ end }}
+            <div class="form-group-checkbox">
                 <input type="checkbox" id="terms" class="win95-checkbox" name="terms" required>
                 <label class="auth-label-checkbox" for="terms">{{ .Lang.pages.register.terms_checkbox_label }}</label>
             </div>

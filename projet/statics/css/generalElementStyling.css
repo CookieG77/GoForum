@@ -14,11 +14,18 @@
     padding: 4px;
 }
 
-.win95-border-indent {
+.win95-border-outdent, .win95-input-outdent {
+    border: 4px solid #ff8080;
+    border-right-color: #800000;
+    border-bottom-color: #800000;
+    padding: 4px;
+}
+
+.win95-border-indent, .win95-border-outdent {
     margin: 8px;
 }
 
-.win95-input-indent {
+.win95-input-indent, .win95-input-outdent {
     outline: 1px solid #c0c0c0;
     outline-offset: -5px;
 }
@@ -91,7 +98,7 @@
 .win95-menu-button {
     background-color: silver;
     border: none;
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 500;
 }
 
@@ -101,4 +108,23 @@
 
 .win95-menu-button:hover {
     background-color: white;
+}
+
+/* Error Popup */
+
+.error-message {
+    margin: 0 2em;
+    position: relative;
+    display: block;
+    top: 1%;
+    background-color: red;
+    padding: 4px 1rem;
+    z-index: 1000;
+    font-size: 20px;
+    color: white;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
 }

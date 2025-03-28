@@ -40,13 +40,10 @@
     {{ if not .bareboneBase }}
         <nav class="options header-sections">
             {{ if .IsAuthenticated }}
-            <button>{{ .Lang.pages.base.header.post_button }}</button>
-            <button id="user-profile-button" class="invisible">
-                <img id="user-profile-picture" class="minimized-image" src="{{ .UserPfpPath }}" alt="profile picture">
-            </button>
+                <button class="win95-menu-button">{{ .Lang.pages.base.header.post_button }}</button>
             {{ else }}
-            <button onclick="window.location.href = '/register'" class="win95-menu-button">{{ .Lang.pages.base.header.register_account_button }}</button>
-            <button id="login-popup-opener" class="win95-menu-button">{{ .Lang.pages.base.header.login_button }}</button>
+                <button onclick="window.location.href = '/register'" class="win95-menu-button">{{ .Lang.pages.base.header.register_account_button }}</button>
+                <button id="login-popup-opener" class="win95-menu-button">{{ .Lang.pages.base.header.login_button }}</button>
             {{ end }}
         </nav>
         <section class="search-box header-sections">
@@ -59,19 +56,26 @@
 
             </div>
         </section>
+        <nav class="options header-sections" id="right-nav">
+            {{ if .IsAuthenticated }}
+                <button id="user-profile-button" class="invisible">
+                    <img id="user-profile-picture" class="minimized-image" src="{{ .UserPfpPath }}" alt="profile picture">
+                </button>
+            {{ end }}
+        </nav>
     {{ end }}
 
     </header>
     {{ if not .bareboneBase }}
         {{ if .IsAuthenticated }}
-            <section id="user-dropdown">
+            <section id="user-dropdown" class="win95-border">
                 <form name="logoutForm" method="POST" class="hidden" action="/">
                     <input type="hidden" name="headerForm" value="logout">
                 </form>
                 <ul>
-                    <li onclick="document.location.href='/profile'">{{ .Lang.pages.base.header.profile_button }}</li>
-                    <li onclick="document.location.href='/settings'">{{ .Lang.pages.base.header.settings_button }}</li>
-                    <li onclick="document.logoutForm.submit()">{{ .Lang.pages.base.header.logout_button }}</li>
+                    <li onclick="document.location.href='/profile'" class="win95-menu-button">{{ .Lang.pages.base.header.profile_button }}</li>
+                    <li onclick="document.location.href='/settings'" class="win95-menu-button">{{ .Lang.pages.base.header.settings_button }}</li>
+                    <li onclick="document.logoutForm.submit()" class="win95-menu-button">{{ .Lang.pages.base.header.logout_button }}</li>
                 </ul>
             </section>
         {{ else }}
@@ -85,31 +89,31 @@
                     <section class="login-popup-section win95-border-indent">
                         <form id="login-popup-form" method="Post">
                             {{ if eq .LoginError "serverError"}}
-                                <p class="login-popup-error-message">{{ .Lang.pages.base.connection_popup.login_server_error }}</p>
+                                <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png"> {{ .Lang.pages.base.connection_popup.login_server_error }}</p>
                             {{ else if eq .LoginError "invalidCredentials"}}
-                                <p class="login-popup-error-message">{{ .Lang.pages.base.connection_popup.login_invalid_credentials }}</p>
+                                <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png">{{ .Lang.pages.base.connection_popup.login_invalid_credentials }}</p>
                             {{ else if eq .LoginError "missingFields"}}
-                                <p class="login-popup-error-message">{{ .Lang.pages.base.connection_popup.login_missing_fields }}</p>
+                                <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png">{{ .Lang.pages.base.connection_popup.login_missing_fields }}</p>
                             {{ else if eq .LoginError "userIsOAuth"}}
                                 {{ if eq .OAuthProvider "google" }}
-                                    <p class="login-popup-error-message">{{ .Lang.pages.base.connection_popup.login_account_is_google }}</p>
+                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png">{{ .Lang.pages.base.connection_popup.login_account_is_google }}</p>
                                 {{ else if eq .OAuthProvider "github" }}
-                                    <p class="login-popup-error-message">{{ .Lang.pages.base.connection_popup.login_account_is_github }}</p>
+                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png">{{ .Lang.pages.base.connection_popup.login_account_is_github }}</p>
                                 {{ else if eq .OAuthProvider "discord" }}
-                                    <p class="login-popup-error-message">{{ .Lang.pages.base.connection_popup.login_account_is_discord }}</p>
+                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png">{{ .Lang.pages.base.connection_popup.login_account_is_discord }}</p>
                                 {{ end }}
                             {{ end }}
                             <input type="hidden" class="win95-input-indent" name="headerForm" value="login">
                             {{ range .LoginMissingField }}
                                 {{ if eq . "email" }}
-                                    <p class="login-popup-error-message">{{ .Lang.pages.base.connection_popup.login_missing_fields }}"</p>
+                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png">{{ .Lang.pages.base.connection_popup.login_missing_fields }}"</p>
                                 {{ end }}
                             {{ end }}
                             <label for="login-popup-mail-or-username">{{ .Lang.pages.base.connection_popup.email_field_label }}</label>
                             <input id="login-popup-mail-or-username" type="text"  class="win95-input-indent" name="email_or_username" required>
                             {{ range .LoginMissingField }}
                                 {{ if eq . "password" }}
-                                    <p class="login-popup-error-message">{{ .Lang.pages.base.connection_popup.login_missing_field_password }}</p>
+                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png">{{ .Lang.pages.base.connection_popup.login_missing_field_password }}</p>
                                 {{ end }}
                             {{ end }}
                             <label for="login-popup-password">{{ .Lang.pages.base.connection_popup.password_field_label }}</label>
