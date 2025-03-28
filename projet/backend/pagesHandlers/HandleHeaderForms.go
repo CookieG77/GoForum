@@ -31,7 +31,14 @@ func ConnectFromHeader(w http.ResponseWriter, r *http.Request, PageInfo *map[str
 			if err != nil {
 				f.ErrorPrintf("Error emptying the session cookie: %v\n", err)
 			} else {
+				// We reset the PageInfo to the default values for a non-authenticated user
+				*PageInfo = f.NewContentInterface(((*PageInfo)["PageTitleKey"]).(string), r)
+				f.GiveUserHisRights(PageInfo, r)
 				(*PageInfo)["IsAuthenticated"] = false
+				(*PageInfo)["LoginError"] = ""
+				(*PageInfo)["LoginMissingField"] = map[string]bool{}
+				(*PageInfo)["ShowLoginPage"] = false
+				(*PageInfo)["Error"] = ""
 			}
 		case "login":
 			f.DebugPrintln("Login form submitted")
@@ -134,7 +141,14 @@ func ConnectFromHeader(w http.ResponseWriter, r *http.Request, PageInfo *map[str
 						(*PageInfo)["ShowLoginPage"] = true
 						return true
 					}
+					// We reset the PageInfo to the default values for an authenticated user
+					*PageInfo = f.NewContentInterface(((*PageInfo)["PageTitleKey"]).(string), r)
+					f.GiveUserHisRights(PageInfo, r)
 					(*PageInfo)["IsAuthenticated"] = true
+					(*PageInfo)["LoginError"] = ""
+					(*PageInfo)["LoginMissingField"] = map[string]bool{}
+					(*PageInfo)["ShowLoginPage"] = false
+					(*PageInfo)["Error"] = ""
 					f.InfoPrintf("User %s logged in\n", emailOrUsername)
 					return false
 				}

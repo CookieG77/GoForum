@@ -1,5 +1,4 @@
 {{ define "content" }}
-<br><br><br><br><br><br>  <!--TODO : Remove this line once the header is repaired when the user is logged in !-->
     <p>Sorry {{ .UserUsername }}. Before you can process and enjoy GoForum, you need to fill this field with the code you received by Email to "{{ .UserMail }}" </p>
     <form method="post" action="/confirm-email-address">
         <button type="submit">Re-send confirmation mail</button>
@@ -9,5 +8,8 @@
     {{ end }}
     {{ if eq .Error "alreadyVerified" }}
         <p>Your email address has already been verified. You can now enjoy GoForum !</p>
+    {{ end }}
+    {{ if eq .Error "invalidToken" }}
+        <p>The link you used is either incorrect or expired !</p>
     {{ end }}
 {{ end }}

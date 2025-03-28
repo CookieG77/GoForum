@@ -73,7 +73,7 @@ func TemplateToText(tmpl *template.Template, content interface{}) string {
 
 // NewContentInterface return a map[string]interface{} with a title given as parameter
 // It also set the language of the user and the list of available languages, as well as the page theme.
-func NewContentInterface(pageTitleKey string, w http.ResponseWriter, r *http.Request) map[string]interface{} {
+func NewContentInterface(pageTitleKey string, r *http.Request) map[string]interface{} {
 	ContentInterface := make(map[string]interface{})
 	// Getting the user language
 	currentLang := GetUserLang(r)
@@ -83,6 +83,7 @@ func NewContentInterface(pageTitleKey string, w http.ResponseWriter, r *http.Req
 	} else {
 		ContentInterface["Lang"] = langText
 		ContentInterface["Title"] = langText["pageNames"].(map[string]interface{})[pageTitleKey]
+		ContentInterface["PageTitleKey"] = pageTitleKey
 	}
 	// On va initialiser les listes de styles et de scripts supplémentaires.
 	// Ces listes serviront à ajouter des styles et des scripts supplémentaires pour qu'ils soient chargés par le template.

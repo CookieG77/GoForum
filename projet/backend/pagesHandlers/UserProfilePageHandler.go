@@ -6,7 +6,7 @@ import (
 )
 
 func UserProfilePage(w http.ResponseWriter, r *http.Request) {
-	PageInfo := f.NewContentInterface("home", w, r)
+	PageInfo := f.NewContentInterface("home", r)
 	// Check the user rights
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {

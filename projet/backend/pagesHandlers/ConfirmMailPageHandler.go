@@ -7,7 +7,7 @@ import (
 )
 
 func ConfirmMailPage(w http.ResponseWriter, r *http.Request) {
-	PageInfo := f.NewContentInterface("home", w, r)
+	PageInfo := f.NewContentInterface("home", r)
 	// Check the user rights
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {
@@ -54,24 +54,25 @@ func ConfirmMailPage(w http.ResponseWriter, r *http.Request) {
 			token := r.URL.Query().Get("token")
 			if token != "" {
 				if !f.CheckEmailIdentification(token, f.VerifyEmailEmail) {
-					// The token is invalid
-					ErrorPage(w, r, http.StatusForbidden)
-					return
+					// The token is invalid or expired
+					PageInfo["Error"] = "invalidToken"
+					f.DebugPrintln("Given token is invalid")
+				} else {
+					// The token is valid
+					err := f.VerifyEmail(user.Email)
+					if err != nil {
+						f.ErrorPrintf("Error while verifying the email address: %s\n", err)
+						ErrorPage(w, r, http.StatusInternalServerError)
+						return
+					}
+					err = f.RemoveEmailIdentificationWithID(token)
+					if err != nil {
+						f.ErrorPrintf("Error while removing the email identification: %s\n", err)
+						ErrorPage(w, r, http.StatusInternalServerError)
+					}
+					// If the email is verified, we redirect the user to the home page
+					http.Redirect(w, r, "/", http.StatusFound)
 				}
-				// The token is valid
-				err := f.VerifyEmail(user.Email)
-				if err != nil {
-					f.ErrorPrintf("Error while verifying the email address: %s\n", err)
-					ErrorPage(w, r, http.StatusInternalServerError)
-					return
-				}
-				err = f.RemoveEmailIdentificationWithID(token)
-				if err != nil {
-					f.ErrorPrintf("Error while removing the email identification: %s\n", err)
-					ErrorPage(w, r, http.StatusInternalServerError)
-				}
-				// If the email is verified, we redirect the user to the home page
-				http.Redirect(w, r, "/", http.StatusFound)
 			}
 		}
 	}
