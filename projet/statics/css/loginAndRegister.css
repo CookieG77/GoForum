@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-content: center;
     background-color: silver;
     margin: 1rem;
 }
@@ -43,9 +43,9 @@
 }
 
 .img-button {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    width: 38px;
+    height: auto;
+    bottom: 10%
 }
 
 #register-connect-with {
