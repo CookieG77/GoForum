@@ -40,13 +40,10 @@
     {{ if not .bareboneBase }}
         <nav class="options header-sections">
             {{ if .IsAuthenticated }}
-            <button>{{ .Lang.pages.base.header.post_button }}</button>
-            <button id="user-profile-button" class="invisible">
-                <img id="user-profile-picture" class="minimized-image" src="{{ .UserPfpPath }}" alt="profile picture">
-            </button>
+                <button class="win95-menu-button">{{ .Lang.pages.base.header.post_button }}</button>
             {{ else }}
-            <button onclick="window.location.href = '/register'" class="win95-menu-button">{{ .Lang.pages.base.header.register_account_button }}</button>
-            <button id="login-popup-opener" class="win95-menu-button">{{ .Lang.pages.base.header.login_button }}</button>
+                <button onclick="window.location.href = '/register'" class="win95-menu-button">{{ .Lang.pages.base.header.register_account_button }}</button>
+                <button id="login-popup-opener" class="win95-menu-button">{{ .Lang.pages.base.header.login_button }}</button>
             {{ end }}
         </nav>
         <section class="search-box header-sections">
@@ -59,19 +56,26 @@
 
             </div>
         </section>
+        <nav class="options header-sections" id="right-nav">
+            {{ if .IsAuthenticated }}
+                <button id="user-profile-button" class="invisible">
+                    <img id="user-profile-picture" class="minimized-image" src="{{ .UserPfpPath }}" alt="profile picture">
+                </button>
+            {{ end }}
+        </nav>
     {{ end }}
 
     </header>
     {{ if not .bareboneBase }}
         {{ if .IsAuthenticated }}
-            <section id="user-dropdown">
+            <section id="user-dropdown" class="win95-border">
                 <form name="logoutForm" method="POST" class="hidden" action="/">
                     <input type="hidden" name="headerForm" value="logout">
                 </form>
                 <ul>
-                    <li onclick="document.location.href='/profile'">{{ .Lang.pages.base.header.profile_button }}</li>
-                    <li onclick="document.location.href='/settings'">{{ .Lang.pages.base.header.settings_button }}</li>
-                    <li onclick="document.logoutForm.submit()">{{ .Lang.pages.base.header.logout_button }}</li>
+                    <li onclick="document.location.href='/profile'" class="win95-menu-button">{{ .Lang.pages.base.header.profile_button }}</li>
+                    <li onclick="document.location.href='/settings'" class="win95-menu-button">{{ .Lang.pages.base.header.settings_button }}</li>
+                    <li onclick="document.logoutForm.submit()" class="win95-menu-button">{{ .Lang.pages.base.header.logout_button }}</li>
                 </ul>
             </section>
         {{ else }}

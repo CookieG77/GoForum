@@ -130,39 +130,38 @@ header{
     justify-content: flex-start;
 }
 
+#right-nav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
 #user-profile-picture {
     border-radius: 50%;
     visibility: visible;
+    max-width: 2rem;
+    height: auto;
 }
 
 #user-dropdown {
-    width: 12rem;
-    height: 30rem;
     position: fixed;
-    right: 0;
-    top: 6rem;
+    right: 1.5rem;
+    top: 8.5rem;
     z-index: 90;
-    transition: transform 300ms ease-in-out, opacity 300ms ease-in-out;
-    transform: translate3d(0, -150%, 0) ;
-    background-color: var(--headerBackground);
-    border-radius: 0 0 1rem 1rem;
+    background-color: silver;
     padding: 1rem;
-    opacity: 0;
+    transform: scale(0);
+    transform-origin: top right;
+    transition: transform 0.2s steps(4, start), opacity 0.5s steps(4, start);
 }
 
 #user-dropdown.active {
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
-    z-index: 90;
+    transform: scale(1);
 }
 
 #user-dropdown ul li {
     list-style-type: none;
-    margin-top: 0.5rem;
-    border-radius: 0.5rem;
-    background-color: var(--searchBackground);
-    padding: 1rem;
-    z-index: 90;
+    padding: 5px 10px;
 }
 
 .invisible {
@@ -176,7 +175,7 @@ main {
     position: fixed;
     overflow: hidden;
     background-color: white;
-    top: 7rem;
+    top: 7.5rem;
     left: 8px;
     right: 8px;
     bottom: 8px;
