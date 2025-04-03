@@ -7,7 +7,7 @@ import (
 )
 
 func ConfirmMailPage(w http.ResponseWriter, r *http.Request) {
-	PageInfo := f.NewContentInterface("home", r)
+	PageInfo := f.NewContentInterface("confirmMail", r)
 	// Check the user rights
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {

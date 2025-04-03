@@ -17,7 +17,7 @@ func UserOtherProfilePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	PageInfo := f.NewContentInterface("user", r)
+	PageInfo := f.NewContentInterface("profile", r)
 	// Check the user rights
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {

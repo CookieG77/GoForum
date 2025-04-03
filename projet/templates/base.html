@@ -2,7 +2,11 @@
 <html lang="{{ .CurrentLang }}">
 <head>
     <meta charset="UTF-8">
-    <title>{{ .Title }} | GoForum</title>
+    {{ if eq .Title "thread" }}
+        <title>{{ .ThreadName }} | GoForum</title>
+    {{ else }}
+        <title>{{ .Title }} | GoForum</title>
+    {{ end }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/img/icon.ico" type="image/x-icon">
     <!-- stylesheets -->
@@ -14,7 +18,7 @@
     <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/vt323">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=search" />
     {{ range $_, $style := .AdditionalStyles }}
-    <link rel="stylesheet" href="{{ $style }}" type="text/css">
+        <link rel="stylesheet" href="{{ $style }}" type="text/css">
     {{ end }}
 
     <!-- scripts -->
@@ -27,7 +31,7 @@
         {{ end }}
     {{ end }}
     {{ range $_, $script := .AdditionalScripts }}
-    <script src="{{ $script }}"></script>
+        <script src="{{ $script }}"></script>
     {{ end }}
 </head>
 <body class="{{ .CurrentTheme }}">

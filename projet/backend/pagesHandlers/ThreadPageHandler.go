@@ -15,7 +15,7 @@ func ThreadHandler(w http.ResponseWriter, r *http.Request) {
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {
 		if !PageInfo["IsAddressVerified"].(bool) {
-			f.InfoPrintf("Home page accessed at %s by unverified %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+			f.InfoPrintf("Thread \"%s\" page accessed at %s by unverified %s : %s\n", threadName, f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
 			http.Redirect(w, r, "/confirm-email-address", http.StatusFound)
 			return
 		}
@@ -30,7 +30,8 @@ func ThreadHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the thread name is empty or does not exist
 	if threadName == "" || !f.CheckIfThreadNameExists(threadName) {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		ErrorPage404(w, r)
+		return
 	}
 
 	thread := f.GetThreadFromName(threadName)
@@ -58,7 +59,7 @@ func ThreadHandler(w http.ResponseWriter, r *http.Request) {
 	if !threadConfig.IsOpenToNonConnectedUsers && !PageInfo["IsAuthenticated"].(bool) {
 		PageInfo["ShowLoginPage"] = true
 		// If the user is not a member of the thread and this thread does not accept non-members, do not display the thread messages and show the 'must join' message
-	} else if !threadConfig.IsOpenToNonMembers && f.IsThreadMember(thread, r) {
+	} else if !threadConfig.IsOpenToNonMembers && !f.IsThreadMember(thread, r) {
 		PageInfo["MustJoinThread"] = true
 
 		// If the user is a member of the thread, display the thread normally

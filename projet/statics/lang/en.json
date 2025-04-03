@@ -8,7 +8,15 @@
     "dark"  : "Dark"
   },
   "pageNames" : {
-    "home" : "Home"
+    "home" : "Home",
+    "register" : "Register",
+    "confirmMail" : "Confirm your email",
+    "resetPassword" : "Reset your password",
+    "error": "Error",
+    "thread": "thread",
+    "profile" : "Profile",
+    "settings" : "Settings"
+
   },
   "pages" : {
     "base" : {

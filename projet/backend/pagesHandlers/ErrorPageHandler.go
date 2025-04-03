@@ -6,19 +6,19 @@ import (
 )
 
 func ErrorPage(w http.ResponseWriter, r *http.Request, status int) {
-	PageInfo := f.NewContentInterface("home", r)
+	PageInfo := f.NewContentInterface("error", r)
 	// Check the user rights
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {
 		// If the user is not verified, redirect him to the verify page
 		if !PageInfo["IsAddressVerified"].(bool) {
-			f.InfoPrintf("Home page accessed at %s by unverified %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+			f.InfoPrintf("Error %d page accessed at %s by unverified %s : %s\n", status, f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
 			http.Redirect(w, r, "/confirm-email-address", http.StatusFound)
 			return
 		}
-		f.InfoPrintf("Home page accessed at %s by verified %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+		f.InfoPrintf("Error %d page accessed at %s by verified %s : %s\n", status, f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
 	} else {
-		f.InfoPrintf("Home page accessed at %s\n", f.GetIP(r))
+		f.InfoPrintf("Error %d page accessed at %s\n", status, f.GetIP(r))
 	}
 
 	// Handle the user logout/login
