@@ -29,6 +29,8 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		PageInfo["ShowLoginPage"] = true
 	}
 
+	PageInfo["AllThreads"] = f.GetAllThreads()
+
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/home.css")
 	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/home.html")

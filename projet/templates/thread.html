@@ -1,0 +1,25 @@
+{{ define "content" }}
+    <div>
+        <img
+                {{if eq .ThreadIcon "default"}}src="img/default_thread_icon.png"{{ else }}src="{{ .ThreadIcon }}"{{ end }}
+                alt="Thread Icon"
+        >
+        <img
+                {{if eq .ThreadBanner "default"}}src="img/default_thread_banner.gif"{{ else }}src="{{ .ThreadBanner }}"{{ end }}
+                alt="Thread Banner"
+        >
+        <h1>{{ .ThreadInfos.ThreadName }}</h1>
+        <p>{{ .ThreadComplementaryInfos.ThreadDescription }}</p>
+    </div>
+    <div>
+        {{ if .ShowLoginPage }}
+            <p>You must be connected to see this page</p>
+        {{ else }}
+            {{ if .MustJoinThread }}
+                <p>You must be a member to see this page</p>
+            {{ else }}
+                <p>The content should be here</p>
+            {{ end }}
+        {{ end }}
+    </div>
+{{ end }}

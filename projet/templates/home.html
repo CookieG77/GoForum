@@ -7,4 +7,13 @@
         <p><a href="/auth/twitter">Twitter</a></p>
         <p><a href="/auth/twitch">Twitch</a></p>
     </div>
+
+    <div>
+        <p>Thread list :</p>
+        <ul>
+            {{ range .AllThreads }}
+                <li><a href="/thread/{{ .ThreadName }}">{{ .ThreadName }}</a></li>
+            {{ end }}
+        </ul>
+    </div>
 {{ end }}

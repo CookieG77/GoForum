@@ -70,12 +70,14 @@ func LaunchWebApp() {
 	f.AddBaseTemplate("templates/base.html")
 
 	// Handle the routes
-	r.HandleFunc("/", pagesHandlers.HomePage)
-	r.HandleFunc("/register", pagesHandlers.RegisterPage)
-	r.HandleFunc("/profile", pagesHandlers.UserProfilePage)
-	r.HandleFunc("/settings", pagesHandlers.UserSettingsPage)
-	r.HandleFunc("/reset-password", pagesHandlers.ResetPasswordPage)
-	r.HandleFunc("/confirm-email-address", pagesHandlers.ConfirmMailPage)
+	r.HandleFunc("/", pagesHandlers.HomePage).Methods("GET", "POST")
+	r.HandleFunc("/register", pagesHandlers.RegisterPage).Methods("GET", "POST")
+	r.HandleFunc("/profile", pagesHandlers.UserSelfProfilePage).Methods("GET", "POST")
+	r.HandleFunc("/profile/{user}", pagesHandlers.UserOtherProfilePage).Methods("GET", "POST")
+	r.HandleFunc("/settings", pagesHandlers.UserSettingsPage).Methods("GET", "POST")
+	r.HandleFunc("/reset-password", pagesHandlers.ResetPasswordPage).Methods("GET", "POST")
+	r.HandleFunc("/confirm-email-address", pagesHandlers.ConfirmMailPage).Methods("GET", "POST")
+	r.HandleFunc("/t/{thread}", pagesHandlers.ThreadHandler).Methods("GET", "POST")
 
 	// Handle error 404 & 405
 	r.NotFoundHandler = http.HandlerFunc(pagesHandlers.ErrorPage404)
