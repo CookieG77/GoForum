@@ -21,7 +21,7 @@ func UserSelfProfilePage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		f.InfoPrintf("User Self Profile page accessed at %s\n", f.GetIP(r))
 		// If the user is not authenticated, show him a forbidden page
-		ErrorPage405(w, r)
+		ErrorPage403(w, r)
 		return
 	}
 

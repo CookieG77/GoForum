@@ -43,6 +43,10 @@ func ErrorPage(w http.ResponseWriter, r *http.Request, status int) {
 	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/error.html")
 }
 
+func ErrorPage403(w http.ResponseWriter, r *http.Request) {
+	ErrorPage(w, r, http.StatusForbidden)
+}
+
 func ErrorPage404(w http.ResponseWriter, r *http.Request) {
 	ErrorPage(w, r, http.StatusNotFound)
 }
