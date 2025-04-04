@@ -1,4 +1,12 @@
 {{ define "content" }}
-    <h1>{{ .ErrorStatus }}</h1>
-    <p>{{ .ErrorMessage }}</p>
+
+<div class="page-error-container win95-border">
+    <img class="page-error-img" src="../img/404.png" alt="Error image"> <!-- TODO Replace with dynamic image-->
+    <div class="page-error-info">
+        <h1 class="page-error-status">{{ .ErrorStatus }}</h1>
+        <p class="page-error-message">{{ .ErrorMessage }}</p>
+    </div>
+
+</div>
+
 {{ end }}
