@@ -8,7 +8,14 @@
     "dark"  : "Sombre"
   },
   "pageNames" : {
-    "home" : "Accueil"
+    "home" : "Accueil",
+    "register" : "Inscription",
+    "confirmMail" : "Confirmer votre email",
+    "resetPassword" : "Réinitialiser votre mot de passe",
+    "error": "Erreur",
+    "thread": "thread",
+    "profile" : "Profil",
+    "settings" : "Paramètres"
   },
   "pages" : {
     "base" : {

@@ -7,7 +7,7 @@ import (
 )
 
 func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
-	PageInfo := f.NewContentInterface("home", r)
+	PageInfo := f.NewContentInterface("resetPassword", r)
 	// Check the user rights
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {

@@ -7,7 +7,7 @@ import (
 )
 
 func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
-	PageInfo := f.NewContentInterface("home", r)
+	PageInfo := f.NewContentInterface("settings", r)
 	// Check the user rights
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {
