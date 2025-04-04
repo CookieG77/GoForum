@@ -127,6 +127,6 @@ function initCustomScrollbar(options) {
 
 // Initialise les barres de défilement.
 document.addEventListener('DOMContentLoaded', () => {
-    const mainContainer = document.querySelector('main');
+    const mainContainer = document.querySelector('.scroll-container');
     initCustomScrollbar({ container: mainContainer });
 });
