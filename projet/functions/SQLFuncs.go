@@ -164,16 +164,22 @@ func CheckIfEmailExists(email string) bool {
 }
 
 // GetUserEmail returns the email of the user
+// Must be authenticated to get the user
 func GetUserEmail(r *http.Request) string {
-	email, err := GetSessionCookie(r)
+	session, err := GetSessionCookie(r)
 	if err != nil {
 		ErrorPrintf("Error getting the user email: %v\n", err)
 		return ""
 	}
-	return email
+	email := session.Values["email"]
+	if email == nil {
+		return ""
+	}
+	return email.(string)
 }
 
 // GetUser returns the user
+// Must be authenticated to get the user
 func GetUser(r *http.Request) User {
 	email := GetUserEmail(r)
 	getUser := "SELECT * FROM Users WHERE email = ?"
@@ -1171,6 +1177,34 @@ func IsThreadAdmin(thread ThreadGoForum, r *http.Request) bool {
 		return true
 	}
 	return false
+}
+
+// JoinThread adds the user to the thread
+// Returns an error if there is one
+func JoinThread(thread ThreadGoForum, r *http.Request) error {
+	email := GetUserEmail(r)
+	insertThreadMember := "INSERT INTO ThreadGoForumMembers (thread_id, user_id) VALUES (?, (SELECT user_id FROM Users WHERE email = ?))"
+	_, err := db.Exec(insertThreadMember, thread.ThreadID, email)
+	if err != nil {
+		ErrorPrintf("Error inserting the user into the thread: %v\n", err)
+		return err
+	}
+	InfoPrintf("User %s joined the thread %s\n", email, thread.ThreadName)
+	return nil
+}
+
+// LeaveThread removes the user from the thread
+// Returns an error if there is one
+func LeaveThread(thread ThreadGoForum, r *http.Request) error {
+	email := GetUserEmail(r)
+	removeThreadMember := "DELETE FROM ThreadGoForumMembers WHERE thread_id = ? AND user_id = (SELECT user_id FROM Users WHERE email = ?)"
+	_, err := db.Exec(removeThreadMember, thread.ThreadID, email)
+	if err != nil {
+		ErrorPrintf("Error removing the user from the thread: %v\n", err)
+		return err
+	}
+	InfoPrintf("User %s left the thread %s\n", email, thread.ThreadName)
+	return nil
 }
 
 // GetMediaLinkFromID returns the media link from the media id

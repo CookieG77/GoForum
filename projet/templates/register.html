@@ -1,6 +1,7 @@
 {{ define "content" }}
 
-    <div id="auth-register" class="auth-container win95-border hidden">
+    <!--suppress GrazieInspection -->
+<div id="auth-register" class="auth-container win95-border hidden">
         <div class="win95-header"><h1>{{ .Lang.pages.register.title }}</h1></div>
         {{ if .Error }}
             <p class="error-message win95-border-outdent"><img class="win95-minor-logo" scr="/img/warningIcon.png"> {{ .Lang.pages.register.error_message }}</p>

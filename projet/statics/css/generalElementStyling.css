@@ -77,7 +77,7 @@
     border-right-color: #404040;
     border-bottom-color: #404040;
     cursor: url('../img/pointer95.cur'), pointer;
-    box-shadow: inset -1px -1px 0px 0px #808080;
+    box-shadow: inset -1px -1px 0 0 #808080;
     user-select: none;
 }
 

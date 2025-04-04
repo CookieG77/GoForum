@@ -63,14 +63,13 @@ func SetSessionCookie(w http.ResponseWriter, r *http.Request, email string, maxA
 
 // GetSessionCookie returns the session cookie for the user.
 // Returns the session cookie and an error if there is one.
-func GetSessionCookie(r *http.Request) (string, error) {
+func GetSessionCookie(r *http.Request) (*sessions.Session, error) {
 	session, err := GetSession(r)
 	if err != nil {
 		ErrorPrintf("Error getting the session: %v\n", err)
-		return "", err
+		return nil, err
 	}
-	email := session.Values["email"].(string)
-	return email, nil
+	return session, nil
 }
 
 // EmptySessionCookie empties the session cookie for the user.

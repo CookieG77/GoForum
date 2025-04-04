@@ -50,3 +50,7 @@ func ErrorPage404(w http.ResponseWriter, r *http.Request) {
 func ErrorPage405(w http.ResponseWriter, r *http.Request) {
 	ErrorPage(w, r, http.StatusMethodNotAllowed)
 }
+
+func ErrorPage500(w http.ResponseWriter, r *http.Request) {
+	ErrorPage(w, r, http.StatusInternalServerError)
+}

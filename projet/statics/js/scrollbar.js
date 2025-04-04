@@ -1,12 +1,12 @@
 /**
  * @param {Object} options - options de configuration pour la fonction.
- * @param {HTMLElement} options.container - Le conteneur général auquel la barre de défilement est appliquée. A entrer en argument.
+ * @param {HTMLElement} options.container - Le conteneur général auquel la barre de défilement est appliquée. À entrer en argument.
  * @param {string} [options.contentSelector='.scroll-content'] - sélecteur de l'élément dans lequel le contenu est mis.
  * @param {string} [options.scrollbarSelector='.custom-scrollbar'] - sélecteur de la piste de la barre de défilement.
  * @param {string} [options.arrowUpSelector='.scrollbar-arrow.up'] - sélecteur de la flèche du haut de la barre de défilement.
  * @param {string} [options.arrowDownSelector='.scrollbar-arrow.down'] - sélecteur de la flèche du bas de la barre de défilement.
  * @param {string} [options.thumbSelector='.scrollbar-thumb'] - sélecteur du pouce de la barre dde défilement.
- * @param {number} [options.scrollStep=30] - distance de scroll lors du clique d'une des flèches
+ * @param {number} [options.scrollStep=30] - distance de scroll lors du clic d'une des flèches
  */
 function initCustomScrollbar(options) {
     const {
@@ -97,7 +97,7 @@ function initCustomScrollbar(options) {
         const thumbHeight = scrollbarThumb.offsetHeight;
         const maxTop = availableHeight - thumbHeight;
 
-        // Contrain le pouce à rester entre les flèches.
+        // Contrain le pouce a resté entre les flèches.
         newTop = Math.max(arrowUpHeight, Math.min(newTop, arrowUpHeight + maxTop));
         scrollbarThumb.style.top = newTop + 'px';
 

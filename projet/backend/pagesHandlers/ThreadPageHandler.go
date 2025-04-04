@@ -55,16 +55,41 @@ func ThreadHandler(w http.ResponseWriter, r *http.Request) {
 	PageInfo["ThreadIcon"] = threadIcon
 	PageInfo["ThreadBanner"] = threadBanner
 
+	//
+	if (r.Method == "POST") && (PageInfo["IsAuthenticated"].(bool)) {
+		err := r.ParseForm()
+		if err != nil {
+			f.ErrorPrintf("Error while parsing the form: %v\n", err)
+			ErrorPage(w, r, http.StatusInternalServerError)
+			return
+		}
+		if r.FormValue("action") == "join" {
+			err := f.JoinThread(thread, r)
+			if err != nil {
+				f.ErrorPrintf("Error while joining thread %s : %v\n", thread.ThreadName, err)
+				ErrorPage500(w, r)
+				return
+			}
+		} else if r.FormValue("action") == "leave" {
+			err := f.LeaveThread(thread, r)
+			if err != nil {
+				f.ErrorPrintf("Error while leaving thread %s : %v\n", thread.ThreadName, err)
+				ErrorPage500(w, r)
+				return
+			}
+		}
+	}
+
 	// If the user is not verified and this thread does not accept non-connected users, do not display the thread and open the login popup
 	if !threadConfig.IsOpenToNonConnectedUsers && !PageInfo["IsAuthenticated"].(bool) {
 		PageInfo["ShowLoginPage"] = true
 		// If the user is not a member of the thread and this thread does not accept non-members, do not display the thread messages and show the 'must join' message
 	} else if !threadConfig.IsOpenToNonMembers && !f.IsThreadMember(thread, r) {
 		PageInfo["MustJoinThread"] = true
-
 		// If the user is a member of the thread, display the thread normally
 	} else {
 		PageInfo["ShowContent"] = true
+		PageInfo["IsAMember"] = f.IsThreadMember(thread, r)
 	}
 
 	// Add additional styles to the content interface and make the template

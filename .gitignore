@@ -38,4 +38,4 @@ logs*.zip
 *.db
 
 # IntelliJ files
-/.idea
+.idea
