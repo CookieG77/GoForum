@@ -7,9 +7,9 @@
     {{ else if eq .ErrorStatus 404 }}
         <img class="page-error-img" src="../img/404.png" alt="Error image">
     {{ else if eq .ErrorStatus 500 }}
-
+        <img class="page-error-img" src="../img/500.png" alt="Error image">
     {{ else }}
-        <!-- Image générique ici -->
+        <!-- <img class="page-error-img" src="../img/" alt="Error image"> -->
     {{ end }}
     <div class="page-error-info">
         <h1 class="page-error-status">{{ .ErrorStatus }}</h1>
