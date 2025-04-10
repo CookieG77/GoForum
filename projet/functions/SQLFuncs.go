@@ -5,12 +5,14 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"time"
 )
 
@@ -78,9 +80,10 @@ type MediaType string
 
 // Constants used to determine the type of the email
 const (
-	UserProfilePicture MediaType = "pfp"           // User profile picture
-	ThreadIcon         MediaType = "thread_icon"   // Thread icon
-	ThreadBanner       MediaType = "thread_banner" // Thread banner
+	UserProfilePicture   MediaType = "pfp"             // User profile picture
+	ThreadIcon           MediaType = "thread_icon"     // Thread icon
+	ThreadBanner         MediaType = "thread_banner"   // Thread banner
+	ThreadMessagePicture MediaType = "message_picture" // Thread message picture
 )
 
 var MediaTypes = []MediaType{
@@ -94,6 +97,18 @@ type MediaLinks struct {
 	MediaType    MediaType
 	MediaAddress string
 }
+
+type ThreadMessage struct {
+	ThreadMessageID int
+	ThreadID        int
+	OwnerID         int
+	CreationDate    time.Time
+	MessageText     string
+	WasEdited       bool
+	MessageLinks    []MediaLinks
+}
+
+var OrderingList = []string{"asc", "desc", "popular", "unpopular"}
 
 // InitDatabaseConnection initialises the database connection
 func InitDatabaseConnection() {
@@ -1263,6 +1278,199 @@ func UpdateMediaLink(media MediaLinks) error {
 	return nil
 }
 
+// DeleteUselessMediaLinks removes the media links that are not used in any message and are of the type ThreadMessagePicture and are older than 1 hour
+// Returns an error if there is one
+func DeleteUselessMediaLinks() error {
+	deleteUselessMediaLinks := "DELETE FROM MediaLinks WHERE media_id NOT IN (SELECT media_id FROM ThreadMessageMediaLinks) AND media_type = ? AND creation_date < datetime('now', '-1 hour')"
+	_, err := db.Exec(deleteUselessMediaLinks, string(ThreadMessagePicture))
+	if err != nil {
+		ErrorPrintf("Error deleting the useless media links: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// AutoDeleteUselessMediaLinks removes the media links that are not used in any message and that are older than 1 minute
+func AutoDeleteUselessMediaLinks() {
+	if os.Getenv("AUTO_DELETE_USELESS_MEDIA_LINKS") == "false" {
+		InfoPrintln("Auto delete useless media links was disabled")
+		return
+	}
+	interval := 1
+	var err error // We have to define it here so we can use it in the 'if' statement
+	if os.Getenv("AUTO_DELETE_USELESS_MEDIA_LINKS_INTERVAL") != "" {
+		interval, err = strconv.Atoi(os.Getenv("AUTO_DELETE_USELESS_MEDIA_LINKS_INTERVAL"))
+		if err != nil {
+			ErrorPrintf("Error parsing the interval AUTO_DELETE_USELESS_MEDIA_LINKS_INTERVAL : %v\n", err)
+			interval = 1
+		}
+	}
+	InfoPrintf("Auto delete useless media links interval is set %d minute(s)\n", interval)
+	for {
+		err := DeleteUselessMediaLinks()
+		if err != nil {
+			ErrorPrintf("Error removing useless media links: %v\n", err)
+			return
+		}
+		DebugPrintln("Useless media links removed")
+		time.Sleep(time.Duration(interval) * time.Minute)
+	}
+}
+
+// AddMessageInThread adds a message to the thread
+// Returns an error if there is one
+func AddMessageInThread(thread ThreadGoForum, content string, user User, mediaLinksID ...string) (int, error) {
+	insertMessage := "INSERT INTO ThreadMessages (thread_id, user_id, message_content) VALUES (?, ?, ?)"
+	res, err := db.Exec(insertMessage, thread.ThreadID, user.UserID, content)
+	if err != nil {
+		ErrorPrintf("Error inserting the message into the database: %v\n", err)
+		return -1, err
+	}
+	messageID, err := res.LastInsertId()
+	if err != nil {
+		ErrorPrintf("Error getting the last insert id: %v\n", err)
+		return -1, err
+	}
+	// Add the media links to the message
+	for _, mediaLinkID := range mediaLinksID {
+		insertMediaLink := "INSERT INTO MessagesMediaLinks (message_id, media_id) VALUES (?, ?)"
+		_, err = db.Exec(insertMediaLink, messageID, mediaLinkID)
+		if err != nil {
+			ErrorPrintf("Error inserting the media link into the message: %v\n", err)
+			return -1, err
+		}
+	}
+	return int(messageID), nil
+}
+
+// RemoveMessageFromThread removes the message from the thread
+// Returns an error if there is one
+func RemoveMessageFromThread(thread ThreadGoForum, messageID int) error {
+	removeMessage := "DELETE FROM Messages WHERE thread_id = ? AND message_id = ?"
+	_, err := db.Exec(removeMessage, thread.ThreadID, messageID)
+	if err != nil {
+		ErrorPrintf("Error removing the message from the database: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// EditMessageInThread edits the message in the thread
+// Returns an error if there is one
+func EditMessageInThread(thread ThreadGoForum, messageID int, newContent string) error {
+	editMessage := "UPDATE Messages SET message_content = ? AND was_edited = true WHERE thread_id = ? AND message_id = ?"
+	_, err := db.Exec(editMessage, newContent, thread.ThreadID, messageID)
+	if err != nil {
+		ErrorPrintf("Error editing the message in the database: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// RemoveMediaLinkFromMessage removes a media link from a message
+// Returns an error if there is one
+func RemoveMediaLinkFromMessage(messageID int, mediaID int) error {
+	removeMediaLink := "DELETE FROM MessagesMediaLinks WHERE message_id = ? AND media_id = ?"
+	_, err := db.Exec(removeMediaLink, messageID, mediaID)
+	if err != nil {
+		ErrorPrintf("Error removing the media link from the message: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// GetNumberOfMessagesInThread returns the number of messages in the thread
+// Returns the number of messages and an error if there is one
+func GetNumberOfMessagesInThread(thread ThreadGoForum) (int, error) {
+	getNumberOfMessages := "SELECT COUNT(*) FROM Messages WHERE thread_id = ?"
+	rows, err := db.Query(getNumberOfMessages, thread.ThreadID)
+	if err != nil {
+		ErrorPrintf("Error getting the number of messages in the thread: %v\n", err)
+		return 0, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var numberOfMessages int
+		err := rows.Scan(&numberOfMessages)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetNumberOfMessagesInThread: %v\n", err)
+			return 0, err
+		}
+		return numberOfMessages, nil
+	}
+	return 0, nil
+}
+
+// GetMessagesFromThread returns the messages from the thread
+// Returns a slice of messages and an error if there is one
+// The messages are ordered by the given order (from the OrderingList)
+// The offset is used to paginate the messages
+// By default the function returns a maximum of 10 messages or is equal to the environment variable 'MAX_MESSAGES_PER_PAGE_LOAD'
+func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]ThreadMessage, error) {
+	// Check if there is still messages to load
+	numberOfMessages, err := GetNumberOfMessagesInThread(thread)
+	if err != nil {
+		ErrorPrintf("Error getting the number of messages in the thread: %v\n", err)
+		return nil, err
+	}
+	if offset >= numberOfMessages {
+		return nil, nil
+	}
+
+	// Get the max messages per page load from the environment variable
+	maxMessagesPerPageLoad := 10
+	if os.Getenv("MAX_MESSAGES_PER_PAGE_LOAD") != "" {
+		var err error
+		maxMessagesPerPageLoad, err = strconv.Atoi(os.Getenv("MAX_MESSAGES_PER_PAGE_LOAD"))
+		if err != nil {
+			ErrorPrintf("Error parsing the max messages per page load: %v\n", err)
+			maxMessagesPerPageLoad = 10
+		}
+	}
+	var getMessages string
+	switch order {
+	case "desc": // descending order
+		getMessages = "SELECT * FROM Messages WHERE thread_id = ? ORDER BY creation_date DESC LIMIT ? OFFSET ?"
+		break
+	case "popular": // popular order
+		getMessages = "SELECT * FROM Messages WHERE thread_id = ? ORDER BY (upvotes - downvotes) DESC LIMIT ? OFFSET ?"
+		break
+	case "unpopular": // unpopular order
+		getMessages = "SELECT * FROM Messages WHERE thread_id = ? ORDER BY (upvotes - downvotes) ASC LIMIT ? OFFSET ?"
+		break
+	default: // ascending order
+		getMessages = "SELECT * FROM Messages WHERE thread_id = ? ORDER BY creation_date ASC LIMIT ? OFFSET ?"
+		break
+	}
+	rows, err := db.Query(getMessages, thread.ThreadID, maxMessagesPerPageLoad, offset)
+	if err != nil {
+		ErrorPrintf("Error getting all the messages from the thread: %v\n", err)
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	var messages []ThreadMessage
+	for rows.Next() {
+		var message ThreadMessage
+		err := rows.Scan(&message.ThreadMessageID, &message.ThreadID, &message.OwnerID, &message.MessageText, &message.CreationDate, &message.WasEdited)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetMessagesFromThread: %v\n", err)
+			return nil, err
+		}
+		messages = append(messages, message)
+	}
+	return messages, nil
+}
+
 // InitDatabase initialises the database.
 // It creates the tables if they do not exist.
 func InitDatabase() {
@@ -1400,12 +1608,50 @@ func InitDatabase() {
 		CREATE TABLE IF NOT EXISTS MediaLinks (
 			media_id INTEGER PRIMARY KEY AUTOINCREMENT,
 			media_type TEXT NOT NULL,
-			media_address TEXT NOT NULL UNIQUE
+			media_address TEXT NOT NULL UNIQUE,
+			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
-	`
+		`
 	_, err = db.Exec(MediaLinksTableSQL)
 	if err != nil {
 		ErrorPrintf("Error creating MediaLinks table: %v\n", err)
+		return
+	}
+
+	// The 'ThreadMessages' table represents the messages that are sent in the threads
+	ThreadMessagesTableSQL := `
+		CREATE TABLE IF NOT EXISTS ThreadMessages (
+			message_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER NOT NULL,
+			thread_id INTEGER NOT NULL,
+			message_content TEXT NOT NULL,
+			up_votes INTEGER DEFAULT 0 NOT NULL,
+			down_votes INTEGER DEFAULT 0 NOT NULL,
+			was_edited BOOLEAN DEFAULT FALSE NOT NULL,
+			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+		    FOREIGN KEY (thread_id) REFERENCES ThreadGoForum(thread_id)
+		);
+		`
+	_, err = db.Exec(ThreadMessagesTableSQL)
+	if err != nil {
+		ErrorPrintf("Error creating ThreadMessages table: %v\n", err)
+		return
+	}
+
+	// The 'ThreadMessageMediaLinks' table represents the media links that are shared in the messages
+	ThreadMessageMediaLinksTableSQL := `
+		CREATE TABLE IF NOT EXISTS ThreadMessageMediaLinks (
+		    message_id INTEGER NOT NULL,
+		    media_id INTEGER NOT NULL,
+		    FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id),
+		    FOREIGN KEY (media_id) REFERENCES MediaLinks(media_id),
+		    PRIMARY KEY (message_id, media_id)
+		);
+		`
+	_, err = db.Exec(ThreadMessageMediaLinksTableSQL)
+	if err != nil {
+		ErrorPrintf("Error creating ThreadMessageMediaLinks table: %v\n", err)
 		return
 	}
 
@@ -1452,6 +1698,9 @@ func InitDatabase() {
 	// Starting the auto delete of the old email identifications
 	go AutoDeleteOldEmailIdentification()
 
+	// Starting the auto delete of the useless media links
+	go AutoDeleteUselessMediaLinks()
+
 	InfoPrintln("Database initialised")
 }
 
@@ -1493,4 +1742,26 @@ func FillDatabase() {
 		ErrorPrintf("Error updating thread TestThread3 configs: %v\n", err)
 		return
 	}
+
+	// Adding fake users
+	for i := 0; i < 15; i++ {
+		err := AddUser(spew.Sprintf("fakeuser%d@fakemailservice.com", i), spew.Sprintf("fakeuser%d", i), "Fake", "User", "password")
+		if err != nil {
+			ErrorPrintf("Error adding fake user %d: %v\n", i, err)
+			return
+		}
+	}
+
+	// Adding fake messages
+	for i := 0; i < 50; i++ {
+		_, err := AddMessageInThread(
+			GetThreadFromName("TestThread"),
+			spew.Sprintf("This is a test message %d", i),
+			User{UserID: i + 1})
+		if err != nil {
+			ErrorPrintf("Error adding fake message %d: %v\n", i, err)
+			return
+		}
+	}
+
 }

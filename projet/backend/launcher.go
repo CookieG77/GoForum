@@ -46,9 +46,8 @@ func LaunchWebApp() {
 	}()
 
 	// Managing the program arguments
-	f.AddValueArg(f.ArgIntValue, "port", "p") // Argument to change the port
-	f.AddNoValueArg("debug", "d")             // Argument to enable the debug mode
-	f.AddNoValueArg("log", "l")               // Argument to enable the log mode
+	f.AddNoValueArg("debug", "d") // Argument to enable the debug mode
+	f.AddNoValueArg("log", "l")   // Argument to enable the log mode
 	if isPresent, err := f.GetArgNoValue("debug", "d"); isPresent && err == nil {
 		f.SetShouldLogDebug(true)
 	}
@@ -78,6 +77,7 @@ func LaunchWebApp() {
 	r.HandleFunc("/reset-password", pagesHandlers.ResetPasswordPage).Methods("GET", "POST")
 	r.HandleFunc("/confirm-email-address", pagesHandlers.ConfirmMailPage).Methods("GET", "POST")
 	r.HandleFunc("/t/{thread}", pagesHandlers.ThreadHandler).Methods("GET", "POST")
+	r.HandleFunc("/api/messages", pagesHandlers.ThreadMessageGetter).Methods("GET")
 
 	// Handle error 404 & 405
 	r.NotFoundHandler = http.HandlerFunc(pagesHandlers.ErrorPage404)
@@ -100,19 +100,19 @@ func LaunchWebApp() {
 }
 
 // getPort returns the port number to use for the server.
+// Get it from the environment variable
 func getPort() int {
-	strPort, err := f.GetArgValue("port", "p")
-	if err != nil {
-		f.ErrorPrintf("Error while getting the port value: %v\n", err)
-	}
+	strPort := os.Getenv("PORT")
 	f.DebugPrintf("Getting the port value: %v\n", strPort)
 	var port int
-	if strPort == nil { // If the port is not provided
+	if strPort == "" { // If the port is not provided
+		f.ErrorPrintf("PORT environment variable not set, switching to default '8080'\n")
 		port = 8080
-	} else {
-		portInt, isAnInt := strPort.(int)
-		if !isAnInt { // If the port is not an int
+	} else { // If the port is provided
+		portInt, err := strconv.Atoi(strPort)
+		if err != nil {
 			f.ErrorPrintf("Error while converting the port value to int: %v\n", err)
+			f.ErrorPrintf("Switching to default port '8080'\n")
 			port = 8080
 		}
 		port = portInt
