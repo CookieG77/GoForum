@@ -2,10 +2,11 @@
     width: 40vw;
     max-width: 900px;
     min-width: 560px;
+    height: auto;
     display: flex;
+    position: absolute;
     flex-direction: column;
     justify-content: center;
-    align-content: center;
     background-color: silver;
     margin: 1rem;
 }

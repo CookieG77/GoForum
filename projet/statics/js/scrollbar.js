@@ -35,7 +35,7 @@ function initCustomScrollbar(options) {
         // Utilise les hauteurs réelles des flèches plutôt que des valeurs fixes.
         const arrowUpHeight = arrowUp.offsetHeight;
         const arrowDownHeight = arrowDown.offsetHeight;
-        const availableHeight =  Math.round(containerHeight - arrowUpHeight - arrowDownHeight) + 8;
+        const availableHeight =  Math.round(containerHeight - arrowUpHeight - arrowDownHeight);
 
         // Cacher la barre de défilement si le contenu rentre dans le conteneur.
         if (contentHeight <= containerHeight) {

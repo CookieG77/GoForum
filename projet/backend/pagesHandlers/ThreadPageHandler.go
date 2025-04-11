@@ -93,6 +93,6 @@ func ThreadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add additional styles to the content interface and make the template
-	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/thread.css")
+	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/thread.css")
 	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/thread.html")
 }

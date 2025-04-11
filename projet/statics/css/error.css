@@ -3,6 +3,7 @@
     display: grid;
     grid-template-columns: 256px auto;
     padding: 8px;
+    position: absolute;
 }
 
 .page-error-img {
