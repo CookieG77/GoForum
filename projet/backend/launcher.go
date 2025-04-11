@@ -76,7 +76,7 @@ func LaunchWebApp() {
 	r.HandleFunc("/settings", pagesHandlers.UserSettingsPage).Methods("GET", "POST")
 	r.HandleFunc("/reset-password", pagesHandlers.ResetPasswordPage).Methods("GET", "POST")
 	r.HandleFunc("/confirm-email-address", pagesHandlers.ConfirmMailPage).Methods("GET", "POST")
-	r.HandleFunc("/t/{thread}", pagesHandlers.ThreadHandler).Methods("GET", "POST")
+	r.HandleFunc("/t/{thread}", pagesHandlers.ThreadPage).Methods("GET", "POST")
 	r.HandleFunc("/api/messages", pagesHandlers.ThreadMessageGetter).Methods("GET")
 
 	// Handle error 404 & 405

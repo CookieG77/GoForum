@@ -3,14 +3,14 @@
     <div id="thread-header" class="win95-header">
         <div class="thread-banner-container">
             {{if eq .ThreadBanner "default"}}
-                <img class="thread-banner" src="img/default_thread_banner.gif" alt="Thread Banner">
+                <img class="thread-banner" src="/img/default_thread_banner.gif" alt="Thread Banner">
             {{ else }}
                 <img class="thread-banner" src="{{ .ThreadBanner }}" alt="Thread Banner">
             {{ end }}
         </div>
         <div id="header-info">
             {{if eq .ThreadIcon "default"}}
-                <img class="thread-icon win95-important-logo" src="img/default_thread_icon.png" alt="Thread Icon">
+                <img class="thread-icon win95-important-logo" src="/img/default_thread_icon.png" alt="Thread Icon">
             {{ else }}
                 <img class="thread-icon win95-important-logo" src="{{ .ThreadIcon }}" alt="Thread Icon">
             {{ end }}

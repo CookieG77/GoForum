@@ -1880,7 +1880,7 @@ func FillDatabase() {
 		_, err := AddMessageInThread(
 			GetThreadFromName("TestThread"),
 			spew.Sprintf("This is a test message %d", i),
-			User{UserID: (i + 1) % 15},
+			User{UserID: (i % 15) + 1},
 			mediaIDs...)
 		if err != nil {
 			ErrorPrintf("Error adding fake message %d: %v\n", i, err)

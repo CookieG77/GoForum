@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func ThreadHandler(w http.ResponseWriter, r *http.Request) {
+func ThreadPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	threadName := vars["thread"]
 
