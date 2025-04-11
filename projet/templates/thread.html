@@ -1,61 +1,67 @@
 {{ define "content" }}
-<div id="thread-container" class="win95-border">
-    <div id="thread-header" class="win95-header">
-        <div class="thread-banner-container">
-            {{if eq .ThreadBanner "default"}}
-                <img class="thread-banner" src="img/default_thread_banner.gif" alt="Thread Banner">
-            {{ else }}
-                <img class="thread-banner" src="{{ .ThreadBanner }}" alt="Thread Banner">
-            {{ end }}
+<div id="thread">
+    <div id="thread-container" class="win95-border">
+        <div id="thread-header" class="win95-header">
+            <div class="thread-title">
+                {{if eq .ThreadIcon "default"}}
+                <img class="thread-icon" src="/img/default_thread_icon.png" alt="Thread Icon">
+                {{ else }}
+                <img class="thread-icon" src="{{ .ThreadIcon }}" alt="Thread Icon">
+                {{ end }}
+                <h1>{{ .ThreadInfos.ThreadName }}</h1>
+            </div>
         </div>
-        <div id="header-info">
-            {{if eq .ThreadIcon "default"}}
-                <img class="thread-icon win95-important-logo" src="img/default_thread_icon.png" alt="Thread Icon">
-            {{ else }}
-                <img class="thread-icon win95-important-logo" src="{{ .ThreadIcon }}" alt="Thread Icon">
-            {{ end }}
-
-            <h1>{{ .ThreadInfos.ThreadName }}</h1>
+        <div id="thread-info" class="win95-description">
+            <div class="thread-banner-container">
+                {{if eq .ThreadBanner "default"}}
+                <img class="thread-banner" src="/img/default_thread_banner.gif" alt="Thread Banner">
+                {{ else }}
+                <img class="thread-banner" src="{{ .ThreadBanner }}" alt="Thread Banner">
+                {{ end }}
+            </div>
             <p>{{ .ThreadComplementaryInfos.ThreadDescription }}</p>
         </div>
 
-    </div>
-    <div class="win95-border-indent">
-        {{ if .ShowLoginPage }}
+        <div id="thread-content" class="win95-border-indent">
+            {{ if .ShowLoginPage }}
             <p>You must be connected to see this page</p>
-        {{ else }}
-            {{ if .MustJoinThread }}
-                <p>You must be a member to see this page</p>
-                {{ if eq .IsAuthenticated false }}
-                    <p>To join the thread, you must register/login</p>
-                {{ else }}
-                    <form action="/t/{{ .ThreadInfos.ThreadName }}" method="POST">
-                        <input type="hidden" name="action" value="join">
-                        <button type="submit" class="win95-button">Join</button>
-                    </form>
-                {{ end }}
             {{ else }}
-                <p>The content should be here</p>
-                {{ if .IsAMember }}
-                    <form action="/t/{{ .ThreadInfos.ThreadName }}" method="POST">
-                        <input type="hidden" name="action" value="leave">
-                        <button type="submit">Leave</button>
-                    </form>
-                {{ else }}
-                    <form action="/t/{{ .ThreadInfos.ThreadName }}" method="POST">
-                        <input type="hidden" name="action" value="join">
-                        <button type="submit" class="win95-button">Join</button>
-                    </form>
-                {{ end }}
+            {{ if .MustJoinThread }}
+            <p>You must be a member to see this page</p>
+            {{ if eq .IsAuthenticated false }}
+            <p>To join the thread, you must register/login</p>
+            {{ else }}
+            <form action="/t/{{ .ThreadInfos.ThreadName }}" method="POST">
+                <input type="hidden" name="action" value="join">
+                <button type="submit" class="win95-button">Join</button>
+            </form>
             {{ end }}
-        {{ end }}
-    </div>
-    <div id="example-message-container" class="hidden">
-        <div class="message">
-            <img src="/img/default_user_icon.png" alt="User Icon">
+            {{ else }}
+            <p>The content should be here</p>
+            {{ if .IsAMember }}
+            <form action="/t/{{ .ThreadInfos.ThreadName }}" method="POST">
+                <input type="hidden" name="action" value="leave">
+                <button type="submit">Leave</button>
+            </form>
+            {{ else }}
+            <form action="/t/{{ .ThreadInfos.ThreadName }}" method="POST">
+                <input type="hidden" name="action" value="join">
+                <button type="submit" class="win95-button">Join</button>
+            </form>
+            {{ end }}
+            {{ end }}
+            {{ end }}
+        </div>
+        <div id="example-message-container" class="hidden">
+            <div class="message">
+                <img src="/img/default_user_icon.png" alt="User Icon">
+            </div>
+        </div>
+        <div id="messages-container">
         </div>
     </div>
-    <div id="messages-container">
+    <div id="thread-sidebar" class=win95-border>
+
     </div>
 </div>
 
