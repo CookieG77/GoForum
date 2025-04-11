@@ -1,7 +1,6 @@
 package functions
 
 import (
-	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
 	"fmt"
@@ -9,6 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"regexp"
@@ -96,16 +96,20 @@ type MediaLinks struct {
 	MediaID      int
 	MediaType    MediaType
 	MediaAddress string
+	CreationDate time.Time
 }
 
-type ThreadMessage struct {
-	ThreadMessageID int
-	ThreadID        int
-	OwnerID         int
-	CreationDate    time.Time
-	MessageText     string
-	WasEdited       bool
-	MessageLinks    []MediaLinks
+type FormattedThreadMessage struct {
+	MessageID      int       `json:"message_id"`
+	ThreadName     string    `json:"thread_name"`
+	MessageContent string    `json:"message_content"`
+	WasEdited      bool      `json:"was_edited"`
+	CreationDate   time.Time `json:"creation_date"`
+	UserName       string    `json:"user_name"`
+	UserPfpAddress string    `json:"user_pfp_address"`
+	UpVotes        int       `json:"up_votes"`
+	DownVotes      int       `json:"down_votes"`
+	MediaLinks     []string  `json:"media_links"`
 }
 
 var OrderingList = []string{"asc", "desc", "popular", "unpopular"}
@@ -1319,7 +1323,7 @@ func AutoDeleteUselessMediaLinks() {
 
 // AddMessageInThread adds a message to the thread
 // Returns an error if there is one
-func AddMessageInThread(thread ThreadGoForum, content string, user User, mediaLinksID ...string) (int, error) {
+func AddMessageInThread(thread ThreadGoForum, content string, user User, mediaLinksID ...int) (int, error) {
 	insertMessage := "INSERT INTO ThreadMessages (thread_id, user_id, message_content) VALUES (?, ?, ?)"
 	res, err := db.Exec(insertMessage, thread.ThreadID, user.UserID, content)
 	if err != nil {
@@ -1333,7 +1337,7 @@ func AddMessageInThread(thread ThreadGoForum, content string, user User, mediaLi
 	}
 	// Add the media links to the message
 	for _, mediaLinkID := range mediaLinksID {
-		insertMediaLink := "INSERT INTO MessagesMediaLinks (message_id, media_id) VALUES (?, ?)"
+		insertMediaLink := "INSERT INTO ThreadMessageMediaLinks (message_id, media_id) VALUES (?, ?)"
 		_, err = db.Exec(insertMediaLink, messageID, mediaLinkID)
 		if err != nil {
 			ErrorPrintf("Error inserting the media link into the message: %v\n", err)
@@ -1382,7 +1386,7 @@ func RemoveMediaLinkFromMessage(messageID int, mediaID int) error {
 // GetNumberOfMessagesInThread returns the number of messages in the thread
 // Returns the number of messages and an error if there is one
 func GetNumberOfMessagesInThread(thread ThreadGoForum) (int, error) {
-	getNumberOfMessages := "SELECT COUNT(*) FROM Messages WHERE thread_id = ?"
+	getNumberOfMessages := "SELECT COUNT(*) FROM ThreadMessages WHERE thread_id = ?"
 	rows, err := db.Query(getNumberOfMessages, thread.ThreadID)
 	if err != nil {
 		ErrorPrintf("Error getting the number of messages in the thread: %v\n", err)
@@ -1411,45 +1415,45 @@ func GetNumberOfMessagesInThread(thread ThreadGoForum) (int, error) {
 // The messages are ordered by the given order (from the OrderingList)
 // The offset is used to paginate the messages
 // By default the function returns a maximum of 10 messages or is equal to the environment variable 'MAX_MESSAGES_PER_PAGE_LOAD'
-func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]ThreadMessage, error) {
-	// Check if there is still messages to load
+func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]FormattedThreadMessage, error) {
+	// Check if there is still incompleteMessages to load
 	numberOfMessages, err := GetNumberOfMessagesInThread(thread)
 	if err != nil {
-		ErrorPrintf("Error getting the number of messages in the thread: %v\n", err)
+		ErrorPrintf("Error getting the number of incompleteMessages in the thread: %v\n", err)
 		return nil, err
 	}
 	if offset >= numberOfMessages {
 		return nil, nil
 	}
 
-	// Get the max messages per page load from the environment variable
+	// Get the max incompleteMessages per page load from the environment variable
 	maxMessagesPerPageLoad := 10
 	if os.Getenv("MAX_MESSAGES_PER_PAGE_LOAD") != "" {
 		var err error
 		maxMessagesPerPageLoad, err = strconv.Atoi(os.Getenv("MAX_MESSAGES_PER_PAGE_LOAD"))
 		if err != nil {
-			ErrorPrintf("Error parsing the max messages per page load: %v\n", err)
+			ErrorPrintf("Error parsing the max incompleteMessages per page load: %v\n", err)
 			maxMessagesPerPageLoad = 10
 		}
 	}
 	var getMessages string
 	switch order {
 	case "desc": // descending order
-		getMessages = "SELECT * FROM Messages WHERE thread_id = ? ORDER BY creation_date DESC LIMIT ? OFFSET ?"
+		getMessages = "SELECT * FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY creation_date DESC LIMIT ? OFFSET ?"
 		break
 	case "popular": // popular order
-		getMessages = "SELECT * FROM Messages WHERE thread_id = ? ORDER BY (upvotes - downvotes) DESC LIMIT ? OFFSET ?"
+		getMessages = "SELECT * FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY (upvotes - downvotes) DESC LIMIT ? OFFSET ?"
 		break
 	case "unpopular": // unpopular order
-		getMessages = "SELECT * FROM Messages WHERE thread_id = ? ORDER BY (upvotes - downvotes) ASC LIMIT ? OFFSET ?"
+		getMessages = "SELECT * FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY (upvotes - downvotes) ASC LIMIT ? OFFSET ?"
 		break
 	default: // ascending order
-		getMessages = "SELECT * FROM Messages WHERE thread_id = ? ORDER BY creation_date ASC LIMIT ? OFFSET ?"
+		getMessages = "SELECT * FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY creation_date ASC LIMIT ? OFFSET ?"
 		break
 	}
-	rows, err := db.Query(getMessages, thread.ThreadID, maxMessagesPerPageLoad, offset)
+	rows, err := db.Query(getMessages, thread.ThreadName, maxMessagesPerPageLoad, offset)
 	if err != nil {
-		ErrorPrintf("Error getting all the messages from the thread: %v\n", err)
+		ErrorPrintf("Error getting all the incompleteMessages from the thread: %v\n", err)
 		return nil, err
 	}
 	defer func(rows *sql.Rows) {
@@ -1458,17 +1462,69 @@ func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]Th
 			ErrorPrintf("Error closing the rows: %v\n", err)
 		}
 	}(rows)
-	var messages []ThreadMessage
+	var incompleteMessages []FormattedThreadMessage
 	for rows.Next() {
-		var message ThreadMessage
-		err := rows.Scan(&message.ThreadMessageID, &message.ThreadID, &message.OwnerID, &message.MessageText, &message.CreationDate, &message.WasEdited)
+		var message FormattedThreadMessage
+		err := rows.Scan(
+			&message.MessageID,
+			&message.ThreadName,
+			&message.MessageContent,
+			&message.WasEdited,
+			&message.CreationDate,
+			&message.UserName,
+			&message.UserPfpAddress,
+			&message.UpVotes,
+			&message.DownVotes)
 		if err != nil {
 			ErrorPrintf("Error scanning the rows in GetMessagesFromThread: %v\n", err)
 			return nil, err
 		}
-		messages = append(messages, message)
+		incompleteMessages = append(incompleteMessages, message)
 	}
-	return messages, nil
+	var Messages []FormattedThreadMessage
+	for _, message := range incompleteMessages {
+		getMessageMediaLinks := "SELECT ml.media_address FROM ThreadMessageMediaLinks tmml JOIN MediaLinks ml ON tmml.media_id = ml.media_id WHERE tmml.message_id = ?;"
+		rows, err := db.Query(getMessageMediaLinks, message.MessageID)
+		if err != nil {
+			ErrorPrintf("Error getting the incompleteMessages from the thread: %v\n", err)
+			return nil, err
+		}
+		defer func(rows *sql.Rows) {
+			err := rows.Close()
+			if err != nil {
+				ErrorPrintf("Error closing the rows: %v\n", err)
+			}
+		}(rows)
+		for rows.Next() {
+			var mediaLink string
+			err := rows.Scan(&mediaLink)
+			if err != nil {
+				ErrorPrintf("Error scanning the rows in GetMessagesFromThread: %v\n", err)
+				return nil, err
+			}
+			message.MediaLinks = append(message.MediaLinks, mediaLink)
+		}
+		Messages = append(Messages, message)
+	}
+	return Messages, nil
+}
+
+func ThreadMessageAddVote(messageID int, userID int, voteType bool) error {
+	addVote := "INSERT INTO ThreadMessageVotes (message_id, user_id, is_upvote) VALUES (?, ?, ?)"
+	_, err := db.Exec(addVote, messageID, userID, voteType)
+	if err != nil {
+		ErrorPrintf("Error adding the vote to the message: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+func ThreadMessageUpVote(messageID int, userID int) error {
+	return ThreadMessageAddVote(messageID, userID, true)
+}
+
+func ThreadMessageDownVote(messageID int, userID int) error {
+	return ThreadMessageAddVote(messageID, userID, false)
 }
 
 // InitDatabase initialises the database.
@@ -1625,8 +1681,6 @@ func InitDatabase() {
 			user_id INTEGER NOT NULL,
 			thread_id INTEGER NOT NULL,
 			message_content TEXT NOT NULL,
-			up_votes INTEGER DEFAULT 0 NOT NULL,
-			down_votes INTEGER DEFAULT 0 NOT NULL,
 			was_edited BOOLEAN DEFAULT FALSE NOT NULL,
 			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		    FOREIGN KEY (user_id) REFERENCES Users(user_id),
@@ -1652,6 +1706,57 @@ func InitDatabase() {
 	_, err = db.Exec(ThreadMessageMediaLinksTableSQL)
 	if err != nil {
 		ErrorPrintf("Error creating ThreadMessageMediaLinks table: %v\n", err)
+		return
+	}
+	ThreadMessageVotesTableSQL := `
+		CREATE TABLE IF NOT EXISTS ThreadMessageVotes (
+		    message_id INTEGER NOT NULL,
+		    user_id INTEGER NOT NULL,
+		    is_upvote BOOLEAN NOT NULL
+		);
+		`
+	_, err = db.Exec(ThreadMessageVotesTableSQL)
+	if err != nil {
+		ErrorPrintf("Error creating ThreadMessageVotes table: %v\n", err)
+		return
+	}
+
+	ViewThreadMessageWithLikesTableSQL := `
+		CREATE VIEW IF NOT EXISTS ViewThreadMessagesWithVotes AS
+		SELECT 
+			tm.message_id,
+			tg.thread_name,  -- Remplace le thread_id par le thread_name
+			tm.message_content,
+			tm.was_edited,
+			tm.creation_date,
+			
+			-- Infos utilisateur
+			u.username,
+		
+			-- Média photo de profil
+			ml.media_address AS pfp_media_address,
+		
+			-- Votes
+			COALESCE(v.upvotes, 0) AS upvotes,
+			COALESCE(v.downvotes, 0) AS downvotes
+		
+		FROM ThreadMessages tm
+		JOIN ThreadGoForum tg ON tm.thread_id = tg.thread_id  -- Jointure pour récupérer le thread_name
+		JOIN Users u ON tm.user_id = u.user_id
+		LEFT JOIN UserConfigs uc ON u.user_id = uc.user_id
+		LEFT JOIN MediaLinks ml ON uc.pfp_id = ml.media_id
+		LEFT JOIN (
+			SELECT 
+				message_id,
+				SUM(CASE WHEN is_upvote = 1 THEN 1 ELSE 0 END) AS upvotes,
+				SUM(CASE WHEN is_upvote = 0 THEN 1 ELSE 0 END) AS downvotes
+			FROM ThreadMessageVotes
+			GROUP BY message_id
+		) v ON tm.message_id = v.message_id;
+		`
+	_, err = db.Exec(ViewThreadMessageWithLikesTableSQL)
+	if err != nil {
+		ErrorPrintf("Error creating ViewThreadMessagesWithVotes view: %v\n", err)
 		return
 	}
 
@@ -1754,14 +1859,53 @@ func FillDatabase() {
 
 	// Adding fake messages
 	for i := 0; i < 50; i++ {
+		// Randomly add a media link to the message
+		var mediaIDs []int
+		if rand.Intn(2) == 0 {
+			mediaID, err := AddMediaLink(ThreadMessagePicture, spew.Sprintf("https://fakeimage%d.com", i))
+			if err != nil {
+				ErrorPrintf("Error adding media link %d: %v\n", i, err)
+				return
+			}
+			mediaIDs = append(mediaIDs, mediaID)
+			if rand.Intn(2) == 0 {
+				mediaID, err := AddMediaLink(ThreadMessagePicture, spew.Sprintf("https://secondfakeimage%d.com", i))
+				if err != nil {
+					ErrorPrintf("Error adding media link %d: %v\n", i, err)
+					return
+				}
+				mediaIDs = append(mediaIDs, mediaID)
+			}
+		}
 		_, err := AddMessageInThread(
 			GetThreadFromName("TestThread"),
 			spew.Sprintf("This is a test message %d", i),
-			User{UserID: i + 1})
+			User{UserID: (i + 1) % 15},
+			mediaIDs...)
 		if err != nil {
 			ErrorPrintf("Error adding fake message %d: %v\n", i, err)
 			return
 		}
+		time.Sleep(250 * time.Millisecond)
 	}
 
+	// Adding fake upvotes / downvotes to the messages
+	for i := 0; i < 15; i++ { // loop for each user
+		for j := 0; j < 50; j++ { // loop for each message
+			// Randomly upvote or downvote the message
+			if rand.Intn(2) == 0 {
+				err := ThreadMessageUpVote(j+1, i+1)
+				if err != nil {
+					ErrorPrintf("Error adding upvote %d for user %d: %v\n", j, i, err)
+					return
+				}
+			} else {
+				err := ThreadMessageDownVote(j+1, i+1)
+				if err != nil {
+					ErrorPrintf("Error adding downvote %d for user %d: %v\n", j, i, err)
+					return
+				}
+			}
+		}
+	}
 }

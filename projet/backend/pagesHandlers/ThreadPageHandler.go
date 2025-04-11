@@ -4,6 +4,8 @@ import (
 	f "GoForum/functions"
 	"github.com/gorilla/mux"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 func ThreadHandler(w http.ResponseWriter, r *http.Request) {
@@ -90,8 +92,16 @@ func ThreadHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		PageInfo["ShowContent"] = true
 		PageInfo["IsAMember"] = f.IsThreadMember(thread, r)
+		maxMessagesPerPageLoad := 10
+		if os.Getenv("MAX_MESSAGES_PER_PAGE_LOAD") != "" {
+			var err error
+			maxMessagesPerPageLoad, err = strconv.Atoi(os.Getenv("MAX_MESSAGES_PER_PAGE_LOAD"))
+			if err != nil {
+				maxMessagesPerPageLoad = 10
+			}
+		}
+		PageInfo["MaxMessagesPerPageLoad"] = maxMessagesPerPageLoad
 	}
-
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/thread.css")
 	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/thread.html")
