@@ -17,7 +17,7 @@ func ThreadMessageGetter(w http.ResponseWriter, r *http.Request) {
 	// Check if the thread name is empty or does not exist
 	if threadName == "" || !f.CheckIfThreadNameExists(threadName) {
 		f.DebugPrintf("Thread \"%s\" does not exist\n", threadName)
-		http.Error(w, "Thread does not exist", http.StatusNotFound)
+		http.Error(w, "Thread does not exist or was not specified !", http.StatusNotFound)
 		return
 	}
 	// Check if the offset is empty or not a number
