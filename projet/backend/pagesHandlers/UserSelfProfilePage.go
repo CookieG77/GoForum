@@ -31,6 +31,6 @@ func UserSelfProfilePage(w http.ResponseWriter, r *http.Request) {
 	// TODO : Display the user profile of the 'user'
 
 	// Add additional styles to the content interface
-	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/userSelfProfile.css")
+	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/userSelfProfile.css", "generalElementStyling.css")
 	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/userSelfProfile.html")
 }
