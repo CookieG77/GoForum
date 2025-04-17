@@ -18,7 +18,7 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 		f.InfoPrintf("Reset Password page accessed at %s\n", f.GetIP(r))
 	}
 
-	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/resetPassword.css")
+	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/resetPassword.css", "generalElementStyling.css")
 
 	PageInfo["bareboneBase"] = true    // This is a barebone page (no header or useless stuff)
 	PageInfo["Error"] = ""             // No error message by default
