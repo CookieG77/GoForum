@@ -1,15 +1,22 @@
 {{ define "content" }}
-    <p>Sorry {{ .UserUsername }}. Before you can process and enjoy GoForum, you need to fill this field with the code you received by Email to "{{ .UserMail }}" </p>
-    <form method="post" action="/confirm-email-address">
-        <button type="submit">Re-send confirmation mail</button>
-    </form>
-    {{ if .Success }}
-        <p>A new confirmation mail has been sent to your email address.</p>
-    {{ end }}
-    {{ if eq .Error "alreadyVerified" }}
-        <p>Your email address has already been verified. You can now enjoy GoForum !</p>
-    {{ end }}
-    {{ if eq .Error "invalidToken" }}
-        <p>The link you used is either incorrect or expired !</p>
-    {{ end }}
+    <div class="win95-border" id="email-verification-container">
+        <div class="win95-header">Email confirmation</div>
+        <div id="email-verification-content" class="win95-border-indent">
+            <p id="email-verification-info">Sorry {{ .UserUsername }}. Before you can process and enjoy GoForum, you need to fill this field with the code you received by Email to "{{ .UserMail }}". </p>
+            <form method="post" action="/confirm-email-address">
+                <button class="win95-button" type="submit">Re-send confirmation mail</button>
+            </form>
+            {{ if .Success }}
+            <p> A new confirmation mail has been sent to your email address.</p>
+            {{ end }}
+            {{ if eq .Error "alreadyVerified" }}
+            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png">Your email address has already been verified. You can now enjoy GoForum !</p>
+            {{ end }}
+            {{ if eq .Error "invalidToken" }}
+            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png">The link you used is either incorrect or expired !</p>
+            {{ end }}
+        </div>
+
+    </div>
+
 {{ end }}

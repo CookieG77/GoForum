@@ -1,54 +1,71 @@
 {{ define "content" }}
-    <p>Welcome to the user settings page !</p>
-    <div id="current-settings">
-        <p> User lang :<span>
-            {{ range $key, $value := .Lang.langs }}
-                {{ if eq (interfaceToString $key) $.UserLang }}
-                    {{ $value }}
-                {{ end }}
-            {{ end }}
-        </span></p>
-        <p> User theme :<span>
-            {{ range $key, $value := .Lang.themes }}
-                {{ if eq (interfaceToString $key) $.UserTheme }}
-                    {{ $value }}
-                {{ end }}
-            {{ end }}
-        </span></p>
-        <button id="change-settings-button">Change settings</button>
-    </div>
-    <div id="change-settings" class="hidden">
-        <form action="/settings" method="post">
-            <label for="lang">Choose a language:</label>
-            <select name="lang" id="lang">
-                <option value="{{ .UserLang }}">
-                    {{ range $key, $value := .Lang.langs }}
-                        {{ if eq (interfaceToString $key) $.UserLang }}
-                            {{ $value }}
-                        {{ end }}
-                    {{ end }}
-                </option>
-                {{ range $lang := .LangList }}
-                    {{ if ne $lang $.UserLang }}
-                    <option value="{{ $lang }}">
-                        {{ range $key, $value := $.Lang.langs }}
-                            {{ if eq (interfaceToString $key) $lang }}
-                                {{ $value }}
+    <div id="settings-container" class="win95-border">
+        <div class="win95-header">
+            <p>Welcome to the user settings page !</p>
+        </div>
+        <div id="settings-content" class="win95-border-indent">
+            <div id="current-settings">
+                <div class="settings-field">
+                    <p> User lang :
+                        <span>
+                            {{ range $key, $value := .Lang.langs }}
+                                {{ if eq (interfaceToString $key) $.UserLang }}
+                                    {{ $value }}
+                                {{ end }}
                             {{ end }}
-                        {{ end }}
-                    </option>
-                    {{ end }}
-                {{ end }}
-            </select>
-            <br>
-            <label for="theme">Choose a theme:</label>
-            <select name="theme" id="theme">
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-            </select>
-            <input type="submit" value="Submit">
+                        </span>
+                    </p>
+                </div>
+                <div class="settings-field">
+                    <p> User theme :
+                        <span>
+                            {{ range $key, $value := .Lang.themes }}
+                                {{ if eq (interfaceToString $key) $.UserTheme }}
+                                    {{ $value }}
+                                {{ end }}
+                            {{ end }}
+                        </span>
+                    </p>
+                </div>
+                <button id="change-settings-button" class="win95-button">Change settings</button>
+            </div>
+            <div id="change-settings" class="hidden">
+                <form action="/settings" method="post">
+                    <div class="settings-field">
+                        <label for="lang">Choose a language:</label>
+                        <select name="lang" id="lang" class="win95-input-indent">
+                            <option value="{{ .UserLang }}">
+                                {{ range $key, $value := .Lang.langs }}
+                                    {{ if eq (interfaceToString $key) $.UserLang }}
+                                        {{ $value }}
+                                    {{ end }}
+                                {{ end }}
+                            </option>
+                            {{ range $lang := .LangList }}
+                                {{ if ne $lang $.UserLang }}
+                                <option value="{{ $lang }}">
+                                    {{ range $key, $value := $.Lang.langs }}
+                                        {{ if eq (interfaceToString $key) $lang }}
+                                            {{ $value }}
+                                        {{ end }}
+                                    {{ end }}
+                                </option>
+                                {{ end }}
+                            {{ end }}
+                        </select>
+                    </div>
+                    <div class="settings-field">
+                        <label for="theme">Choose a theme:</label>
+                        <select name="theme" id="theme" class="win95-input-indent">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                        <input type="submit" value="Submit" class="win95-button">
+                    </div>
+                </form>
+                <button id="close-change-settings-button" class="win95-button">Close</button>
+            </div>
+        </div>
 
-        </form>
-        <button id="close-change-settings-button">Close</button>
     </div>
 {{ end }}
