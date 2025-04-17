@@ -32,5 +32,5 @@ func UserSelfProfilePage(w http.ResponseWriter, r *http.Request) {
 
 	// Add additional styles to the content interface
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/userSelfProfile.css")
-	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/userSelfProfile.html")
+	f.MakeTemplateAndExecute(w, PageInfo, "templates/userSelfProfile.html")
 }

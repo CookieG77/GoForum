@@ -61,7 +61,23 @@
         </div>
     </div>
     <div id="thread-sidebar" class=win95-border>
-
+        {{ range $modTeamMember := .ThreadModerationTeam }}
+        <div class="thread-moderation-team-member">
+            <img src="{{ $modTeamMember.PfpAddress }}" alt="User Icon">
+            <h4>{{ $modTeamMember.Username }}</h4>
+            <p>
+                {{ if eq $modTeamMember.RightsLevel 1 }}
+                    Moderator
+                {{ end }}
+                {{ if eq $modTeamMember.RightsLevel 2 }}
+                    Administrator
+                {{ end }}
+                {{ if eq $modTeamMember.RightsLevel 3 }}
+                    Owner
+                {{ end }}
+            </p>
+        </div>
+        {{ end }}
     </div>
 </div>
 

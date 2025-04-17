@@ -39,5 +39,5 @@ func UserOtherProfilePage(w http.ResponseWriter, r *http.Request) {
 
 	// Add additional styles to the content interface
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/userProfile.css")
-	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/userProfile.html")
+	f.MakeTemplateAndExecute(w, PageInfo, "templates/userProfile.html")
 }

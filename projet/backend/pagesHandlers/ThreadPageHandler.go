@@ -102,7 +102,11 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 		}
 		PageInfo["MaxMessagesPerPageLoad"] = maxMessagesPerPageLoad
 	}
+	// Add the thread moderation team to the page
+	PageInfo["ThreadModerationTeam"] = f.GetThreadModerationTeam(thread)
+
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/thread.css")
-	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/thread.html")
+	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadScript.js")
+	f.MakeTemplateAndExecute(w, PageInfo, "templates/thread.html")
 }

@@ -29,7 +29,8 @@ func ThreadOptionPage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// If not authenticated, redirect to the login page
 		f.InfoPrintf("Thread option page accessed at %s\n", f.GetIP(r))
-		http.Redirect(w, r, "/?openlogin=true", http.StatusFound)
+		RedirectToLogin(w, r)
+		return
 	}
 
 	// Handle the user logout/login
@@ -43,5 +44,5 @@ func ThreadOptionPage(w http.ResponseWriter, r *http.Request) {
 
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/threadOption.css")
-	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/threadOption.html")
+	f.MakeTemplateAndExecute(w, PageInfo, "templates/threadOption.html")
 }

@@ -123,5 +123,5 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/resetPassword.html")
+	f.MakeTemplateAndExecute(w, PageInfo, "templates/resetPassword.html")
 }

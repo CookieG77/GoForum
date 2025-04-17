@@ -38,7 +38,7 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			f.ErrorPrintf("Error parsing the form: %v\n", err)
 			PageInfo["Error"] = true
-			f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 			return
 		}
 		// Getting the form values
@@ -80,7 +80,7 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 				f.DebugPrintf("Accept terms is empty\n")
 				PageInfo["MissingField"].(map[string]bool)["acceptTerms"] = true
 			}
-			f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 			return
 		}
 		// Reading the form values
@@ -95,7 +95,7 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 		if !f.IsEmailValid(email) {
 			f.DebugPrintf("Email is not valid")
 			PageInfo["EmailError"] = "invalid"
-			f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 			return
 		}
 		// Check if the email is already linked to an OAuth account
@@ -104,42 +104,42 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 			f.DebugPrintf("Email is already linked to an OAuth account : %s", provider)
 			PageInfo["EmailError"] = "alreadyInUseOAuth"
 			PageInfo["Provider"] = provider
-			f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 			return
 		}
 		// Check if the email is already in the database
 		if f.CheckIfEmailExists(email) {
 			f.DebugPrintf("Email is already in use")
 			PageInfo["EmailError"] = "alreadyInUse"
-			f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 			return
 		}
 		// Check if the username is already in the database
 		if f.CheckIfUsernameExists(username) {
 			f.DebugPrintf("Username is already in use")
 			PageInfo["UsernameError"] = "alreadyInUse"
-			f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 			return
 		}
 		// Check if the username is valid
 		if !f.IsUsernameValid(username) {
 			f.DebugPrintf("Username is not valid")
 			PageInfo["UsernameError"] = "invalid"
-			f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 			return
 		}
 		// Check if the password is strong enough
 		if !f.CheckPasswordStrength(password) {
 			f.DebugPrintf("Password is not strong enough")
 			PageInfo["PasswordError"] = "invalid"
-			f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 			return
 		}
 		// Check if the password and the confirmation password are the same
 		if password != confirmPassword {
 			f.DebugPrintf("Passwords do not match")
 			PageInfo["PasswordError"] = "different"
-			f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 			return
 		}
 		// Insert the user in the database
@@ -147,7 +147,7 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			f.ErrorPrintf("Error adding the user: %v\n", err)
 			PageInfo["Error"] = true
-			f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 			return
 		}
 		f.DebugPrintf(
@@ -169,5 +169,5 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/confirm-email-address", http.StatusSeeOther)
 
 	}
-	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/register.html")
+	f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 }

@@ -13,11 +13,11 @@ var wg sync.WaitGroup
 var dialer *gomail.Dialer
 
 // initialized is used to check if the SMTP service has been initialized or not.
-var initialized bool = false
+var initialized = false
 
 // InitMail initializes the mailer.
 // If the SMTP server configuration file is not found, the function will log an error and return.
-func InitMail(SMTPServerConfigFile string) {
+func InitMail() {
 	// Load the SMTP server configuration from the .env file
 	smtpServer := os.Getenv("SMTP_HOST")
 	smtpPort, err := strconv.Atoi(os.Getenv("SMTP_PORT"))

@@ -40,7 +40,7 @@ func ErrorPage(w http.ResponseWriter, r *http.Request, status int) {
 
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/error.css")
-	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/error.html")
+	f.MakeTemplateAndExecute(w, PageInfo, "templates/error.html")
 }
 
 func ErrorPage403(w http.ResponseWriter, r *http.Request) {

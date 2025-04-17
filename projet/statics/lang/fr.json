@@ -14,6 +14,7 @@
     "resetPassword" : "Réinitialiser votre mot de passe",
     "error": "Erreur",
     "thread": "thread",
+    "threadNewMessage" : "threadNewMessage",
     "profile" : "Profil",
     "settings" : "Paramètres"
   },

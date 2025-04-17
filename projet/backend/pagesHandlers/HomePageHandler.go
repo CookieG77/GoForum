@@ -33,5 +33,11 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/home.css")
-	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/home.html")
+	f.MakeTemplateAndExecute(w, PageInfo, "templates/home.html")
+}
+
+// RedirectToLogin redirects the user to the login page if they are not authenticated.
+func RedirectToLogin(w http.ResponseWriter, r *http.Request) {
+	// Redirect to the login page if the user is not authenticated
+	http.Redirect(w, r, "/?openlogin=true", http.StatusFound)
 }

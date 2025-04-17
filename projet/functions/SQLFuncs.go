@@ -1,14 +1,14 @@
 package functions
 
 import (
+	cr "crypto/rand"
 	"database/sql"
 	"encoding/hex"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"math/rand"
+	mr "math/rand"
 	"net/http"
 	"os"
 	"regexp"
@@ -39,6 +39,12 @@ type UserConfigs struct {
 	Lang   string
 	Theme  string
 	PfpID  int
+}
+
+type SimplifiedUser struct {
+	Username    string
+	PfpAddress  string
+	RightsLevel int
 }
 
 // EmailType is a type used to determine the type of the email
@@ -102,13 +108,14 @@ type MediaLinks struct {
 type FormattedThreadMessage struct {
 	MessageID      int       `json:"message_id"`
 	ThreadName     string    `json:"thread_name"`
+	MessageTitle   string    `json:"message_title"`
 	MessageContent string    `json:"message_content"`
 	WasEdited      bool      `json:"was_edited"`
 	CreationDate   time.Time `json:"creation_date"`
 	UserName       string    `json:"user_name"`
 	UserPfpAddress string    `json:"user_pfp_address"`
-	UpVotes        int       `json:"up_votes"`
-	DownVotes      int       `json:"down_votes"`
+	Upvotes        int       `json:"up_votes"`
+	Downvotes      int       `json:"down_votes"`
 	MediaLinks     []string  `json:"media_links"`
 }
 
@@ -783,7 +790,7 @@ func RandomHexString(n int) (string, error) {
 	}
 
 	bytes := make([]byte, (n+1)/2)
-	_, err := rand.Read(bytes)
+	_, err := cr.Read(bytes)
 	if err != nil {
 		return "", err
 	}
@@ -938,12 +945,15 @@ func AddThread(threadName string, owner User, description string) error {
 		ErrorPrintf("Error inserting the thread into the database: %v\n", err)
 		return err
 	}
+	// Insert the thread config into the ThreadGoForumConfigs table
 	insertThreadConfig := "INSERT INTO ThreadGoForumConfigs (thread_id, thread_description) VALUES ((SELECT thread_id FROM ThreadGoForum WHERE thread_name = ?), ?)"
 	_, err = db.Exec(insertThreadConfig, threadName, description)
 	if err != nil {
 		ErrorPrintf("Error inserting the thread config into the database: %v\n", err)
 		return err
 	}
+	// Insert the thread owner into the ThreadGoForumMembers table
+
 	return nil
 }
 
@@ -1134,9 +1144,14 @@ func IsThreadOwner(thread ThreadGoForum, r *http.Request) bool {
 
 // IsThreadMember checks if the user is a member of the thread
 func IsThreadMember(thread ThreadGoForum, r *http.Request) bool {
-	email := GetUserEmail(r)
+	user := GetUser(r)
+	return IsUserInThread(thread, user)
+}
+
+// IsUserInThread checks if the user is in the thread
+func IsUserInThread(thread ThreadGoForum, user User) bool {
 	checkIfMember := "SELECT thread_id FROM ThreadGoForumMembers WHERE thread_id = ? AND user_id = (SELECT user_id FROM Users WHERE email = ?)"
-	rows, err := db.Query(checkIfMember, thread.ThreadID, email)
+	rows, err := db.Query(checkIfMember, thread.ThreadID, user.Email)
 	if err != nil {
 		ErrorPrintf("Error checking if the user is a member of the thread: %v\n", err)
 		return false
@@ -1151,6 +1166,34 @@ func IsThreadMember(thread ThreadGoForum, r *http.Request) bool {
 		return true
 	}
 	return false
+}
+
+// IsUserBannedFromThread checks if the user is banned from the thread
+func IsUserBannedFromThread(thread ThreadGoForum, user User) bool {
+	checkifBanned := `SELECT rights_level FROM ThreadGoForumMembers WHERE thread_id = ? AND user_id = ?`
+	rows, err := db.Query(checkifBanned, thread.ThreadID, user.UserID)
+	if err != nil {
+		ErrorPrintf("Error checking if the user is banned from the thread: %v\n", err)
+		return true // Assume the user is banned if there is an error
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var rightsLevel int
+		err := rows.Scan(&rightsLevel)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in IsUserBannedFromThread: %v\n", err)
+			return true // Assume the user is banned if there is an error
+		}
+		if rightsLevel >= 0 {
+			return false
+		}
+	}
+	return true
 }
 
 // GetThreadMemberRightsLevel returns the rights level of the user in the given thread
@@ -1226,6 +1269,32 @@ func LeaveThread(thread ThreadGoForum, r *http.Request) error {
 	return nil
 }
 
+// AddUserToThread adds the user to the thread
+// Returns an error if there is one
+func AddUserToThread(thread ThreadGoForum, user User, rightLevel int) error {
+	if rightLevel == -1 {
+		InfoPrintf("Adding user %s to the thread %s as a banned member\n", user.Email, thread.ThreadName)
+	} else if rightLevel == 0 {
+		InfoPrintf("Adding user %s to the thread %s as a member\n", user.Email, thread.ThreadName)
+	} else if rightLevel == 1 {
+		InfoPrintf("Adding user %s to the thread %s as a moderator\n", user.Email, thread.ThreadName)
+	} else if rightLevel == 2 {
+		InfoPrintf("Adding user %s to the thread %s as an admin\n", user.Email, thread.ThreadName)
+	} else if rightLevel == 3 {
+		InfoPrintf("Adding user %s to the thread %s as a owner\n", user.Email, thread.ThreadName)
+	} else {
+		ErrorPrintf("Error: unknown rights level %d\n", rightLevel)
+		return fmt.Errorf("unknown rights level %d", rightLevel)
+	}
+	insertThreadOwner := "INSERT INTO ThreadGoForumMembers (thread_id, user_id, rights_level) VALUES ((SELECT thread_id FROM ThreadGoForum WHERE thread_name = ?), ?, ?)"
+	_, err := db.Exec(insertThreadOwner, thread.ThreadName, user.UserID, rightLevel)
+	if err != nil {
+		ErrorPrintf("Error inserting the thread owner into the database: %v\n", err)
+		return err
+	}
+	return nil
+}
+
 // GetMediaLinkFromID returns the media link from the media id
 // Returns an empty MediaLinks struct if there is an error
 func GetMediaLinkFromID(mediaID int) MediaLinks {
@@ -1243,7 +1312,7 @@ func GetMediaLinkFromID(mediaID int) MediaLinks {
 	}(rows)
 	if rows.Next() {
 		var mediaLink MediaLinks
-		err := rows.Scan(&mediaLink.MediaID, &mediaLink.MediaType, &mediaLink.MediaAddress)
+		err := rows.Scan(&mediaLink.MediaID, &mediaLink.MediaType, &mediaLink.MediaAddress, &mediaLink.CreationDate)
 		if err != nil {
 			ErrorPrintf("Error scanning the rows in GetMediaLinkFromID: %v\n", err)
 			return MediaLinks{}
@@ -1321,11 +1390,29 @@ func AutoDeleteUselessMediaLinks() {
 	}
 }
 
+// IsUserAllowedToSendMessageInThread checks if the user is allowed to send a message in the thread
+// Returns true if the user is allowed to send a message and false otherwise
+func IsUserAllowedToSendMessageInThread(thread ThreadGoForum, user User) bool {
+	if thread.ThreadID <= 0 {
+		return false
+	}
+	if thread.OwnerID == user.UserID {
+		return true
+	}
+	if IsUserInThread(thread, user) {
+		if IsUserBannedFromThread(thread, user) {
+			return false
+		}
+		return true
+	}
+	return false
+}
+
 // AddMessageInThread adds a message to the thread
 // Returns an error if there is one
-func AddMessageInThread(thread ThreadGoForum, content string, user User, mediaLinksID ...int) (int, error) {
-	insertMessage := "INSERT INTO ThreadMessages (thread_id, user_id, message_content) VALUES (?, ?, ?)"
-	res, err := db.Exec(insertMessage, thread.ThreadID, user.UserID, content)
+func AddMessageInThread(thread ThreadGoForum, title string, content string, user User, mediaLinksID ...int) (int, error) {
+	insertMessage := "INSERT INTO ThreadMessages (thread_id, user_id, message_title, message_content) VALUES (?, ?, ?, ?)"
+	res, err := db.Exec(insertMessage, thread.ThreadID, user.UserID, title, content)
 	if err != nil {
 		ErrorPrintf("Error inserting the message into the database: %v\n", err)
 		return -1, err
@@ -1345,6 +1432,24 @@ func AddMessageInThread(thread ThreadGoForum, content string, user User, mediaLi
 		}
 	}
 	return int(messageID), nil
+}
+
+// IsMessageTitleValid checks if the message title is valid
+// Message title must be at least 5 characters long
+// Message title must be at most 50 characters long
+// Message title must only contain letters, numbers, underscores, hyphens and spaces
+func IsMessageTitleValid(messageTitle string) bool {
+	messageTitleRegex := regexp.MustCompile(`^[a-zA-Z0-9 _\-]{5,50}$`)
+	return messageTitleRegex.MatchString(messageTitle)
+}
+
+// IsMessageContentValid checks if the message content is valid
+// Message content must be at least 5 characters long
+// Message content must be at most 500 characters long
+// Message content must only contain letters, numbers, underscores, hyphens, spaces, punctuation and most special characters
+func IsMessageContentValid(messageContent string) bool {
+	messageContentRegex := regexp.MustCompile(`^[a-zA-Z0-9 _\-.,;:!?(){}\[\]<>@#$%^&*+=~|\\"'/]{5,500}$`)
+	return messageContentRegex.MatchString(messageContent)
 }
 
 // RemoveMessageFromThread removes the message from the thread
@@ -1468,13 +1573,14 @@ func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]Fo
 		err := rows.Scan(
 			&message.MessageID,
 			&message.ThreadName,
+			&message.MessageTitle,
 			&message.MessageContent,
 			&message.WasEdited,
 			&message.CreationDate,
 			&message.UserName,
 			&message.UserPfpAddress,
-			&message.UpVotes,
-			&message.DownVotes)
+			&message.Upvotes,
+			&message.Downvotes)
 		if err != nil {
 			ErrorPrintf("Error scanning the rows in GetMessagesFromThread: %v\n", err)
 			return nil, err
@@ -1489,12 +1595,6 @@ func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]Fo
 			ErrorPrintf("Error getting the incompleteMessages from the thread: %v\n", err)
 			return nil, err
 		}
-		defer func(rows *sql.Rows) {
-			err := rows.Close()
-			if err != nil {
-				ErrorPrintf("Error closing the rows: %v\n", err)
-			}
-		}(rows)
 		for rows.Next() {
 			var mediaLink string
 			err := rows.Scan(&mediaLink)
@@ -1505,8 +1605,45 @@ func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]Fo
 			message.MediaLinks = append(message.MediaLinks, mediaLink)
 		}
 		Messages = append(Messages, message)
+		err = rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
 	}
 	return Messages, nil
+}
+
+func GetThreadModerationTeam(forum ThreadGoForum) []SimplifiedUser {
+	getThreadModerationTeam := `
+		SELECT u.username, ml.media_address, tgm.rights_level
+		FROM ThreadGoForumMembers tgm
+		    JOIN Users u ON tgm.user_id = u.user_id
+		    JOIN UserConfigs uc ON u.user_id = uc.user_id
+		    JOIN MediaLinks ml ON uc.pfp_id = ml.media_id
+		WHERE tgm.thread_id = ? AND tgm.rights_level > 0
+		ORDER BY tgm.rights_level DESC;`
+	rows, err := db.Query(getThreadModerationTeam, forum.ThreadID)
+	if err != nil {
+		ErrorPrintf("Error getting the thread moderation team: %v\n", err)
+		return nil
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	var moderationTeam []SimplifiedUser
+	for rows.Next() {
+		var user SimplifiedUser
+		err := rows.Scan(&user.Username, &user.PfpAddress, &user.RightsLevel)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetThreadModerationTeam: %v\n", err)
+			return nil
+		}
+		moderationTeam = append(moderationTeam, user)
+	}
+	return moderationTeam
 }
 
 func ThreadMessageAddVote(messageID int, userID int, voteType bool) error {
@@ -1642,6 +1779,10 @@ func InitDatabase() {
 	}
 
 	// The 'ThreadGoForumMembers' represents the members of a thread
+	// if the 'right_level' is -1, the user is banned from the thread
+	// if the 'rights_level' is 0, the user is a normal member
+	// if the 'rights_level' is 1, the user is a moderator
+	// if the 'rights_level' is 2, the user is an admin
 	ThreadGoForumMembersTableSQL := `
 		CREATE TABLE IF NOT EXISTS ThreadGoForumMembers (
 			user_id INTEGER NOT NULL,
@@ -1680,6 +1821,7 @@ func InitDatabase() {
 			message_id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER NOT NULL,
 			thread_id INTEGER NOT NULL,
+			message_title TEXT NOT NULL,
 			message_content TEXT NOT NULL,
 			was_edited BOOLEAN DEFAULT FALSE NOT NULL,
 			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1725,23 +1867,17 @@ func InitDatabase() {
 		CREATE VIEW IF NOT EXISTS ViewThreadMessagesWithVotes AS
 		SELECT 
 			tm.message_id,
-			tg.thread_name,  -- Remplace le thread_id par le thread_name
+			tg.thread_name,
+			tm.message_title,
 			tm.message_content,
 			tm.was_edited,
 			tm.creation_date,
-			
-			-- Infos utilisateur
 			u.username,
-		
-			-- Média photo de profil
 			ml.media_address AS pfp_media_address,
-		
-			-- Votes
 			COALESCE(v.upvotes, 0) AS upvotes,
 			COALESCE(v.downvotes, 0) AS downvotes
-		
 		FROM ThreadMessages tm
-		JOIN ThreadGoForum tg ON tm.thread_id = tg.thread_id  -- Jointure pour récupérer le thread_name
+		JOIN ThreadGoForum tg ON tm.thread_id = tg.thread_id
 		JOIN Users u ON tm.user_id = u.user_id
 		LEFT JOIN UserConfigs uc ON u.user_id = uc.user_id
 		LEFT JOIN MediaLinks ml ON uc.pfp_id = ml.media_id
@@ -1850,9 +1986,14 @@ func FillDatabase() {
 
 	// Adding fake users
 	for i := 0; i < 15; i++ {
-		err := AddUser(spew.Sprintf("fakeuser%d@fakemailservice.com", i), spew.Sprintf("fakeuser%d", i), "Fake", "User", "password")
+		err := AddUser(fmt.Sprintf("fakeuser%d@fakemailservice.com", i), fmt.Sprintf("fakeuser%d", i), "Fake", "User", "password")
 		if err != nil {
 			ErrorPrintf("Error adding fake user %d: %v\n", i, err)
+			return
+		}
+		err = VerifyEmail(fmt.Sprintf("fakeuser%d@fakemailservice.com", i))
+		if err != nil {
+			ErrorPrintf("Error verifying fake user %d: %v\n", i, err)
 			return
 		}
 	}
@@ -1861,15 +2002,15 @@ func FillDatabase() {
 	for i := 0; i < 50; i++ {
 		// Randomly add a media link to the message
 		var mediaIDs []int
-		if rand.Intn(2) == 0 {
-			mediaID, err := AddMediaLink(ThreadMessagePicture, spew.Sprintf("https://fakeimage%d.com", i))
+		if mr.Intn(2) == 0 {
+			mediaID, err := AddMediaLink(ThreadMessagePicture, fmt.Sprintf("https://fakeimage%d.com", i))
 			if err != nil {
 				ErrorPrintf("Error adding media link %d: %v\n", i, err)
 				return
 			}
 			mediaIDs = append(mediaIDs, mediaID)
-			if rand.Intn(2) == 0 {
-				mediaID, err := AddMediaLink(ThreadMessagePicture, spew.Sprintf("https://secondfakeimage%d.com", i))
+			if mr.Intn(2) == 0 {
+				mediaID, err := AddMediaLink(ThreadMessagePicture, fmt.Sprintf("https://secondfakeimage%d.com", i))
 				if err != nil {
 					ErrorPrintf("Error adding media link %d: %v\n", i, err)
 					return
@@ -1879,7 +2020,8 @@ func FillDatabase() {
 		}
 		_, err := AddMessageInThread(
 			GetThreadFromName("TestThread"),
-			spew.Sprintf("This is a test message %d", i),
+			fmt.Sprintf("Test message %d title", i),
+			fmt.Sprintf("This is a test %d message ", i),
 			User{UserID: (i % 15) + 1},
 			mediaIDs...)
 		if err != nil {
@@ -1893,7 +2035,7 @@ func FillDatabase() {
 	for i := 0; i < 15; i++ { // loop for each user
 		for j := 0; j < 50; j++ { // loop for each message
 			// Randomly upvote or downvote the message
-			if rand.Intn(2) == 0 {
+			if mr.Intn(2) == 0 {
 				err := ThreadMessageUpVote(j+1, i+1)
 				if err != nil {
 					ErrorPrintf("Error adding upvote %d for user %d: %v\n", j, i, err)
@@ -1906,6 +2048,15 @@ func FillDatabase() {
 					return
 				}
 			}
+		}
+	}
+
+	// Adding fake Moderators / Admin to the threads
+	for i := 0; i < 15; i++ {
+		err := AddUserToThread(GetThreadFromName("TestThread"), User{UserID: i + 1}, mr.Intn(3))
+		if err != nil {
+			ErrorPrintf("Error adding user/moderator/admin %d to thread TestThread: %v\n", i, err)
+			return
 		}
 	}
 }

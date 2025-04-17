@@ -28,5 +28,5 @@ func ThreadCreationPage(w http.ResponseWriter, r *http.Request) {
 
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/threadCreation.css")
-	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/threadCreation.html")
+	f.MakeTemplateAndExecute(w, PageInfo, "templates/threadCreation.html")
 }

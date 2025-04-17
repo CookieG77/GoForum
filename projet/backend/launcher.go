@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"GoForum/backend/apiPageHandlers"
 	"GoForum/backend/pagesHandlers"
 	f "GoForum/functions"
 	"fmt"
@@ -77,7 +78,8 @@ func LaunchWebApp() {
 	r.HandleFunc("/reset-password", pagesHandlers.ResetPasswordPage).Methods("GET", "POST")
 	r.HandleFunc("/confirm-email-address", pagesHandlers.ConfirmMailPage).Methods("GET", "POST")
 	r.HandleFunc("/t/{thread}", pagesHandlers.ThreadPage).Methods("GET", "POST")
-	r.HandleFunc("/api/messages", pagesHandlers.ThreadMessageGetter).Methods("GET")
+	r.HandleFunc("/api/messages", apiPageHandlers.ThreadMessageGetter).Methods("GET")
+	r.HandleFunc("/api/thread/{thread}/{action}", apiPageHandlers.ThreadMessageHandler).Methods("POST")
 
 	// Handle error 404 & 405
 	r.NotFoundHandler = http.HandlerFunc(pagesHandlers.ErrorPage404)
@@ -93,7 +95,7 @@ func LaunchWebApp() {
 	f.InitOAuthKeys(finalPort, r)
 
 	// Initialize the mail configuration
-	f.InitMail("MailConfig.json")
+	f.InitMail()
 
 	// Launch the server
 	f.LaunchServer(r, finalPort)

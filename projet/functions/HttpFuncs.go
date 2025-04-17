@@ -8,8 +8,8 @@ import (
 	"os"
 )
 
-var isCertified bool = false
-var isInitialized bool = false
+var isCertified = false
+var isInitialized = false
 
 // baseTemplates is a list of base templates to be used by the templates.
 var baseTemplates []string
@@ -48,7 +48,7 @@ func ExecuteTemplate(w http.ResponseWriter, tmpl *template.Template, content int
 }
 
 // MakeTemplateAndExecute is to be used for pagesHandlers that do not require any particular processing
-func MakeTemplateAndExecute(w http.ResponseWriter, r *http.Request, content interface{}, templatesDir ...string) {
+func MakeTemplateAndExecute(w http.ResponseWriter, content interface{}, templatesDir ...string) {
 	tmpl := MakeTemplate(w, templatesDir...)
 	ExecuteTemplate(w, tmpl, content)
 }

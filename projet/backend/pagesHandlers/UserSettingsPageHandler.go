@@ -22,7 +22,7 @@ func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		f.InfoPrintf("User Settings page accessed at %s\n", f.GetIP(r))
 		// If the user is not authenticated, show him a forbidden page
-		http.Redirect(w, r, "/?openlogin=true", http.StatusSeeOther)
+		RedirectToLogin(w, r)
 		return
 	}
 
@@ -78,5 +78,5 @@ func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
 	// Add additional styles to the content interface
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/userSettings.css")
 	f.AddAdditionalScriptsToContentInterface(&PageInfo, "js/userSettingsScript.js")
-	f.MakeTemplateAndExecute(w, r, PageInfo, "templates/userSettings.html")
+	f.MakeTemplateAndExecute(w, PageInfo, "templates/userSettings.html")
 }
