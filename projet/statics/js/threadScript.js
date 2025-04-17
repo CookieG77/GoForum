@@ -1,10 +1,13 @@
-const path = window.location.pathname;
-const segments = path.split("/");
-const threadName = segments[2];
-// TODO: Remove the print statement
-console.log("Thread ID:", threadName);
+function getCurrentThreadName() {
+    const path = window.location.pathname;
+    const segments = path.split("/");
+    const threadName = segments[2];
+    // TODO: Remove the print statement
+    console.log("Thread ID:", threadName);
+    return threadName;
+}
 
-function sendMessage() {
+function sendMessage(threadName) {
     const titleText = document.getElementById("new_message_title").value;
     const contentText = document.getElementById("new_message_content").value;
 

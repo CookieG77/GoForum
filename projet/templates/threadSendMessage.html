@@ -1,0 +1,19 @@
+{{ define "content" }}
+<div>
+  <label for="threadSelect">In which thread</label>
+  <select id="threadSelect">
+    {{ range $thread := .UserThreads }}
+      <option value="{{ $thread.ThreadName }}">{{ $thread.ThreadName }}</option>
+    {{ end }}
+  </select>
+  <br>
+  <label for="messageTitle">Message title</label>
+  <input type="text" id="messageTitle" placeholder="Type your message title here..." />
+  <br>
+  <label for="messageContent">Message content</label>
+  <input type="text" id="messageContent" placeholder="Type your message here..." />
+  <br>
+  <button id="sendMessageButton">Send</button>
+</div>
+
+{{ end }}

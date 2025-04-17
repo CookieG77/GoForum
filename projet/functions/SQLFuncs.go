@@ -1646,6 +1646,34 @@ func GetThreadModerationTeam(forum ThreadGoForum) []SimplifiedUser {
 	return moderationTeam
 }
 
+// GetUserThreads returns the threads where the user is a member
+// Returns a slice of threads or nil if there is an error
+func GetUserThreads(user User) []ThreadGoForum {
+	getUserThreads := "SELECT tg.thread_id, tg.thread_name, tg.owner_id, tg.creation_date FROM ThreadGoForumMembers tgm JOIN ThreadGoForum tg ON tgm.thread_id = tg.thread_id WHERE tgm.user_id = ?"
+	rows, err := db.Query(getUserThreads, user.UserID)
+	if err != nil {
+		ErrorPrintf("Error getting the threads from the user: %v\n", err)
+		return nil
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	var threads []ThreadGoForum
+	for rows.Next() {
+		var thread ThreadGoForum
+		err := rows.Scan(&thread.ThreadID, &thread.ThreadName, &thread.OwnerID, &thread.CreationDate)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetUserThreads: %v\n", err)
+			return nil
+		}
+		threads = append(threads, thread)
+	}
+	return threads
+}
+
 func ThreadMessageAddVote(messageID int, userID int, voteType bool) error {
 	addVote := "INSERT INTO ThreadMessageVotes (message_id, user_id, is_upvote) VALUES (?, ?, ?)"
 	_, err := db.Exec(addVote, messageID, userID, voteType)
