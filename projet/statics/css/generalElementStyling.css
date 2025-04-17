@@ -19,6 +19,8 @@
     border-right-color: #800000;
     border-bottom-color: #800000;
     padding: 4px;
+    display: flex;
+    align-items: center;
 }
 
 .win95-border-indent, .win95-border-outdent {
@@ -145,4 +147,10 @@
 
 .win95-description{
     padding: 8px;
+}
+
+.win95-menu-box{
+    border-top: grey 2px solid;
+    border-bottom: white 2px solid;
+    width: 100%;
 }
