@@ -1122,10 +1122,9 @@ func CheckIfThreadNameExists(threadName string) bool {
 }
 
 // IsThreadOwner checks if the user is the owner of the thread
-func IsThreadOwner(thread ThreadGoForum, r *http.Request) bool {
-	email := GetUserEmail(r)
-	checkIfOwner := "SELECT thread_name FROM ThreadGoForum WHERE thread_name = ? AND owner_id = (SELECT user_id FROM Users WHERE email = ?)"
-	rows, err := db.Query(checkIfOwner, thread.ThreadName, email)
+func IsThreadOwner(thread ThreadGoForum, user User) bool {
+	checkIfOwner := "SELECT thread_name FROM ThreadGoForum WHERE thread_name = ? AND owner_id = ?"
+	rows, err := db.Query(checkIfOwner, thread.ThreadName, user.UserID)
 	if err != nil {
 		ErrorPrintf("Error checking if the user is the owner of the thread: %v\n", err)
 		return false
@@ -1197,12 +1196,11 @@ func IsUserBannedFromThread(thread ThreadGoForum, user User) bool {
 }
 
 // GetThreadMemberRightsLevel returns the rights level of the user in the given thread
-func GetThreadMemberRightsLevel(thread ThreadGoForum, r *http.Request) int {
-	email := GetUserEmail(r)
-	checkIfModerator := "SELECT rights_level FROM ThreadGoForumMembers WHERE thread_id = ? AND user_id = (SELECT user_id FROM Users WHERE email = ?)"
-	rows, err := db.Query(checkIfModerator, thread.ThreadID, email)
+func GetThreadMemberRightsLevel(thread ThreadGoForum, user User) int {
+	checkIfModerator := "SELECT rights_level FROM ThreadGoForumMembers WHERE thread_id = ? AND user_id = ?"
+	rows, err := db.Query(checkIfModerator, thread.ThreadID, user.UserID)
 	if err != nil {
-		ErrorPrintf("Error getting the user rights level: %v\n", err)
+		ErrorPrintf("Error checking if the user is a member of the thread: %v\n", err)
 		return 0
 	}
 	defer func(rows *sql.Rows) {
@@ -1212,20 +1210,20 @@ func GetThreadMemberRightsLevel(thread ThreadGoForum, r *http.Request) int {
 		}
 	}(rows)
 	if rows.Next() {
-		var rightLevel int
-		err := rows.Scan(rightLevel)
+		var rightsLevel int
+		err := rows.Scan(&rightsLevel)
 		if err != nil {
 			ErrorPrintf("Error scanning the rows in GetThreadMemberRightsLevel: %v\n", err)
 			return 0
 		}
-		return rightLevel
+		return rightsLevel
 	}
 	return 0
 }
 
 // IsThreadModerator checks if the user is a moderator of the given thread
-func IsThreadModerator(thread ThreadGoForum, r *http.Request) bool {
-	rightLevel := GetThreadMemberRightsLevel(thread, r)
+func IsThreadModerator(thread ThreadGoForum, user User) bool {
+	rightLevel := GetThreadMemberRightsLevel(thread, user)
 	if rightLevel == 1 {
 		return true
 	}
@@ -1233,8 +1231,8 @@ func IsThreadModerator(thread ThreadGoForum, r *http.Request) bool {
 }
 
 // IsThreadAdmin checks if the user is an admin of the given thread
-func IsThreadAdmin(thread ThreadGoForum, r *http.Request) bool {
-	rightLevel := GetThreadMemberRightsLevel(thread, r)
+func IsThreadAdmin(thread ThreadGoForum, user User) bool {
+	rightLevel := GetThreadMemberRightsLevel(thread, user)
 	if rightLevel == 2 {
 		return true
 	}
@@ -1408,6 +1406,35 @@ func IsUserAllowedToSendMessageInThread(thread ThreadGoForum, user User) bool {
 	return false
 }
 
+// IsUserAllowedToEditMessageInThread checks if the user is allowed to edit a message in the thread
+// Returns true if the user is allowed to edit a message and false otherwise
+func IsUserAllowedToEditMessageInThread(thread ThreadGoForum, user User, messageID int) bool {
+	if thread.ThreadID <= 0 {
+		return false
+	}
+	if IsUserInThread(thread, user) {
+		if IsUserBannedFromThread(thread, user) {
+			return false
+		}
+		checkIfOwner := "SELECT message_id FROM ThreadMessages WHERE thread_id = ? AND message_id = ? AND user_id = ?"
+		rows, err := db.Query(checkIfOwner, thread.ThreadID, messageID, user.UserID)
+		if err != nil {
+			ErrorPrintf("Error checking if the user is the owner of the message: %v\n", err)
+			return false
+		}
+		defer func(rows *sql.Rows) {
+			err := rows.Close()
+			if err != nil {
+				ErrorPrintf("Error closing the rows: %v\n", err)
+			}
+		}(rows)
+		if rows.Next() {
+			return true
+		}
+	}
+	return false
+}
+
 // AddMessageInThread adds a message to the thread
 // Returns an error if there is one
 func AddMessageInThread(thread ThreadGoForum, title string, content string, user User, mediaLinksID ...int) (int, error) {
@@ -1437,25 +1464,25 @@ func AddMessageInThread(thread ThreadGoForum, title string, content string, user
 // IsMessageTitleValid checks if the message title is valid
 // Message title must be at least 5 characters long
 // Message title must be at most 50 characters long
-// Message title must only contain letters, numbers, underscores, hyphens and spaces
+// Message title must only contain letters, numbers, underscores, hyphens, spaces, punctuation, most special characters, accents and emojis
 func IsMessageTitleValid(messageTitle string) bool {
-	messageTitleRegex := regexp.MustCompile(`^[a-zA-Z0-9 _\-]{5,50}$`)
+	messageTitleRegex := regexp.MustCompile(`^[a-zA-Z0-9 _\-.,;:!?(){}\[\]<>@#$%^&*+=~|\\"'/éèêëôçàâäïîùûü]{5,50}$`)
 	return messageTitleRegex.MatchString(messageTitle)
 }
 
 // IsMessageContentValid checks if the message content is valid
 // Message content must be at least 5 characters long
 // Message content must be at most 500 characters long
-// Message content must only contain letters, numbers, underscores, hyphens, spaces, punctuation and most special characters
+// Message content must only contain letters, numbers, underscores, hyphens, spaces, punctuation, most special characters, accents and emojis
 func IsMessageContentValid(messageContent string) bool {
-	messageContentRegex := regexp.MustCompile(`^[a-zA-Z0-9 _\-.,;:!?(){}\[\]<>@#$%^&*+=~|\\"'/]{5,500}$`)
+	messageContentRegex := regexp.MustCompile(`^[a-zA-Z0-9 _\-.,;:!?(){}\[\]<>@#$%^&*+=~|\\"'/éèêëôçàâäïîùûü]{5,500}$`)
 	return messageContentRegex.MatchString(messageContent)
 }
 
 // RemoveMessageFromThread removes the message from the thread
 // Returns an error if there is one
 func RemoveMessageFromThread(thread ThreadGoForum, messageID int) error {
-	removeMessage := "DELETE FROM Messages WHERE thread_id = ? AND message_id = ?"
+	removeMessage := "DELETE FROM ThreadMessages WHERE thread_id = ? AND message_id = ?"
 	_, err := db.Exec(removeMessage, thread.ThreadID, messageID)
 	if err != nil {
 		ErrorPrintf("Error removing the message from the database: %v\n", err)
@@ -1464,11 +1491,11 @@ func RemoveMessageFromThread(thread ThreadGoForum, messageID int) error {
 	return nil
 }
 
-// EditMessageInThread edits the message in the thread
+// EditMessageFromThread edits the message in the thread
 // Returns an error if there is one
-func EditMessageInThread(thread ThreadGoForum, messageID int, newContent string) error {
-	editMessage := "UPDATE Messages SET message_content = ? AND was_edited = true WHERE thread_id = ? AND message_id = ?"
-	_, err := db.Exec(editMessage, newContent, thread.ThreadID, messageID)
+func EditMessageFromThread(thread ThreadGoForum, messageID int, newTitle string, newContent string) error {
+	editMessage := "UPDATE ThreadMessages SET message_title = ? , message_content = ? , was_edited = true WHERE thread_id = ? AND message_id = ?"
+	_, err := db.Exec(editMessage, newTitle, newContent, thread.ThreadID, messageID)
 	if err != nil {
 		ErrorPrintf("Error editing the message in the database: %v\n", err)
 		return err
@@ -1486,6 +1513,27 @@ func RemoveMediaLinkFromMessage(messageID int, mediaID int) error {
 		return err
 	}
 	return nil
+}
+
+// MediaExistsInMessage checks if the media link exists in the message
+// Returns true if the media link exists and false otherwise
+func MediaExistsInMessage(messageID int, mediaID int) bool {
+	checkIfMediaExists := "SELECT media_id FROM ThreadMessageMediaLinks WHERE message_id = ? AND media_id = ?"
+	rows, err := db.Query(checkIfMediaExists, messageID, mediaID)
+	if err != nil {
+		ErrorPrintf("Error checking if the media link exists in the message: %v\n", err)
+		return false
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		return true
+	}
+	return false
 }
 
 // GetNumberOfMessagesInThread returns the number of messages in the thread
@@ -1513,6 +1561,98 @@ func GetNumberOfMessagesInThread(thread ThreadGoForum) (int, error) {
 		return numberOfMessages, nil
 	}
 	return 0, nil
+}
+
+// MessageExistsInThread checks if the message exists in the thread
+// Returns true if the message exists and false otherwise
+func MessageExistsInThread(thread ThreadGoForum, messageID int) bool {
+	checkIfMessageExists := "SELECT message_id FROM ThreadMessages WHERE thread_id = ? AND message_id = ?"
+	rows, err := db.Query(checkIfMessageExists, thread.ThreadID, messageID)
+	if err != nil {
+		ErrorPrintf("Error checking if the message exists in the thread: %v\n", err)
+		return false
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		return true
+	}
+	return false
+}
+
+// IsUserAllowedToDeleteMessage checks if the user is allowed to delete the message
+// Returns true if the user is allowed to delete the message and false otherwise
+// A user is allowed to delete a message if he is the owner of the message or if he is the owner or an admin of the thread
+func IsUserAllowedToDeleteMessage(thread ThreadGoForum, user User, messageID int) bool {
+	if thread.OwnerID == user.UserID {
+		return true
+	}
+	if IsThreadOwner(thread, user) {
+		return true
+	}
+	if IsThreadAdmin(thread, user) {
+		return true
+	}
+	// Check if the user is the owner of the message
+	checkIfMessageOwner := "SELECT user_id FROM ThreadMessages WHERE thread_id = ? AND message_id = ?"
+	rows, err := db.Query(checkIfMessageOwner, thread.ThreadID, messageID)
+	if err != nil {
+		ErrorPrintf("Error checking if the user is the owner of the message: %v\n", err)
+		return false
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var messageOwnerID int
+		err := rows.Scan(&messageOwnerID)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in IsUserAllowedToDeleteMessage: %v\n", err)
+			return false
+		}
+		if messageOwnerID == user.UserID {
+			return true
+		}
+	}
+	return false
+}
+
+// HasUserAlreadyVoted checks if the user has already voted for the message
+// Returns 0 if the user has not voted, 1 if the user has upvoted and -1 if the user has downvoted
+func HasUserAlreadyVoted(user User, messageID int) int {
+	checkIfUserVoted := "SELECT is_upvote FROM ThreadMessageVotes WHERE user_id = ? AND message_id = ?"
+	rows, err := db.Query(checkIfUserVoted, user.UserID, messageID)
+	if err != nil {
+		ErrorPrintf("Error checking if the user has already voted: %v\n", err)
+		return 0
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows in HasUserAlreadyVoted: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var isUpvote bool
+		err := rows.Scan(&isUpvote)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in HasUserAlreadyVoted: %v\n", err)
+			return 0
+		}
+		if isUpvote {
+			return 1
+		} else {
+			return -1
+		}
+	}
+	return 0
 }
 
 // GetMessagesFromThread returns the messages from the thread
@@ -1613,6 +1753,8 @@ func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]Fo
 	return Messages, nil
 }
 
+// GetThreadModerationTeam returns the moderation team of the thread
+// Returns a slice of SimplifiedUser
 func GetThreadModerationTeam(forum ThreadGoForum) []SimplifiedUser {
 	getThreadModerationTeam := `
 		SELECT u.username, ml.media_address, tgm.rights_level
@@ -1674,6 +1816,8 @@ func GetUserThreads(user User) []ThreadGoForum {
 	return threads
 }
 
+// ThreadMessageAddVote adds a vote to the message
+// Returns an error if there is one
 func ThreadMessageAddVote(messageID int, userID int, voteType bool) error {
 	addVote := "INSERT INTO ThreadMessageVotes (message_id, user_id, is_upvote) VALUES (?, ?, ?)"
 	_, err := db.Exec(addVote, messageID, userID, voteType)
@@ -1684,12 +1828,43 @@ func ThreadMessageAddVote(messageID int, userID int, voteType bool) error {
 	return nil
 }
 
+// ThreadMessageUpVote adds a vote to the message
+// Returns an error if there is one
 func ThreadMessageUpVote(messageID int, userID int) error {
 	return ThreadMessageAddVote(messageID, userID, true)
 }
 
+// ThreadMessageDownVote adds a downvote to the message
+// Returns an error if there is one
 func ThreadMessageDownVote(messageID int, userID int) error {
 	return ThreadMessageAddVote(messageID, userID, false)
+}
+
+// ThreadMessageRemoveVote removes the vote from the message
+// Returns an error if there is one
+func ThreadMessageRemoveVote(messageID int, userID int) error {
+	removeVote := "DELETE FROM ThreadMessageVotes WHERE message_id = ? AND user_id = ?"
+	_, err := db.Exec(removeVote, messageID, userID)
+	if err != nil {
+		ErrorPrintf("Error removing the vote from the message: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// ThreadMessageUpdateVote updates the vote of the message
+// Returns an error if there is one
+// It updates the vote of the message to the new vote
+// if voteType is true, it means the user upvoted the message
+// if voteType is false, it means the user downvoted the message
+func ThreadMessageUpdateVote(messageID int, userID int, voteType bool) error {
+	updateVote := "UPDATE ThreadMessageVotes SET is_upvote = ? WHERE message_id = ? AND user_id = ?"
+	_, err := db.Exec(updateVote, voteType, messageID, userID)
+	if err != nil {
+		ErrorPrintf("Error updating the vote of the message: %v\n", err)
+		return err
+	}
+	return nil
 }
 
 // InitDatabase initialises the database.

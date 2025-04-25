@@ -14,6 +14,28 @@
   <input type="text" id="messageContent" placeholder="Type your message here..." />
   <br>
   <button id="sendMessageButton">Send</button>
+  <br>
+  <div id="afterMessageSendOptionContainer" class="hidden">
+    <p>Last message data</p>
+    <div style="border: 0.5rem solid blue;">
+      <div id="messageThreadContainer"></div>
+      <div id="messageIDContainer"></div>
+    </div>
+    <button  id="deleteMessageButton">Delete last message</button>
+    <button  id="upvoteButton">Upvote last message</button>
+    <button  id="downvoteButton">Downvote last message</button>
+    <br>
+    <p>Update last message</p>
+    <div>
+      <label for="updatedMessageTitle">Message title</label>
+      <input type="text" id="updatedMessageTitle" placeholder="Type your message title here..." />
+      <br>
+      <label for="updatedMessageContent">Message content</label>
+      <input type="text" id="updatedMessageContent" placeholder="Type your message here..." />
+      <br>
+      <button id="updateMessageButton">Send</button>
+    </div>
+  </div>
 </div>
 
 {{ end }}

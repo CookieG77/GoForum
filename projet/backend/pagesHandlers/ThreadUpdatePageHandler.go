@@ -20,7 +20,7 @@ func ThreadOptionPage(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/confirmMail", http.StatusFound)
 			return
 		}
-		if !f.IsThreadOwner(f.GetThreadFromName(threadName), r) {
+		if !f.IsThreadOwner(f.GetThreadFromName(threadName), f.GetUser(r)) {
 			f.InfoPrintf("Thread option page accessed at %s by verified non owner %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
 			ErrorPage404(w, r)
 			return
