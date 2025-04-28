@@ -1241,29 +1241,27 @@ func IsThreadAdmin(thread ThreadGoForum, user User) bool {
 
 // JoinThread adds the user to the thread
 // Returns an error if there is one
-func JoinThread(thread ThreadGoForum, r *http.Request) error {
-	email := GetUserEmail(r)
-	insertThreadMember := "INSERT INTO ThreadGoForumMembers (thread_id, user_id) VALUES (?, (SELECT user_id FROM Users WHERE email = ?))"
-	_, err := db.Exec(insertThreadMember, thread.ThreadID, email)
+func JoinThread(thread ThreadGoForum, user User) error {
+	insertThreadMember := "INSERT INTO ThreadGoForumMembers (thread_id, user_id) VALUES (?, ?)"
+	_, err := db.Exec(insertThreadMember, thread.ThreadID, user.UserID)
 	if err != nil {
 		ErrorPrintf("Error inserting the user into the thread: %v\n", err)
 		return err
 	}
-	InfoPrintf("User %s joined the thread %s\n", email, thread.ThreadName)
+	InfoPrintf("User %s joined the thread %s\n", user.Email, thread.ThreadName)
 	return nil
 }
 
 // LeaveThread removes the user from the thread
 // Returns an error if there is one
-func LeaveThread(thread ThreadGoForum, r *http.Request) error {
-	email := GetUserEmail(r)
-	removeThreadMember := "DELETE FROM ThreadGoForumMembers WHERE thread_id = ? AND user_id = (SELECT user_id FROM Users WHERE email = ?)"
-	_, err := db.Exec(removeThreadMember, thread.ThreadID, email)
+func LeaveThread(thread ThreadGoForum, user User) error {
+	removeThreadMember := "DELETE FROM ThreadGoForumMembers WHERE thread_id = ? AND user_id = ?"
+	_, err := db.Exec(removeThreadMember, thread.ThreadID, user.UserID)
 	if err != nil {
 		ErrorPrintf("Error removing the user from the thread: %v\n", err)
 		return err
 	}
-	InfoPrintf("User %s left the thread %s\n", email, thread.ThreadName)
+	InfoPrintf("User %s left the thread %s\n", user.Email, thread.ThreadName)
 	return nil
 }
 
@@ -2256,7 +2254,7 @@ func FillDatabase() {
 
 	// Adding fake Moderators / Admin to the threads
 	for i := 0; i < 15; i++ {
-		err := AddUserToThread(GetThreadFromName("TestThread"), User{UserID: i + 1}, mr.Intn(3))
+		err := AddUserToThread(GetThreadFromName("TestThread"), User{UserID: i + 1, Username: fmt.Sprintf("fakeuser%d", i)}, mr.Intn(3))
 		if err != nil {
 			ErrorPrintf("Error adding user/moderator/admin %d to thread TestThread: %v\n", i, err)
 			return

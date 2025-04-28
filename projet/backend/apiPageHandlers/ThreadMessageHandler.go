@@ -28,7 +28,7 @@ type jsonMessageDesignator struct {
 }
 
 // ThreadMessageHandler handles the thread message requests from ajax calls
-// It's path is /api/thread/{thread}/{action}?id={id}
+// Its path is /api/thread/{thread}/m/{action}?id={id}
 // The "thread" is the name of the thread
 // The "action" can be "sendMessage", "deleteMessage", "editMessage", "reportMessage", "upvoteMessage", "downvoteMessage"
 // The "id" is the id of the message to edit/delete/report
@@ -59,7 +59,9 @@ func ThreadMessageHandler(w http.ResponseWriter, r *http.Request) {
 		action == "editMessage" ||
 		action == "reportMessage" ||
 		action == "upvoteMessage" ||
-		action == "downvoteMessage") {
+		action == "downvoteMessage" ||
+		action == "joinThread" ||
+		action == "leaveThread") {
 
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
 		http.Error(w, "Action is empty or does not exist !", http.StatusNotFound)
@@ -105,6 +107,12 @@ func ThreadMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	case "downvoteMessage":
 		downVoteMessage(w, r, thread, user)
+		return
+	case "joinThread":
+		joinThread(w, r, thread, user)
+		return
+	case "leaveThread":
+		leaveThread(w, r, thread, user)
 		return
 	default:
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
@@ -509,6 +517,65 @@ func downVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoFo
 			return
 		}
 		f.DebugPrintf("User %s changed his upvote to downvote on message %d\n", user.Username, id)
+		return
+	}
+}
+
+// joinThread handles the join thread action
+// This action is used to join a thread
+func joinThread(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+	if f.IsUserInThread(thread, user) {
+		f.DebugPrintf("User is already in the thread\n")
+		http.Error(w, "User is already in the thread", http.StatusBadRequest)
+		return
+	}
+
+	err := f.JoinThread(thread, user)
+	if err != nil {
+		f.ErrorPrintf("Error while joining the thread: %v\n", err)
+		http.Error(w, "Error while joining the thread", http.StatusInternalServerError)
+		return
+	}
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+// leaveThread handles the leave thread action
+// This action is used to leave a thread
+func leaveThread(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+	if !f.IsUserInThread(thread, user) {
+		f.DebugPrintf("User is not in the thread\n")
+		http.Error(w, "User is not in the thread", http.StatusBadRequest)
+		return
+	}
+	err := f.LeaveThread(thread, user)
+	if err != nil {
+		f.ErrorPrintf("Error while leaving the thread: %v\n", err)
+		http.Error(w, "Error while leaving the thread", http.StatusInternalServerError)
+		return
+	}
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
 		return
 	}
 }

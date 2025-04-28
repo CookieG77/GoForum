@@ -31,9 +31,6 @@ function sendMessage(threadName, messageTitle, messageContent) {
             title: messageTitle,
             content: messageContent
         })
-    })
-    .then(response => {
-        return response;
     });
 }
 
@@ -54,9 +51,6 @@ function deleteMessage(threadName, messageId) {
         body: JSON.stringify({
             messageId: messageId
         })
-    })
-    .then(response => {
-        return response;
     });
 }
 
@@ -79,9 +73,6 @@ function removeMedia(threadName, messageId, mediaId) {
             messageId: messageId,
             mediaId: mediaId
         })
-    })
-    .then(response => {
-        return response;
     });
 }
 
@@ -106,10 +97,7 @@ function editMessage(threadName, messageId, newMessageTitle, newMessageContent) 
             title: newMessageTitle,
             content: newMessageContent
         })
-    })
-        .then(response => {
-            return response;
-        });
+    });
 }
 
 /**
@@ -130,10 +118,7 @@ function reportMessage(threadName, messageId) {
         body: JSON.stringify({
             messageId: messageId
         })
-    })
-        .then(response => {
-            return response;
-        });
+    });
 }
 
 /**
@@ -153,10 +138,7 @@ function upvoteMessage(threadName, messageId) {
         body: JSON.stringify({
             messageId: messageId
         })
-    })
-        .then(response => {
-            return response;
-        });
+    });
 }
 
 /**
@@ -176,8 +158,39 @@ function downvoteMessage(threadName, messageId) {
         body: JSON.stringify({
             messageId: messageId
         })
-    })
-        .then(response => {
-            return response;
-        });
+    });
+}
+
+/**
+ * Join the thread with the given name.
+ * @description This function sends a request to join a thread. It does not handle the response.
+ * @description But a success response means that the thread has been joined.
+ * @description A BadRequest response means that the user already joined the thread.
+ * @param threadName
+ * @returns {Promise<Response>}
+ */
+function joinThread(threadName) {
+    return fetch( `/api/thread/${threadName}/joinThread`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    });
+}
+
+/**
+ * Leave the thread with the given name.
+ * @description This function sends a request to leave a thread. It does not handle the response.
+ * @description But a success response means that the thread has been left.
+ * @description A BadRequest response means that the user is already not in the thread.
+ * @param threadName
+ * @returns {Promise<Response>}
+ */
+function leaveThread(threadName) {
+    return fetch( `/api/thread/${threadName}/leaveThread`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    });
 }

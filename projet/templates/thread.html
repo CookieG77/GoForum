@@ -31,23 +31,17 @@
                 {{ if eq .IsAuthenticated false }}
                     <p>To join the thread, you must register/login</p>
                 {{ else }}
-                    <form action="/t/{{ .ThreadInfos.ThreadName }}" method="POST">
-                        <input type="hidden" name="action" value="join">
-                        <button type="submit" class="win95-button">Join</button>
-                    </form>
+                    <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
+                    <button id="JoinThreadButton" class="win95-button">Join</button>
                 {{ end }}
             {{ else }}
                 <p>The content should be here</p>
                     {{ if .IsAMember }}
-                        <form action="/t/{{ .ThreadInfos.ThreadName }}" method="POST">
-                            <input type="hidden" name="action" value="leave">
-                            <button type="submit">Leave</button>
-                        </form>
+                        <button id="LeaveThreadButton" class="win95-button">Leave</button>
+                        <button id="JoinThreadButton" class="win95-button hidden">Join</button>
                     {{ else }}
-                        <form action="/t/{{ .ThreadInfos.ThreadName }}" method="POST">
-                            <input type="hidden" name="action" value="join">
-                            <button type="submit" class="win95-button">Join</button>
-                        </form>
+                        <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
+                        <button id="JoinThreadButton" class="win95-button">Join</button>
                     {{ end }}
                 {{ end }}
             {{ end }}

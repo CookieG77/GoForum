@@ -57,31 +57,6 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 	PageInfo["ThreadIcon"] = threadIcon
 	PageInfo["ThreadBanner"] = threadBanner
 
-	//
-	if (r.Method == "POST") && (PageInfo["IsAuthenticated"].(bool)) {
-		err := r.ParseForm()
-		if err != nil {
-			f.ErrorPrintf("Error while parsing the form: %v\n", err)
-			ErrorPage(w, r, http.StatusInternalServerError)
-			return
-		}
-		if r.FormValue("action") == "join" {
-			err := f.JoinThread(thread, r)
-			if err != nil {
-				f.ErrorPrintf("Error while joining thread %s : %v\n", thread.ThreadName, err)
-				ErrorPage500(w, r)
-				return
-			}
-		} else if r.FormValue("action") == "leave" {
-			err := f.LeaveThread(thread, r)
-			if err != nil {
-				f.ErrorPrintf("Error while leaving thread %s : %v\n", thread.ThreadName, err)
-				ErrorPage500(w, r)
-				return
-			}
-		}
-	}
-
 	// If the user is not verified and this thread does not accept non-connected users, do not display the thread and open the login popup
 	if !threadConfig.IsOpenToNonConnectedUsers && !PageInfo["IsAuthenticated"].(bool) {
 		PageInfo["ShowLoginPage"] = true
@@ -107,6 +82,6 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/thread.css")
-	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadScript.js")
+	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadScript.js", "/js/threadPageScript.js")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/thread.html")
 }
