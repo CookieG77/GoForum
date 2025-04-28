@@ -117,9 +117,18 @@ type FormattedThreadMessage struct {
 	Upvotes        int       `json:"up_votes"`
 	Downvotes      int       `json:"down_votes"`
 	MediaLinks     []string  `json:"media_links"`
+	MessageTags    []string  `json:"message_tags"`
+	VoteState      int       `json:"vote_state"`
 }
 
 var OrderingList = []string{"asc", "desc", "popular", "unpopular"}
+
+type ThreadTag struct {
+	TagID    int
+	ThreadID int
+	TagName  string
+	TagColor string
+}
 
 // InitDatabaseConnection initialises the database connection
 func InitDatabaseConnection() {
@@ -409,13 +418,13 @@ func GetUsernameFromEmail(email string) string {
 	return ""
 }
 
-// GetEmailFromUsername returns the email from the username
-func GetEmailFromUsername(username string) string {
-	getEmail := "SELECT email FROM Users WHERE username = ?"
+// GetUserFromUsername returns the email from the username
+func GetUserFromUsername(username string) (User, error) {
+	getEmail := "SELECT * FROM Users WHERE username = ?"
 	rows, err := db.Query(getEmail, username)
 	if err != nil {
 		ErrorPrintf("Error getting the email from the username: %v\n", err)
-		return ""
+		return User{}, err
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
@@ -424,15 +433,26 @@ func GetEmailFromUsername(username string) string {
 		}
 	}(rows)
 	if rows.Next() {
-		var email string
-		err := rows.Scan(&email)
+		var user User
+		err := rows.Scan(
+			&user.UserID,
+			&user.Email,
+			&user.Username,
+			&user.Firstname,
+			&user.Lastname,
+			&user.PasswordHash,
+			&user.EmailVerified,
+			&user.OAuthProvider,
+			&user.OAuthID,
+			&user.CreatedAt,
+		)
 		if err != nil {
-			ErrorPrintf("Error scanning the rows in GetEmailFromUsername: %v\n", err)
-			return ""
+			ErrorPrintf("Error scanning the rows in GetUserFromUsername: %v\n", err)
+			return User{}, err
 		}
-		return email
+		return user, nil
 	}
-	return ""
+	return User{}, fmt.Errorf("user not found")
 }
 
 // GetEmailFromID returns the email from the user id
@@ -1659,6 +1679,15 @@ func HasUserAlreadyVoted(user User, messageID int) int {
 // The offset is used to paginate the messages
 // By default the function returns a maximum of 10 messages or is equal to the environment variable 'MAX_MESSAGES_PER_PAGE_LOAD'
 func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]FormattedThreadMessage, error) {
+	return GetMessagesFromThreadWithPOV(thread, offset, order, User{})
+}
+
+// GetMessagesFromThreadWithPOV returns the messages from the thread viewed from the point of view of the user
+// Returns a slice of messages and an error if there is one
+// The messages are ordered by the given order (from the OrderingList)
+// The offset is used to paginate the messages
+// By default the function returns a maximum of 10 messages or is equal to the environment variable 'MAX_MESSAGES_PER_PAGE_LOAD'
+func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string, user User) ([]FormattedThreadMessage, error) {
 	// Check if there is still incompleteMessages to load
 	numberOfMessages, err := GetNumberOfMessagesInThread(thread)
 	if err != nil {
@@ -1741,6 +1770,14 @@ func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]Fo
 				return nil, err
 			}
 			message.MediaLinks = append(message.MediaLinks, mediaLink)
+		}
+		// Sets FormattedThreadMessage.VoteState to -1 if the user disliked the message
+		// Sets FormattedThreadMessage.VoteState to 1 if the user liked the message
+		// Sets FormattedThreadMessage.VoteState to 0 if the user has not voted
+		if user.UserID != 0 {
+			message.VoteState = HasUserAlreadyVoted(user, message.MessageID)
+		} else {
+			message.VoteState = 0
 		}
 		Messages = append(Messages, message)
 		err = rows.Close()
@@ -1865,6 +1902,175 @@ func ThreadMessageUpdateVote(messageID int, userID int, voteType bool) error {
 	return nil
 }
 
+func isValidHexColor(color string) bool {
+	// Check if the color is a valid hexadecimal color code
+	// The color must start with # and be followed by 6 or 3 hexadecimal digits
+	if len(color) != 7 && len(color) != 4 {
+		return false
+	}
+	if color[0] != '#' {
+		return false
+	}
+	for i := 1; i < len(color); i++ {
+		if !((color[i] >= '0' && color[i] <= '9') || (color[i] >= 'a' && color[i] <= 'f') || (color[i] >= 'A' && color[i] <= 'F')) {
+			return false
+		}
+	}
+	return true
+}
+
+// IsTagAlreadyExists checks if the tag already exists in the thread
+// Returns true if the tag already exists and false otherwise
+func IsTagAlreadyExists(thread ThreadGoForum, tagName string) (bool, error) {
+	getTag := "SELECT tag_name FROM ThreadGoForumTags WHERE thread_id = ? AND tag_name = ?"
+	rows, err := db.Query(getTag, thread.ThreadID, tagName)
+	if err != nil {
+		ErrorPrintf("Error checking if the tag already exists: %v\n", err)
+		return false, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		return true, nil
+	}
+	return false, nil
+}
+
+// IsTagIDAssociatedWithThread checks if the tag id is associated with the thread
+// Returns true if the tag id is associated with the thread and false otherwise
+func IsTagIDAssociatedWithThread(thread ThreadGoForum, tagID int) (bool, error) {
+	getTag := "SELECT tag_id FROM ThreadGoForumTags WHERE thread_id = ? AND tag_id = ?"
+	rows, err := db.Query(getTag, thread.ThreadID, tagID)
+	if err != nil {
+		ErrorPrintf("Error checking if the tag id is associated with the thread: %v\n", err)
+		return false, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		return true, nil
+	}
+	return false, nil
+}
+
+// AddThreadTag adds a tag to the thread
+// Returns an error if there is one
+// The tag name must be unique in the thread
+// The tag color must be a valid hexadecimal color code
+// The tag name must be at least 3 characters long
+// The tag name must be at most 30 characters long
+func AddThreadTag(thread ThreadGoForum, tagName string, tagColor string) error {
+	if len(tagName) < 3 || len(tagName) > 30 {
+		return fmt.Errorf("tag name must be between 3 and 30 characters long")
+	}
+	if !isValidHexColor(tagColor) {
+		return fmt.Errorf("tag color must be a valid hexadecimal color code")
+	}
+	exists, err := IsTagAlreadyExists(thread, tagName)
+	if err != nil {
+		ErrorPrintf("Error checking if the tag already exists: %v\n", err)
+		return err
+	}
+	if exists {
+		return fmt.Errorf("tag name already exists in the thread")
+	}
+	insertTag := "INSERT INTO ThreadGoForumTags (thread_id, tag_name, tag_color) VALUES (?, ?, ?)"
+	_, err = db.Exec(insertTag, thread.ThreadID, tagName, tagColor)
+	if err != nil {
+		ErrorPrintf("Error adding the tag to the thread: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// RemoveThreadTag removes the tag from the thread
+// Returns an error if there is one
+func RemoveThreadTag(thread ThreadGoForum, tagName string) error {
+	removeTag := "DELETE FROM ThreadGoForumTags WHERE thread_id = ? AND tag_name = ?"
+	_, err := db.Exec(removeTag, thread.ThreadID, tagName)
+	if err != nil {
+		ErrorPrintf("Error removing the tag from the thread: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// GetThreadTags returns the tags of the thread
+// Returns a slice of tags and an error if there is one
+func GetThreadTags(thread ThreadGoForum) ([]ThreadTag, error) {
+	getTags := "SELECT * FROM ThreadGoForumTags WHERE thread_id = ?"
+	rows, err := db.Query(getTags, thread.ThreadID)
+	if err != nil {
+		ErrorPrintf("Error getting the tags from the thread: %v\n", err)
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	var tags []ThreadTag
+	for rows.Next() {
+		var tag ThreadTag
+		err := rows.Scan(&tag.TagID, &tag.ThreadID, &tag.TagName, &tag.TagColor)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetThreadTags: %v\n", err)
+			return nil, err
+		}
+		tags = append(tags, tag)
+	}
+	return tags, nil
+}
+
+// AddTagToMessage adds the tag to the message
+// Returns an error if there is one
+func AddTagToMessage(messageID int, tags int) error {
+	addTag := "INSERT INTO ThreadMessageTags (message_id, tag_id) VALUES (?, ?)"
+	_, err := db.Exec(addTag, messageID, tags)
+	if err != nil {
+		ErrorPrintf("Error adding the tag to the message: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// GetMessageTags returns the tags of the message
+// Returns a slice of tags and an error if there is one
+func GetMessageTags(messageID int) ([]ThreadTag, error) {
+	getTags := "SELECT tt.tag_id, tt.thread_id, tt.tag_name, tt.tag_color FROM ThreadGoForumTags tt JOIN ThreadMessageTags tmt ON tt.tag_id = tmt.tag_id WHERE tmt.message_id = ?"
+	rows, err := db.Query(getTags, messageID)
+	if err != nil {
+		ErrorPrintf("Error getting the tags from the message: %v\n", err)
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	var tags []ThreadTag
+	for rows.Next() {
+		var tag ThreadTag
+		err := rows.Scan(&tag.TagID, &tag.ThreadID, &tag.TagName, &tag.TagColor)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetMessageTags: %v\n", err)
+			return nil, err
+		}
+		tags = append(tags, tag)
+	}
+	return tags, nil
+}
+
 // InitDatabase initialises the database.
 // It creates the tables if they do not exist.
 func InitDatabase() {
@@ -1979,6 +2185,23 @@ func InitDatabase() {
 		return
 	}
 
+	// The 'ThreadGoForumTags' table represents the tags of a thread
+	// the tag_color column is used to determine the color of the tag (it's a hexadecimal color code, e.g. #FF0000)
+	ThreadGoForumTagsTableSQL := `
+		CREATE TABLE IF NOT EXISTS ThreadGoForumTags (
+		    tag_id INTEGER PRIMARY KEY AUTOINCREMENT,
+		    thread_id INTEGER NOT NULL,
+		    tag_name TEXT NOT NULL,
+		    tag_color TEXT NOT NULL,
+		    FOREIGN KEY (thread_id) REFERENCES ThreadGoForum(thread_id)
+		);
+		`
+	_, err = db.Exec(ThreadGoForumTagsTableSQL)
+	if err != nil {
+		ErrorPrintf("Error creating ThreadGoForumTags table: %v\n", err)
+		return
+	}
+
 	// The 'ThreadGoForumMembers' represents the members of a thread
 	// if the 'right_level' is -1, the user is banned from the thread
 	// if the 'rights_level' is 0, the user is a normal member
@@ -2061,6 +2284,21 @@ func InitDatabase() {
 	_, err = db.Exec(ThreadMessageVotesTableSQL)
 	if err != nil {
 		ErrorPrintf("Error creating ThreadMessageVotes table: %v\n", err)
+		return
+	}
+
+	ThreadMessageTagsTableSQL := `
+		CREATE TABLE IF NOT EXISTS ThreadMessageTags (
+		    message_id INTEGER NOT NULL,
+		    tag_id INTEGER NOT NULL,
+		    FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id),
+		    FOREIGN KEY (tag_id) REFERENCES ThreadGoForumTags(tag_id),
+		    PRIMARY KEY (message_id, tag_id)
+		);
+		`
+	_, err = db.Exec(ThreadMessageTagsTableSQL)
+	if err != nil {
+		ErrorPrintf("Error creating ThreadMessageTags table: %v\n", err)
 		return
 	}
 

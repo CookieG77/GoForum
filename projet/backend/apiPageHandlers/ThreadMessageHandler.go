@@ -11,6 +11,7 @@ import (
 type jsonMessage struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
+	Tags    []int  `json:"tags,string"`
 }
 
 type jsonUpdateMessage struct {
@@ -190,6 +191,28 @@ func sendMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 		return
 	}
 	f.DebugPrintf("Message sent with ID: %d\n", messageID)
+
+	// Add the tags to the message
+	if len(msg.Tags) > 0 {
+		for _, tagID := range msg.Tags {
+			isCorrect, err := f.IsTagIDAssociatedWithThread(thread, tagID)
+			if !isCorrect {
+				f.DebugPrintf("Tag ID %d is not associated with thread %s\n", tagID, thread.ThreadID)
+				http.Error(w, "Tag ID is not associated with thread", http.StatusBadRequest)
+			} else {
+				err = f.AddTagToMessage(messageID, tagID)
+				if err != nil {
+					f.ErrorPrintf("Error while adding the tag to the message: %v\n", err)
+					http.Error(w, "Error while adding the tag to the message", http.StatusInternalServerError)
+					return
+				}
+			}
+		}
+		f.DebugPrintf("Tags added to message with ID: %d\n", messageID)
+	} else {
+		f.DebugPrintf("No tags to add to the message with ID: %d\n", messageID)
+	}
+
 	// Return the response with the message ID
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success", "messageId":` + strconv.Itoa(messageID) + `}`))

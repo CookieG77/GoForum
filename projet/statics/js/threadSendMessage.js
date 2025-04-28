@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("sendMessageButton").addEventListener("click", function() {
         const threadName = threadSelect.value
-        sendMessage(threadName, messageTitle.value, messageContent.value)
+        sendMessage(threadName, messageTitle.value, messageContent.value, null)
             .then(r => {
                 if (r.ok) {
                     return r.json();

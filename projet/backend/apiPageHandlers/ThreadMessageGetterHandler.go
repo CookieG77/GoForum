@@ -13,6 +13,10 @@ func ThreadMessageGetter(w http.ResponseWriter, r *http.Request) {
 	threadName := query.Get("thread")
 	offset := query.Get("offset")
 	order := query.Get("order")
+	viewfrom := query.Get("viewfrom")
+
+	isViewFromUserPOV := true
+	User := f.User{}
 
 	// Check if the thread name is empty or does not exist
 	if threadName == "" || !f.CheckIfThreadNameExists(threadName) {
@@ -48,14 +52,34 @@ func ThreadMessageGetter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Messages, err := f.GetMessagesFromThread(
-		f.GetThreadFromName(threadName),
-		offsetInt,
-		order)
-	if err != nil {
-		f.ErrorPrintf("Error getting messages from thread: %s\n", err)
-		http.Error(w, "Error getting messages from thread", http.StatusInternalServerError)
-		return
+	// Check if the viewfrom is empty or not a valid viewfrom
+	if viewfrom == "" {
+		isViewFromUserPOV = false
+	} else {
+		User, err = f.GetUserFromUsername(viewfrom)
+		if err != nil {
+			f.ErrorPrintf("Error getting user from username: %s\n", err)
+			http.Error(w, "Error getting user from username", http.StatusBadRequest)
+			return
+		}
+	}
+	var Messages []f.FormattedThreadMessage
+	if isViewFromUserPOV {
+		Messages, err = f.GetMessagesFromThreadWithPOV(
+			f.GetThreadFromName(threadName),
+			offsetInt,
+			order,
+			User)
+	} else {
+		Messages, err = f.GetMessagesFromThread(
+			f.GetThreadFromName(threadName),
+			offsetInt,
+			order)
+		if err != nil {
+			f.ErrorPrintf("Error getting messages from thread: %s\n", err)
+			http.Error(w, "Error getting messages from thread", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")

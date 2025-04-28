@@ -19,9 +19,10 @@ function getCurrentThreadName() {
  * @param threadName {string} - The name of the thread to send the message to.
  * @param messageTitle {string} - The title of the message.
  * @param messageContent {string} - The content of the message.
+ * @param messageTags {string[]} - The tags of the message.
  * @returns {Promise<Response>} - The response from the server.
  */
-function sendMessage(threadName, messageTitle, messageContent) {
+function sendMessage(threadName, messageTitle, messageContent, messageTags) {
     return fetch(`/api/thread/${threadName}/sendMessage`, {
         method: "POST",
         headers: {
@@ -29,7 +30,8 @@ function sendMessage(threadName, messageTitle, messageContent) {
         },
         body: JSON.stringify({
             title: messageTitle,
-            content: messageContent
+            content: messageContent,
+            tags: messageTags
         })
     });
 }
