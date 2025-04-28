@@ -19,6 +19,11 @@
     height: 100%;
     grid-column: 2/3;
     background-color: silver;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    gap: 2px;
 }
 
 .thread-banner-container{
@@ -51,4 +56,36 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.thread-sidebar-sections{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.moderation-icon{
+    height: 96px;
+    width: 96px;
+    border-radius: 50%;
+}
+
+.thread-moderation-team-member{
+    display: grid;
+    grid-template-columns: auto 1fr;
+    padding: 4px;
+    gap: 8px;
+}
+
+.thread-sidebar-team-member-name{
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.moderation-title{
+    font-size: 24px;
 }
