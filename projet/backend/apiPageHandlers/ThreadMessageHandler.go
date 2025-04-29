@@ -595,6 +595,12 @@ func leaveThread(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 		http.Error(w, "User is not in the thread", http.StatusBadRequest)
 		return
 	}
+	// If the user is the owner do not allow him to escape from his responsibilities (prevent him from leaving the thread)
+	if f.IsThreadOwner(thread, user) {
+		f.DebugPrintf("User is the owner of the thread\n")
+		http.Error(w, "User is the owner of the thread", http.StatusBadRequest)
+	}
+
 	err := f.LeaveThread(thread, user)
 	if err != nil {
 		f.ErrorPrintf("Error while leaving the thread: %v\n", err)

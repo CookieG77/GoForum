@@ -863,7 +863,7 @@ func AutoDeleteOldEmailIdentification() {
 
 // AddThread adds a thread to the database.
 // Returns an error if there is one.
-func AddThread(threadName string, owner User, description string) error {
+func AddThread(owner User, threadName string, description string) error {
 	insertThread := "INSERT INTO ThreadGoForum (thread_name, owner_id, creation_date) VALUES (?, ?, ?)"
 	_, err := db.Exec(insertThread, threadName, owner.UserID, time.Now())
 	if err != nil {
@@ -1164,6 +1164,15 @@ func IsThreadModerator(thread ThreadGoForum, user User) bool {
 func IsThreadAdmin(thread ThreadGoForum, user User) bool {
 	rightLevel := GetThreadMemberRightsLevel(thread, user)
 	if rightLevel == 2 {
+		return true
+	}
+	return false
+}
+
+// IsThreadOwner checks if the user is the owner of the given thread
+func IsThreadOwner(thread ThreadGoForum, user User) bool {
+	rightLevel := GetThreadMemberRightsLevel(thread, user)
+	if rightLevel == 3 {
 		return true
 	}
 	return false
@@ -2312,14 +2321,14 @@ func FillDatabase() {
 	// TODO : fill the database with test data for development testing and demonstration purposes
 
 	// A test thread
-	err := AddThread("TestThread", User{UserID: 1}, "This is a test thread ! :P  (o_o)")
+	err := AddThread(User{UserID: 1}, "TestThread", "This is a test thread ! :P  (o_o)")
 	if err != nil {
 		ErrorPrintf("Error adding thread TestThread: %v\n", err)
 		return
 	}
 
 	// A test thread with must be connected
-	err = AddThread("TestThread2", User{UserID: 1}, "This is an other test thread where you must be connected ! (►__◄)")
+	err = AddThread(User{UserID: 1}, "TestThread2", "This is an other test thread where you must be connected ! (►__◄)")
 	if err != nil {
 		ErrorPrintf("Error adding thread TestThread2: %v\n", err)
 		return
@@ -2333,7 +2342,7 @@ func FillDatabase() {
 	}
 
 	// A test thread with must be a member
-	err = AddThread("TestThread3", User{UserID: 1}, "This is also an other test thread where you must be a member ! (◕‿-)")
+	err = AddThread(User{UserID: 1}, "TestThread3", "This is also an other test thread where you must be a member ! (◕‿-)")
 	if err != nil {
 		ErrorPrintf("Error adding thread TestThread3: %v\n", err)
 		return

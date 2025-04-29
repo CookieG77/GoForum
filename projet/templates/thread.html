@@ -28,14 +28,14 @@
             {{ else }}
                 {{ if .MustJoinThread }}
                     <p>{{ .Lang.pages.thread.must_join_thread_message }}</p>
-                {{ if eq .IsAuthenticated false }}
-                    <p>{{ .Lang.pages.thread.must_login_to_join_message}}</p>
+                    {{ if eq .IsAuthenticated false }}
+                        <p>{{ .Lang.pages.thread.must_login_to_join_message}}</p>
+                    {{ else }}
+                        <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
+                        <button id="JoinThreadButton" class="win95-button">Join</button>
+                    {{ end }}
                 {{ else }}
-                    <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
-                    <button id="JoinThreadButton" class="win95-button">Join</button>
-                {{ end }}
-            {{ else }}
-                <p>The content should be here</p>
+                    <p>The content should be here</p>
                     {{ if .IsAMember }}
                         <button id="LeaveThreadButton" class="win95-button">Leave</button>
                         <button id="JoinThreadButton" class="win95-button hidden">Join</button>

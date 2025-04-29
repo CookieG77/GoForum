@@ -1,3 +1,36 @@
 {{ define "content" }}
 
+<form method="POST">
+    {{ if .NameAlreadyExist }}
+        <div class="alert alert-danger">
+            {{ .Lang.pages.thread_creation.name_already_exist }}
+        </div>
+    {{ end }}
+    {{ if .NameNotValid }}
+        <div>
+            {{ .Lang.pages.thread_creation.name_invalid }}
+        </div>
+    {{ end }}
+    <div>
+        <label for="thread_name">{{ .Lang.pages.thread_creation.thread_name }}</label>
+        <input type="text" name="thread_name" id="thread_name"  minlength="5" maxlength="50">
+    </div>
+    {{ if .DescriptionNotValid }}
+        <div>
+            {{ .Lang.pages.thread_creation.description_invalid }}
+        </div>
+    {{ end }}
+    <div>
+        <label for="thread_description">{{ .Lang.pages.thread_creation.thread_description }}</label>
+        <textarea name="thread_description" id="thread_description" required maxlength="500" minlength="20"></textarea>
+    </div>
+    {{ if .ErrorCreationThread }}
+        <div>
+            {{ .Lang.pages.thread_creation.thread_creation_error }}
+        </div>
+    {{ end }}
+    <button type="submit">{{ .Lang.pages.thread_creation.thread_creation_submit }}</button>
+
+</form>
+
 {{ end }}

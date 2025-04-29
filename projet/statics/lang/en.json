@@ -99,6 +99,15 @@
       "must_join_thread_message" : "You must join this thread to see it's content.",
       "must_login_to_join_message" : "To join the thread, you must register/login",
       "order_label" : "Message order : "
+    },
+    "thread_creation" : {
+      "thread_name" : "Thread name",
+      "thread_description" : "Description",
+      "name_already_exist" : "This thread name already exists.",
+      "name_invalid" : "Invalid thread name : Must be at least between 3 and 20 characters long and must be made only of letters, numbers, underscores and hyphens",
+      "description_invalid" : "Invalid description : Must be at least between 20 and 500 characters long",
+      "thread_creation_error" : "An error occurred while trying to create the thread. Please try again later.",
+      "thread_creation_submit" : "Create thread"
     }
   }
 }

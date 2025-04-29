@@ -2,6 +2,7 @@ package pagesHandlers
 
 import (
 	f "GoForum/functions"
+	"fmt"
 	"net/http"
 )
 
@@ -25,6 +26,48 @@ func ThreadCreationPage(w http.ResponseWriter, r *http.Request) {
 
 	// Handle the user logout/login
 	ConnectFromHeader(w, r, &PageInfo)
+
+	PageInfo["NameNotValid"] = false
+	PageInfo["DescriptionNotValid"] = false
+	PageInfo["ErrorCreationThread"] = false
+
+	// Handle the thread creation form
+	if r.Method == "POST" {
+		// parse the form
+		err := r.ParseForm()
+		if err == nil {
+			// Get the form values
+			threadName := r.FormValue("thread_name")
+			threadDescription := r.FormValue("thread_description")
+
+			// Check if the thread name is valid
+			if f.IsThreadNameValid(threadName) {
+				// Check if the thread description is valid
+				if f.IsThreadDescriptionValid(threadDescription) {
+					// Create the thread
+					err := f.AddThread(f.GetUser(r), threadName, threadDescription)
+					if err != nil {
+						f.ErrorPrintf("Error creating the thread : %s\n", err)
+						PageInfo["ErrorCreationThread"] = true
+					} else {
+						f.InfoPrintf("Thread created with name : %s\n", threadName)
+						// Redirect to the thread page
+						http.Redirect(w, r, fmt.Sprintf("/t/%s", threadName), http.StatusFound)
+					}
+				} else {
+					f.DebugPrintf("Thread description not valid : %s\n", threadDescription)
+					PageInfo["DescriptionNotValid"] = true
+				}
+			} else {
+				f.DebugPrintf("Thread name not valid : %s\n", threadName)
+				PageInfo["NameNotValid"] = true
+			}
+		} else {
+			f.ErrorPrintf("Error parsing the form : %s\n", err)
+			PageInfo["ErrorCreationThread"] = true
+		}
+
+	}
 
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/threadCreation.css")
