@@ -196,3 +196,13 @@ function leaveThread(threadName) {
         }
     });
 }
+
+function getMessage(threadName, offset, order) {
+    return fetch( `/api/messages?thread=${threadName}&offset=${offset}&order=${order}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    });
+}
+

@@ -19,40 +19,52 @@
                     <img class="thread-banner" src="{{ .ThreadBanner }}" alt="Thread Banner">
                 {{ end }}
             </div>
-            <p>{{ .ThreadComplementaryInfos.ThreadDescription }}</p>
+            <div id="thread-description" class="win95-border-indent">
+                <p>{{ .ThreadComplementaryInfos.ThreadDescription }}</p>
+                <div id="thread-description-join">
+                    {{ if not .ShowLoginPage }}
+                    {{ if .MustJoinThread }}
+                    {{ if eq .IsAuthenticated false }}
+                    <p class="grid-align-right win95-border-bulge">{{ .Lang.pages.thread.must_login_to_join_message}}</p>
+                    {{ else }}
+                    <div id="join-button" class="grid-align-right">
+                        <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
+                        <button id="JoinThreadButton" class="win95-button">Join</button>
+                    </div>
+                    {{ end }}
+                    {{ else }}
+                    {{ if .IsAMember }}
+                    <div id="join-button" class="grid-align-right">
+                        <button id="LeaveThreadButton" class="win95-button">Leave</button>
+                        <button id="JoinThreadButton" class="win95-button hidden">Join</button>
+                    </div>
+                    {{ else }}
+                    <div id="join-button" class="grid-align-right">
+                        <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
+                        <button id="JoinThreadButton" class="win95-button">Join</button>
+                    </div>
+                    {{ end }}
+                    {{ end }}
+                    {{ end }}
+                    <div id="order-container" class="grid-align-right">
+                        <label for="order">{{ .Lang.pages.thread.order_label }}</label>
+                        <select id="order" class="win95-input-indent">
+                            {{ range $order := .MessageOrdering }}
+                            <option value="{{ $order }}">{{ $order }}</option>
+                            {{ end }}
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
-
         <div id="thread-content" class="win95-border-indent">
             {{ if .ShowLoginPage }}
                 <p>{{ .Lang.pages.thread.must_connect_message }}</p>
             {{ else }}
                 {{ if .MustJoinThread }}
                     <p>{{ .Lang.pages.thread.must_join_thread_message }}</p>
-                    {{ if eq .IsAuthenticated false }}
-                        <p>{{ .Lang.pages.thread.must_login_to_join_message}}</p>
-                    {{ else }}
-                        <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
-                        <button id="JoinThreadButton" class="win95-button">Join</button>
-                    {{ end }}
-                {{ else }}
-                    <p>The content should be here</p>
-                    {{ if .IsAMember }}
-                        <button id="LeaveThreadButton" class="win95-button">Leave</button>
-                        <button id="JoinThreadButton" class="win95-button hidden">Join</button>
-                    {{ else }}
-                        <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
-                        <button id="JoinThreadButton" class="win95-button">Join</button>
-                    {{ end }}
                 {{ end }}
             {{ end }}
-        </div>
-        <div id="order-container">
-            <label for="order">{{ .Lang.pages.thread.order_label }}</label>
-            <select id="order">
-                {{ range $order := .MessageOrdering }}
-                    <option value="{{ $order }}">{{ $order }}</option>
-                {{ end }}
-            </select>
         </div>
         <div id="example-message-container" class="hidden">
             <div class="message">
@@ -81,7 +93,6 @@
                             {{ end }}
                         </p>
                     </div>
-
                 </div>
             {{ end }}
         </section>
