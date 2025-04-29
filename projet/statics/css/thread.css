@@ -90,3 +90,24 @@
 .moderation-title{
     font-size: 24px;
 }
+
+#thread-description{
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+}
+
+#thread-description-join{
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+}
+
+.grid-align-right{
+    justify-self: right;
+}
+
+#order-container {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-top: 4px;
+}
