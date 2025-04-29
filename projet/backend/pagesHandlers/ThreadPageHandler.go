@@ -39,6 +39,7 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 	thread := f.GetThreadFromName(threadName)
 
 	// Get User and user rights
+	PageInfo["UserRank"] = 0
 	user := f.GetUser(r)
 	if (user != f.User{}) {
 		userRank := f.GetUserRankInThread(thread, user)

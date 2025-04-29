@@ -1051,8 +1051,8 @@ func CheckIfThreadNameExists(threadName string) bool {
 	return false
 }
 
-// IsThreadOwner checks if the user is the owner of the thread
-func IsThreadOwner(thread ThreadGoForum, user User) bool {
+// AlsoIsThreadOwner checks if the user is the owner of the thread (variant checking of ownership)
+func AlsoIsThreadOwner(thread ThreadGoForum, user User) bool {
 	checkIfOwner := "SELECT thread_name FROM ThreadGoForum WHERE thread_name = ? AND owner_id = ?"
 	rows, err := db.Query(checkIfOwner, thread.ThreadName, user.UserID)
 	if err != nil {

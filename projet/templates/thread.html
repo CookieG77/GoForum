@@ -4,9 +4,9 @@
         <div id="thread-header" class="win95-header">
             <div class="thread-title">
                 {{if eq .ThreadIcon "default"}}
-                    <img class="thread-icon" src="/img/default_thread_icon.png" alt="Thread Icon">
+                    <img class="thread-icon unselectable" src="/img/default_thread_icon.png" alt="Thread Icon">
                 {{ else }}
-                    <img class="thread-icon" src="{{ .ThreadIcon }}" alt="Thread Icon">
+                    <img class="thread-icon unselectable" src="{{ .ThreadIcon }}" alt="Thread Icon">
                 {{ end }}
                 <h1>{{ .ThreadInfos.ThreadName }}</h1>
             </div>
@@ -14,37 +14,45 @@
         <div id="thread-info" class="win95-description">
             <div class="thread-banner-container">
                 {{if eq .ThreadBanner "default"}}
-                    <img class="thread-banner" src="/img/default_thread_banner.gif" alt="Thread Banner">
+                    <img class="thread-banner unselectable" src="/img/default_thread_banner.gif" alt="Thread Banner">
                 {{ else }}
-                    <img class="thread-banner" src="{{ .ThreadBanner }}" alt="Thread Banner">
+                    <img class="thread-banner unselectable" src="{{ .ThreadBanner }}" alt="Thread Banner">
                 {{ end }}
             </div>
             <div id="thread-description" class="win95-border-indent">
                 <p>{{ .ThreadComplementaryInfos.ThreadDescription }}</p>
                 <div id="thread-description-join">
-                    {{ if not .ShowLoginPage }}
-                    {{ if .MustJoinThread }}
-                    {{ if eq .IsAuthenticated false }}
-                    <p class="grid-align-right win95-border-bulge">{{ .Lang.pages.thread.must_login_to_join_message}}</p>
+                    {{ if ne .UserRank 3 }}
+                        {{ if not .ShowLoginPage }}
+                            {{ if .MustJoinThread }}
+                                {{ if eq .IsAuthenticated false }}
+                                    <p class="grid-align-right win95-border-bulge">{{ .Lang.pages.thread.must_login_to_join_message}}</p>
+                                {{ else }}
+                                    <div id="join-button" class="grid-align-right">
+                                        <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
+                                        <button id="JoinThreadButton" class="win95-button">Join</button>
+                                    </div>
+                                {{ end }}
+                            {{ else }}
+                                {{ if .IsAMember }}
+                                    <div id="join-button" class="grid-align-right">
+                                        <button id="LeaveThreadButton" class="win95-button">Leave</button>
+                                        <button id="JoinThreadButton" class="win95-button hidden">Join</button>
+                                    </div>
+                                {{ else }}
+                                    <div id="join-button" class="grid-align-right">
+                                        <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
+                                        <button id="JoinThreadButton" class="win95-button">Join</button>
+                                    </div>
+                                {{ end }}
+                            {{ end }}
+                        {{ end }}
                     {{ else }}
                     <div id="join-button" class="grid-align-right">
-                        <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
-                        <button id="JoinThreadButton" class="win95-button">Join</button>
+                        <button id="LeaveThreadButton" class="hidden"></button>
+                        <button id="JoinThreadButton" class="hidden"></button>
+                        <button id="EditThreadButton" class="win95-button" onclick="">Edit</button>
                     </div>
-                    {{ end }}
-                    {{ else }}
-                    {{ if .IsAMember }}
-                    <div id="join-button" class="grid-align-right">
-                        <button id="LeaveThreadButton" class="win95-button">Leave</button>
-                        <button id="JoinThreadButton" class="win95-button hidden">Join</button>
-                    </div>
-                    {{ else }}
-                    <div id="join-button" class="grid-align-right">
-                        <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
-                        <button id="JoinThreadButton" class="win95-button">Join</button>
-                    </div>
-                    {{ end }}
-                    {{ end }}
                     {{ end }}
                     <div id="order-container" class="grid-align-right">
                         <label for="order">{{ .Lang.pages.thread.order_label }}</label>
@@ -78,7 +86,7 @@
         <section class="thread-sidebar-section win95-border-indent">
             {{ range $modTeamMember := .ThreadModerationTeam }}
                 <div class="thread-moderation-team-member win95-border-bulge">
-                    <img class="moderation-icon" src="{{ $modTeamMember.PfpAddress }}" alt="User Icon">
+                    <img class="moderation-icon unselectable" src="{{ $modTeamMember.PfpAddress }}" alt="User Icon">
                     <div class="thread-sidebar-team-member-name">
                         <h4>{{ $modTeamMember.Username }}</h4>
                         <p class="moderation-title">
