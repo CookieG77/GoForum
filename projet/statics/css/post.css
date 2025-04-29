@@ -2,7 +2,7 @@
     box-sizing: border-box;
 }
 
-.comment-box {
+.post-box {
     background-color: red;
     width: 100%;
     display: grid;
@@ -11,14 +11,14 @@
     padding: 8px;
 }
 
-.comment-section{
+.post-section{
     padding: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.comment-header{
+.post-header{
     width: 100%;
     height: 100%;
     background-color: green;
@@ -27,46 +27,50 @@
     justify-content: space-between;
 }
 
-.comment-content{
+.post-content{
     width: 100%;
     height: 100%;
     background-color: blue;
 }
 
-.comment-action{
+.post-action{
     width: 100%;
     height: 100%;
     background-color: yellow;
 }
 
-.comment-header{
+.post-header{
     padding: 4px;
 }
 
-.comment-profile{
+.post-profile{
     position: relative;
     display: flex;
     height: 100%;
     align-items: center;
 }
 
-.comment-profile-picture {
+.post-profile-picture {
     position: relative;
     height: 100%;
     border-radius: 50%;
     margin-right: 8px;
 }
 
-.comment-content{
+.post-content{
     display: flex;
     align-items: center;
     padding: 16px;
 }
 
-.comment-vote{
+.post-vote{
     align-items: center;
 }
 
-.comment-action{
+.post-action{
     gap: 50px;
+}
+
+.post-picture{
+    height: 500px;
 }

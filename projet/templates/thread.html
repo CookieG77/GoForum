@@ -63,23 +63,31 @@
         </div>
     </div>
     <div id="thread-sidebar" class=win95-border>
-        {{ range $modTeamMember := .ThreadModerationTeam }}
-        <div class="thread-moderation-team-member">
-            <img src="{{ $modTeamMember.PfpAddress }}" alt="User Icon">
-            <h4>{{ $modTeamMember.Username }}</h4>
-            <p>
-                {{ if eq $modTeamMember.RightsLevel 1 }}
-                    {{ $.Lang.pages.thread.rank.moderator }}
-                {{ end }}
-                {{ if eq $modTeamMember.RightsLevel 2 }}
-                    {{ $.Lang.pages.thread.rank.administrator }}
-                {{ end }}
-                {{ if eq $modTeamMember.RightsLevel 3 }}
-                    {{ $.Lang.pages.thread.rank.owner }}
-                {{ end }}
-            </p>
-        </div>
-        {{ end }}
+        <section class="thread-sidebar-section win95-border-indent">
+            {{ range $modTeamMember := .ThreadModerationTeam }}
+                <div class="thread-moderation-team-member win95-border-bulge">
+                    <img class="moderation-icon" src="{{ $modTeamMember.PfpAddress }}" alt="User Icon">
+                    <div class="thread-sidebar-team-member-name">
+                        <h4>{{ $modTeamMember.Username }}</h4>
+                        <p class="moderation-title">
+                            {{ if eq $modTeamMember.RightsLevel 1 }}
+                                {{ $.Lang.pages.thread.rank.moderator }}
+                            {{ end }}
+                            {{ if eq $modTeamMember.RightsLevel 2 }}
+                                {{ $.Lang.pages.thread.rank.administrator }}
+                            {{ end }}
+                            {{ if eq $modTeamMember.RightsLevel 3 }}
+                                {{ $.Lang.pages.thread.rank.owner }}
+                            {{ end }}
+                        </p>
+                    </div>
+
+                </div>
+            {{ end }}
+        </section>
+        <section class="thread-sidebar-section win95-border-indent">
+            Tags
+        </section>
     </div>
 </div>
 

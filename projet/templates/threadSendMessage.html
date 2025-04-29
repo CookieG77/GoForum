@@ -1,17 +1,28 @@
 {{ define "content" }}
-<div>
-  <label for="threadSelect">In which thread</label>
-  <select id="threadSelect">
-    {{ range $thread := .UserThreads }}
+<div class="win95-border" id="send-message-box">
+  <div class="send-message-section win95-border-indent">
+    <label for="threadSelect">In which thread</label>
+    <select id="threadSelect">
+      {{ range $thread := .UserThreads }}
       <option value="{{ $thread.ThreadName }}">{{ $thread.ThreadName }}</option>
-    {{ end }}
-  </select>
+      {{ end }}
+    </select>
+  </div>
+
   <br>
-  <label for="messageTitle">Message title</label>
-  <input type="text" id="messageTitle" placeholder="Type your message title here..." />
+
+  <div class="send-message-section">
+    <label for="messageTitle">Message title</label>
+    <input type="text" id="messageTitle" placeholder="Type your message title here..." />
+  </div>
+
   <br>
-  <label for="messageContent">Message content</label>
-  <input type="text" id="messageContent" placeholder="Type your message here..." />
+  <div class="send-message-section">
+    <label for="messageContent">Message content</label>
+    <input type="text" id="messageContent" placeholder="Type your message here..." />
+  </div>
+
+
   <br>
   <button id="sendMessageButton">Send</button>
   <br>

@@ -23,6 +23,15 @@
     align-items: center;
 }
 
+.win95-border-bulge{
+    border: 4px solid #ffffff;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
 .win95-border-indent, .win95-border-outdent {
     margin: 8px;
 }
