@@ -24,12 +24,12 @@
 
         <div id="thread-content" class="win95-border-indent">
             {{ if .ShowLoginPage }}
-                <p>You must be connected to see this page</p>
+                <p>{{ .Lang.pages.thread.must_connect_message }}</p>
             {{ else }}
                 {{ if .MustJoinThread }}
-                    <p>You must be a member to see this page</p>
+                    <p>{{ .Lang.pages.thread.must_join_thread_message }}</p>
                 {{ if eq .IsAuthenticated false }}
-                    <p>To join the thread, you must register/login</p>
+                    <p>{{ .Lang.pages.thread.must_login_to_join_message}}</p>
                 {{ else }}
                     <button id="LeaveThreadButton" class="win95-button hidden">Leave</button>
                     <button id="JoinThreadButton" class="win95-button">Join</button>
@@ -46,6 +46,14 @@
                 {{ end }}
             {{ end }}
         </div>
+        <div id="order-container">
+            <label for="order">{{ .Lang.pages.thread.order_label }}</label>
+            <select id="order">
+                {{ range $order := .MessageOrdering }}
+                    <option value="{{ $order }}">{{ $order }}</option>
+                {{ end }}
+            </select>
+        </div>
         <div id="example-message-container" class="hidden">
             <div class="message">
                 <img src="/img/default_user_icon.png" alt="User Icon">
@@ -61,13 +69,13 @@
             <h4>{{ $modTeamMember.Username }}</h4>
             <p>
                 {{ if eq $modTeamMember.RightsLevel 1 }}
-                    Moderator
+                    {{ $.Lang.pages.thread.rank.moderator }}
                 {{ end }}
                 {{ if eq $modTeamMember.RightsLevel 2 }}
-                    Administrator
+                    {{ $.Lang.pages.thread.rank.administrator }}
                 {{ end }}
                 {{ if eq $modTeamMember.RightsLevel 3 }}
-                    Owner
+                    {{ $.Lang.pages.thread.rank.owner }}
                 {{ end }}
             </p>
         </div>

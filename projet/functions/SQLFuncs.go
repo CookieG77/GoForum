@@ -130,6 +130,9 @@ type ThreadTag struct {
 	TagColor string
 }
 
+// PossibleMessageOrderingList is a list of possible message ordering
+var PossibleMessageOrderingList = []string{"asc", "desc", "popular", "unpopular"}
+
 // InitDatabaseConnection initialises the database connection
 func InitDatabaseConnection() {
 	if !databaseInitialised {
@@ -250,46 +253,6 @@ func GetUser(r *http.Request) User {
 		return user
 	}
 	return User{}
-}
-
-// GetUserRank returns the rank of the user
-// 0 = user; 1 = moderator; 2 = admin
-func GetUserRank(r *http.Request) int {
-	email := GetUserEmail(r)
-	checkRights := "SELECT rights_level FROM Moderation WHERE user_id = (SELECT user_id FROM Users WHERE email = ?)"
-	rows, err := db.Query(checkRights, email)
-	if err != nil {
-		ErrorPrintf("Error checking the user rights: %v\n", err)
-		return 0
-	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			ErrorPrintf("Error closing the rows: %v\n", err)
-		}
-	}(rows)
-	if rows.Next() {
-		var rightsLevel int
-		err := rows.Scan(&rightsLevel)
-		if err != nil {
-			ErrorPrintf("Error scanning the rows in GetUserRank: %v\n", err)
-			return 0
-		}
-		return rightsLevel
-	}
-	return 0
-}
-
-// GetUserRankString returns the rank of the user as a string
-func GetUserRankString(r *http.Request) string {
-	switch GetUserRank(r) {
-	case 1:
-		return "moderator"
-	case 2:
-		return "admin"
-	default:
-		return "user"
-	}
 }
 
 // GetUserConfig returns the user configs
@@ -705,43 +668,17 @@ func IsAuthenticated(r *http.Request) bool {
 // GiveUserHisRights gives the user his admin/moderator rights.
 // Also gives the user his pfp and check if he is verified.
 func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
+	(*PageInfo)["IsAuthenticated"] = false
+	(*PageInfo)["IsAddressVerified"] = false
 	if IsAuthenticated(r) {
 		(*PageInfo)["IsAuthenticated"] = true
-		(*PageInfo)["IsAddressVerified"] = false
-		(*PageInfo)["IsAdmin"] = false
-		(*PageInfo)["IsModerator"] = false
 
 		// Check if the user is an admin or a moderator
-		email := GetUserEmail(r)
-		checkRights := "SELECT rights_level FROM Moderation WHERE user_id = (SELECT user_id FROM Users WHERE email = ?)"
-		rows, err := db.Query(checkRights, email)
-		if err != nil {
-			ErrorPrintf("Error checking the user rights: %v\n", err)
-			return
-		}
-		defer func(rows *sql.Rows) {
-			err := rows.Close()
-			if err != nil {
-				ErrorPrintf("Error closing the rows: %v\n", err)
-			}
-		}(rows)
-		if rows.Next() {
-			var rightsLevel int
-			err := rows.Scan(&rightsLevel)
-			if err != nil {
-				ErrorPrintf("Error scanning the rows in GiveUserHisRights: %v\n", err)
-				return
-			}
-			if rightsLevel == 1 {
-				(*PageInfo)["IsModerator"] = true
-			} else if rightsLevel == 2 {
-				(*PageInfo)["IsAdmin"] = true
-			}
-		}
+		user := GetUser(r)
 
 		// Check if the email is verified
-		checkEmailVerified := "SELECT email_verified FROM Users WHERE email = ?"
-		rows, err = db.Query(checkEmailVerified, email)
+		checkEmailVerified := "SELECT email_verified FROM Users WHERE user_id = ?"
+		rows, err := db.Query(checkEmailVerified, user.UserID)
 		if err != nil {
 			ErrorPrintf("Error checking if the email is verified: %v\n", err)
 			return
@@ -768,38 +705,6 @@ func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
 		(*PageInfo)["UserPfpPath"] = GetMediaLinkFromID(GetUserConfig(r).PfpID).MediaAddress
 		return
 	}
-	(*PageInfo)["IsAuthenticated"] = false
-	(*PageInfo)["IsAddressVerified"] = false
-}
-
-// AddUserToModeration adds the user to the Moderation table if he is not already in it.
-// The user is added with the rights level given as parameter.
-// Returns an error if there is one.
-func AddUserToModeration(email string, rightsLevel int) error {
-	InfoPrintf("Adding user %s with email %s to moderation: %d\n", GetUsernameFromEmail(email), email, rightsLevel)
-	checkIfAlreadyInDB := "SELECT user_id FROM Moderation WHERE user_id = (SELECT user_id FROM Users WHERE email = ?)"
-	rows, err := db.Query(checkIfAlreadyInDB, email)
-	if err != nil {
-		ErrorPrintf("Error checking if the user is already in the Moderation table: %v\n", err)
-		return err
-	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			ErrorPrintf("Error closing the rows: %v\n", err)
-		}
-	}(rows)
-	if rows.Next() {
-		DebugPrintf("User %s is already in the Moderation table\n", email)
-		return nil
-	}
-	insertUser := "INSERT INTO Moderation (user_id, rights_level) VALUES ((SELECT user_id FROM Users WHERE email = ?), ?)"
-	_, err = db.Exec(insertUser, email, rightsLevel)
-	if err != nil {
-		ErrorPrintf("Error inserting the user into the Moderation table: %v\n", err)
-		return err
-	}
-	return nil
 }
 
 // RandomHexString generates a random hexadecimal string of length n.
@@ -973,7 +878,12 @@ func AddThread(threadName string, owner User, description string) error {
 		return err
 	}
 	// Insert the thread owner into the ThreadGoForumMembers table
-
+	insertThreadOwner := "INSERT INTO ThreadGoForumMembers (thread_id, user_id, rights_level) VALUES ((SELECT thread_id FROM ThreadGoForum WHERE thread_name = ?), ?, 3)"
+	_, err = db.Exec(insertThreadOwner, threadName, owner.UserID)
+	if err != nil {
+		ErrorPrintf("Error inserting the thread owner into the database: %v\n", err)
+		return err
+	}
 	return nil
 }
 
@@ -1788,6 +1698,34 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 	return Messages, nil
 }
 
+// GetUserRankInThread returns the rights_level of the user in the thread
+// ( 0 = member, 1 = moderator, 2 = admin, 3 = owner, -1 = banned )
+// Returns the rights_level of the user in the thread
+func GetUserRankInThread(thread ThreadGoForum, user User) int {
+	getUserRank := "SELECT rights_level FROM ThreadGoForumMembers WHERE thread_id = ? AND user_id = ?"
+	rows, err := db.Query(getUserRank, thread.ThreadID, user.UserID)
+	if err != nil {
+		ErrorPrintf("Error getting the rank of the user in the thread: %v\n", err)
+		return 0
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var rank int
+		err := rows.Scan(&rank)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetUserRankInThread: %v\n", err)
+			return 0
+		}
+		return rank
+	}
+	return 0
+}
+
 // GetThreadModerationTeam returns the moderation team of the thread
 // Returns a slice of SimplifiedUser
 func GetThreadModerationTeam(forum ThreadGoForum) []SimplifiedUser {
@@ -2110,22 +2048,6 @@ func InitDatabase() {
 		return
 	}
 
-	// the 'Moderation' table only contains the id of the user who has admin/moderator rights
-	// the 'rights_level' column is used to determine the rights level of the user
-	// 0 = user; 1 = moderator; 2 = admin
-	ModerationTableSQL := `
-		CREATE TABLE IF NOT EXISTS Moderation (
-			user_id INTEGER PRIMARY KEY,
-			rights_level INTEGER DEFAULT 0 NOT NULL,
-			FOREIGN KEY (user_id) REFERENCES Users(user_id)
-		);
-		`
-	_, err = db.Exec(ModerationTableSQL)
-	if err != nil {
-		ErrorPrintf("Error creating Moderation table: %v\n", err)
-		return
-	}
-
 	// the 'EmailIdentificationTable' table only contains the id of a user and the id of a link from an email
 	// the 'email_id' column is used to determine the email id (it's a unique identifier, it's a 64 characters long hexadecimal string)
 	// the 'email_type' column is used to determine the type of the email (it can be 'reset_password', 'verify_email' or 'other')
@@ -2207,6 +2129,7 @@ func InitDatabase() {
 	// if the 'rights_level' is 0, the user is a normal member
 	// if the 'rights_level' is 1, the user is a moderator
 	// if the 'rights_level' is 2, the user is an admin
+	// if the 'rights_level' is 3, the user is the owner of the thread
 	ThreadGoForumMembersTableSQL := `
 		CREATE TABLE IF NOT EXISTS ThreadGoForumMembers (
 			user_id INTEGER NOT NULL,
@@ -2491,7 +2414,7 @@ func FillDatabase() {
 	}
 
 	// Adding fake Moderators / Admin to the threads
-	for i := 0; i < 15; i++ {
+	for i := 1; i < 15; i++ {
 		err := AddUserToThread(GetThreadFromName("TestThread"), User{UserID: i + 1, Username: fmt.Sprintf("fakeuser%d", i)}, mr.Intn(3))
 		if err != nil {
 			ErrorPrintf("Error adding user/moderator/admin %d to thread TestThread: %v\n", i, err)

@@ -87,6 +87,18 @@
       "register_with"                  : "S'inscrire avec",
       "login_instead"                  : "Déjà un membre ?",
       "login_instead_button"           : "Connecte toi!"
+    },
+    "thread" : {
+      "banned_message" : "Vous êtes banni de ce thread. Vous n'êtes pas autorisé à y accéder.",
+      "rank" : {
+        "moderator" : "Modérateur",
+        "administrator" : "Administrateur",
+        "owner" : "Propriétaire"
+      },
+      "must_connect_message" : "Vous devez être connecté pour voir cette page.",
+      "must_join_thread_message" : "Vous devez rejoindre ce thread pour voir son contenu.",
+      "must_login_to_join_message" : "Pour rejoindre ce thread, vous devez être connecté.",
+      "order_label" : "Ordre des messages : ",
     }
   }
 }

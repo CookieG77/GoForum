@@ -86,6 +86,14 @@ func ThreadMessageHandler(w http.ResponseWriter, r *http.Request) {
 	thread := f.GetThreadFromName(threadName)
 	user := f.GetUser(r)
 
+	// Check if the user is banned from the thread
+	userRank := f.GetUserRankInThread(thread, user)
+	if userRank < 0 { // If the user is banned from the thread we show him the YOU ARE BANNED page
+		f.DebugPrintf("User is banned from the thread he's trying to access\n")
+		http.Error(w, "User is banned from the thread", http.StatusForbidden)
+		return
+	}
+
 	// Execute the action
 	switch action {
 	case "sendMessage":
@@ -246,7 +254,7 @@ func deleteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 		return
 	}
 
-	f.DebugPrintf("Message with ID \"%d\" deleted by %s %s\n", msgID, f.GetUserRankString(r), user.Username)
+	f.DebugPrintf("Message with ID \"%d\" deleted by %s\n", msgID, user.Username)
 
 	// Return the response
 	// Return the message ID
@@ -327,7 +335,7 @@ func removeMedia(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 		http.Error(w, "Error while removing the media", http.StatusInternalServerError)
 		return
 	}
-	f.DebugPrintf("Media with ID \"%d\" removed from message with ID \"%d\" by %s %s\n", msg.MediaID, msg.ID, f.GetUserRankString(r), user.Username)
+	f.DebugPrintf("Media with ID \"%d\" removed from message with ID \"%d\" by %s\n", msg.MediaID, msg.ID, user.Username)
 	// Return the response
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success"}`))
@@ -421,7 +429,7 @@ func editMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 		http.Error(w, "Error while sending the message", http.StatusInternalServerError)
 		return
 	}
-	f.DebugPrintf("Message with ID \"%d\" was edited by %s %s\n", msg.ID, f.GetUserRankString(r), user.Username)
+	f.DebugPrintf("Message with ID \"%d\" was edited by %s\n", msg.ID, user.Username)
 	// Return the response with the message ID
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success"}`))

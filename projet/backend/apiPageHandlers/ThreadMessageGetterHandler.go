@@ -13,10 +13,6 @@ func ThreadMessageGetter(w http.ResponseWriter, r *http.Request) {
 	threadName := query.Get("thread")
 	offset := query.Get("offset")
 	order := query.Get("order")
-	viewfrom := query.Get("viewfrom")
-
-	isViewFromUserPOV := true
-	User := f.User{}
 
 	// Check if the thread name is empty or does not exist
 	if threadName == "" || !f.CheckIfThreadNameExists(threadName) {
@@ -52,24 +48,32 @@ func ThreadMessageGetter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if the viewfrom is empty or not a valid viewfrom
-	if viewfrom == "" {
-		isViewFromUserPOV = false
-	} else {
-		User, err = f.GetUserFromUsername(viewfrom)
-		if err != nil {
-			f.ErrorPrintf("Error getting user from username: %s\n", err)
-			http.Error(w, "Error getting user from username", http.StatusBadRequest)
-			return
-		}
+	thread := f.GetThreadFromName(threadName)
+	threadConfig := f.GetThreadConfigFromThread(thread)
+	user := f.GetUser(r)
+
+	// Check if the user is banned from the thread
+	userRank := f.GetUserRankInThread(thread, user)
+	if userRank < 0 { // If the user is banned from the thread we show him the YOU ARE BANNED page
+		f.DebugPrintf("User is banned from the thread he's trying to access\n")
+		http.Error(w, "User is banned from the thread", http.StatusForbidden)
+		return
 	}
+
+	// Check if the user is in the thread
+	if !f.IsUserInThread(thread, user) && !threadConfig.IsOpenToNonMembers {
+		f.DebugPrintf("User is not in the thread he's trying to access and the thread forbbid non member to access it\n")
+		http.Error(w, "User is not in the thread", http.StatusForbidden)
+		return
+	}
+
 	var Messages []f.FormattedThreadMessage
-	if isViewFromUserPOV {
+	if (user != f.User{}) {
 		Messages, err = f.GetMessagesFromThreadWithPOV(
 			f.GetThreadFromName(threadName),
 			offsetInt,
 			order,
-			User)
+			user)
 	} else {
 		Messages, err = f.GetMessagesFromThread(
 			f.GetThreadFromName(threadName),

@@ -12,9 +12,9 @@ func ConfirmMailPage(w http.ResponseWriter, r *http.Request) {
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {
 		if !PageInfo["IsAddressVerified"].(bool) {
-			f.InfoPrintf("Confirm Mail page accessed at %s by unverified %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+			f.InfoPrintf("Confirm Mail page accessed at %s by unverified : %s\n", f.GetIP(r), f.GetUserEmail(r))
 		} else {
-			f.InfoPrintf("Confirm Mail page accessed at %s by verified %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+			f.InfoPrintf("Confirm Mail page accessed at %s by verified : %s\n", f.GetIP(r), f.GetUserEmail(r))
 		}
 	} else {
 		f.InfoPrintf("Confirm Mail page accessed at %s\n", f.GetIP(r))

@@ -11,7 +11,7 @@ func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 	// Check the user rights
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {
-		f.InfoPrintf("Reset Password page accessed at %s by %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+		f.InfoPrintf("Reset Password page accessed at %s by : %s\n", f.GetIP(r), f.GetUserEmail(r))
 		// Redirect the user to the home page if he is already authenticated
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	} else {

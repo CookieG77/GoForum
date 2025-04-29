@@ -12,11 +12,11 @@ func ThreadCreationPage(w http.ResponseWriter, r *http.Request) {
 	if PageInfo["IsAuthenticated"].(bool) {
 		// If the user is not verified, redirect him to the verify page
 		if !PageInfo["IsAddressVerified"].(bool) {
-			f.InfoPrintf("Thread creation page accessed at %s by unverified %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+			f.InfoPrintf("Thread creation page accessed at %s by unverified : %s\n", f.GetIP(r), f.GetUserEmail(r))
 			http.Redirect(w, r, "/confirmMail", http.StatusFound)
 			return
 		}
-		f.InfoPrintf("Thread creation page accessed at %s by verified %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+		f.InfoPrintf("Thread creation page accessed at %s by verified : %s\n", f.GetIP(r), f.GetUserEmail(r))
 	} else {
 		// If not authenticated, redirect to the login page
 		f.InfoPrintf("Thread creation page accessed at %s\n", f.GetIP(r))

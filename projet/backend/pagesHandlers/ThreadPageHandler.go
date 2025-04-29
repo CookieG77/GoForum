@@ -17,11 +17,11 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 	f.GiveUserHisRights(&PageInfo, r)
 	if PageInfo["IsAuthenticated"].(bool) {
 		if !PageInfo["IsAddressVerified"].(bool) {
-			f.InfoPrintf("Thread \"%s\" page accessed at %s by unverified %s : %s\n", threadName, f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+			f.InfoPrintf("Thread \"%s\" page accessed at %s by unverified : %s\n", threadName, f.GetIP(r), f.GetUserEmail(r))
 			http.Redirect(w, r, "/confirm-email-address", http.StatusFound)
 			return
 		}
-		f.InfoPrintf("Thread \"%s\" page accessed at %s by verified %s : %s\n", threadName, f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+		f.InfoPrintf("Thread \"%s\" page accessed at %s by verified : %s\n", threadName, f.GetIP(r), f.GetUserEmail(r))
 	} else {
 		f.InfoPrintf("Thread \"%s\" page accessed at %s\n", threadName, f.GetIP(r))
 	}
@@ -37,6 +37,18 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	thread := f.GetThreadFromName(threadName)
+
+	// Get User and user rights
+	user := f.GetUser(r)
+	if (user != f.User{}) {
+		userRank := f.GetUserRankInThread(thread, user)
+		if userRank < 0 { // If the user is banned from the thread we show him the YOU ARE BANNED page
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/youAreBanned.html")
+			return
+		}
+		PageInfo["UserRank"] = userRank
+	}
+
 	threadConfig := f.GetThreadConfigFromThread(thread)
 	threadIcon := f.GetMediaLinkFromID(threadConfig.ThreadIconID).MediaAddress
 	if threadIcon == "" {
@@ -61,7 +73,7 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 	if !threadConfig.IsOpenToNonConnectedUsers && !PageInfo["IsAuthenticated"].(bool) {
 		PageInfo["ShowLoginPage"] = true
 		// If the user is not a member of the thread and this thread does not accept non-members, do not display the thread messages and show the 'must join' message
-	} else if !threadConfig.IsOpenToNonMembers && !f.IsThreadMember(thread, r) {
+	} else if !threadConfig.IsOpenToNonMembers && !f.IsUserInThread(thread, user) {
 		PageInfo["MustJoinThread"] = true
 		// If the user is a member of the thread, display the thread normally
 	} else {
@@ -79,6 +91,8 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 	}
 	// Add the thread moderation team to the page
 	PageInfo["ThreadModerationTeam"] = f.GetThreadModerationTeam(thread)
+
+	PageInfo["MessageOrdering"] = f.OrderingList
 
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/thread.css")

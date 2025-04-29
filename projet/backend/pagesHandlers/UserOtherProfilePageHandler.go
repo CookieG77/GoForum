@@ -23,11 +23,11 @@ func UserOtherProfilePage(w http.ResponseWriter, r *http.Request) {
 	if PageInfo["IsAuthenticated"].(bool) {
 		// If the user is not verified, redirect him to the verify page
 		if !PageInfo["IsAddressVerified"].(bool) {
-			f.InfoPrintf("User Profile page of '%s' accessed at %s by unverified %s : %s\n", user, f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+			f.InfoPrintf("User Profile page of '%s' accessed at %s by unverified : %s\n", user, f.GetIP(r), f.GetUserEmail(r))
 			http.Redirect(w, r, "/confirm-email-address", http.StatusFound)
 			return
 		}
-		f.InfoPrintf("User Profile page of '%s' accessed at %s by verified %s : %s\n", user, f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+		f.InfoPrintf("User Profile page of '%s' accessed at %s by verified : %s\n", user, f.GetIP(r), f.GetUserEmail(r))
 	} else {
 		f.InfoPrintf("User Profile page of '%s' accessed at %s\n", user, f.GetIP(r))
 	}

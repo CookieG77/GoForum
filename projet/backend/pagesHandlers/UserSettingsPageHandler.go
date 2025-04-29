@@ -13,12 +13,12 @@ func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
 	if PageInfo["IsAuthenticated"].(bool) {
 		// If the user is not verified, redirect him to the verify page
 		if !PageInfo["IsAddressVerified"].(bool) {
-			f.InfoPrintf("User Settings page accessed at %s by unverified %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+			f.InfoPrintf("User Settings page accessed at %s by unverified : %s\n", f.GetIP(r), f.GetUserEmail(r))
 			// Redirect the user to the confirm email address page
 			http.Redirect(w, r, "/confirm-email-address", http.StatusFound)
 			return
 		}
-		f.InfoPrintf("User Settings page accessed at %s by verified %s : %s\n", f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+		f.InfoPrintf("User Settings page accessed at %s by verified : %s\n", f.GetIP(r), f.GetUserEmail(r))
 	} else {
 		f.InfoPrintf("User Settings page accessed at %s\n", f.GetIP(r))
 		// If the user is not authenticated, show him a forbidden page

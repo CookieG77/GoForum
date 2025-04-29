@@ -12,11 +12,11 @@ func ErrorPage(w http.ResponseWriter, r *http.Request, status int) {
 	if PageInfo["IsAuthenticated"].(bool) {
 		// If the user is not verified, redirect him to the verify page
 		if !PageInfo["IsAddressVerified"].(bool) {
-			f.InfoPrintf("Error %d page accessed at %s by unverified %s : %s\n", status, f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+			f.InfoPrintf("Error %d page accessed at %s by unverified : %s\n", status, f.GetIP(r), f.GetUserEmail(r))
 			http.Redirect(w, r, "/confirm-email-address", http.StatusFound)
 			return
 		}
-		f.InfoPrintf("Error %d page accessed at %s by verified %s : %s\n", status, f.GetIP(r), f.GetUserRankString(r), f.GetUserEmail(r))
+		f.InfoPrintf("Error %d page accessed at %s by verified : %s\n", status, f.GetIP(r), f.GetUserEmail(r))
 	} else {
 		f.InfoPrintf("Error %d page accessed at %s\n", status, f.GetIP(r))
 	}

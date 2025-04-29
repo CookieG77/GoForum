@@ -87,6 +87,18 @@
       "register_with"                  : "Register with",
       "login_instead"                  : "Already a member ?",
       "login_instead_button"           : "Login"
+    },
+    "thread" : {
+      "banned_message" : "You are banned from this thread. You are forbidden to access it.",
+      "rank" : {
+        "moderator" : "Moderator",
+        "administrator" : "Administrator",
+        "owner" : "Owner"
+      },
+      "must_connect_message" : "You must be connected to see this page.",
+      "must_join_thread_message" : "You must join this thread to see it's content.",
+      "must_login_to_join_message" : "To join the thread, you must register/login",
+      "order_label" : "Message order : "
     }
   }
 }
