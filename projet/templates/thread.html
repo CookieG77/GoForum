@@ -4,9 +4,9 @@
         <div id="thread-header" class="win95-header">
             <div class="thread-title">
                 {{if eq .ThreadIcon "default"}}
-                    <img class="thread-icon unselectable" src="/img/default_thread_icon.png" alt="Thread Icon">
+                    <img class="thread-icon unselectable" draggable="false" src="/img/default_thread_icon.png" alt="Thread Icon">
                 {{ else }}
-                    <img class="thread-icon unselectable" src="{{ .ThreadIcon }}" alt="Thread Icon">
+                    <img class="thread-icon unselectable" draggable="false" src="{{ .ThreadIcon }}" alt="Thread Icon">
                 {{ end }}
                 <h1>{{ .ThreadInfos.ThreadName }}</h1>
             </div>
@@ -14,9 +14,9 @@
         <div id="thread-info" class="win95-description">
             <div class="thread-banner-container">
                 {{if eq .ThreadBanner "default"}}
-                    <img class="thread-banner unselectable" src="/img/default_thread_banner.gif" alt="Thread Banner">
+                    <img class="thread-banner unselectable" draggable="false" src="/img/default_thread_banner.gif" alt="Thread Banner">
                 {{ else }}
-                    <img class="thread-banner unselectable" src="{{ .ThreadBanner }}" alt="Thread Banner">
+                    <img class="thread-banner unselectable" draggable="false" src="{{ .ThreadBanner }}" alt="Thread Banner">
                 {{ end }}
             </div>
             <div id="thread-description" class="win95-border-indent">
@@ -76,7 +76,7 @@
         </div>
         <div id="example-message-container" class="hidden">
             <div class="message">
-                <img src="/img/default_user_icon.png" alt="User Icon">
+                <img class="unselectable" draggable="false" src="/img/default_user_icon.png" alt="User Icon">
             </div>
         </div>
         <div id="messages-container">
@@ -86,7 +86,7 @@
         <section class="thread-sidebar-section win95-border-indent">
             {{ range $modTeamMember := .ThreadModerationTeam }}
                 <div class="thread-moderation-team-member win95-border-bulge">
-                    <img class="moderation-icon unselectable" src="{{ $modTeamMember.PfpAddress }}" alt="User Icon">
+                    <img class="moderation-icon unselectable" draggable="false" src="{{ $modTeamMember.PfpAddress }}" alt="User Icon">
                     <div class="thread-sidebar-team-member-name">
                         <h4>{{ $modTeamMember.Username }}</h4>
                         <p class="moderation-title">

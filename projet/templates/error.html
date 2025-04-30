@@ -3,11 +3,11 @@
 <div class="page-error-container win95-border">
 
     {{ if eq .ErrorStatus 403 }}
-        <img class="page-error-img" src="../img/403.png" alt="Error image">
+        <img class="page-error-img unselectable" draggable="false" src="../img/403.png" alt="Error image">
     {{ else if eq .ErrorStatus 404 }}
-        <img class="page-error-img" src="../img/404.png" alt="Error image">
+        <img class="page-error-img unselectable" draggable="false" src="../img/404.png" alt="Error image">
     {{ else if eq .ErrorStatus 500 }}
-        <img class="page-error-img" src="../img/500.png" alt="Error image">
+        <img class="page-error-img unselectable" draggable="false" src="../img/500.png" alt="Error image">
     {{ else }}
         <!-- <img class="page-error-img" src="../img/" alt="Error image"> -->
     {{ end }}
