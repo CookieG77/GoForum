@@ -13,7 +13,7 @@
     {{ end }}
     <div>
         <label for="thread_name">{{ .Lang.pages.thread_creation.thread_name }}</label>
-        <input type="text" name="thread_name" id="thread_name"  minlength="5" maxlength="50">
+        <input type="text" name="thread_name" id="thread_name" required minlength="5" maxlength="50">
     </div>
     {{ if .DescriptionNotValid }}
         <div>

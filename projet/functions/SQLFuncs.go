@@ -1,16 +1,16 @@
 package functions
 
 import (
-	cr "crypto/rand"
 	"database/sql"
-	"encoding/hex"
 	"fmt"
+	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	mr "math/rand"
 	"net/http"
 	"os"
+	"path"
 	"regexp"
 	"strconv"
 	"time"
@@ -96,9 +96,10 @@ var MediaTypes = []MediaType{
 	UserProfilePicture,
 	ThreadIcon,
 	ThreadBanner,
+	ThreadMessagePicture,
 }
 
-type MediaLinks struct {
+type MediaLink struct {
 	MediaID      int
 	MediaType    MediaType
 	MediaAddress string
@@ -282,9 +283,9 @@ func GetUserConfig(r *http.Request) UserConfigs {
 	return UserConfigs{}
 }
 
-// SaveUserConfig saves the user configs
+// UpdateUserConfig saves the user configs
 // Returns an error if there is one
-func SaveUserConfig(userConfigs UserConfigs) error {
+func UpdateUserConfig(userConfigs UserConfigs) error {
 	email := GetEmailFromID(userConfigs.UserID)
 	saveUserConfig := "UPDATE UserConfigs SET lang = ?, theme = ?, pfp_id = ? WHERE user_id = (SELECT user_id FROM Users WHERE email = ?)"
 	_, err := db.Exec(saveUserConfig, userConfigs.Lang, userConfigs.Theme, userConfigs.PfpID, email)
@@ -707,33 +708,12 @@ func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
 	}
 }
 
-// RandomHexString generates a random hexadecimal string of length n.
-// Returns the random hexadecimal string and an error if there is one.
-func RandomHexString(n int) (string, error) {
-	if n <= 0 {
-		return "", fmt.Errorf("la longueur doit être supérieure à zéro")
-	}
-
-	bytes := make([]byte, (n+1)/2)
-	_, err := cr.Read(bytes)
-	if err != nil {
-		return "", err
-	}
-
-	hexStr := hex.EncodeToString(bytes)
-	return hexStr[:n], nil // trim any excess
-}
-
 // CreateEmailIdentificationLink creates a link between an email and an email id.
 // Returns the email id and an error if there is one.
 func CreateEmailIdentificationLink(email string, emailType EmailType) (string, error) {
-	emailID, err := RandomHexString(64)
-	if err != nil {
-		ErrorPrintf("Error generating the email id: %v\n", err)
-		return "", err
-	}
+	emailID := uuid.New().String() // Generate a new UUID for the email id for it to be unique
 	insertEmailIdentification := "INSERT INTO EmailIdentification (email_id, user_id, email_type) VALUES (?, (SELECT user_id FROM Users WHERE email = ?), ?)"
-	_, err = db.Exec(insertEmailIdentification, emailID, email, string(emailType))
+	_, err := db.Exec(insertEmailIdentification, emailID, email, string(emailType))
 	if err != nil {
 		ErrorPrintf("Error inserting the email identification into the database: %v\n", err)
 		return "", err
@@ -1230,14 +1210,35 @@ func AddUserToThread(thread ThreadGoForum, user User, rightLevel int) error {
 	return nil
 }
 
+// IsAMediaType checks if the string is a media type
+func IsAMediaType(mediaType string) bool {
+	for _, v := range MediaTypes {
+		if string(v) == mediaType {
+			return true
+		}
+	}
+	return false
+}
+
+// GetMediaTypeFromString returns the media type from the string
+// Returns an error if the media type is not valid
+func GetMediaTypeFromString(mediaType string) (MediaType, error) {
+	for _, v := range MediaTypes {
+		if string(v) == mediaType {
+			return v, nil
+		}
+	}
+	return "", fmt.Errorf("invalid media type: %s", mediaType)
+}
+
 // GetMediaLinkFromID returns the media link from the media id
-// Returns an empty MediaLinks struct if there is an error
-func GetMediaLinkFromID(mediaID int) MediaLinks {
-	getMediaLink := "SELECT * FROM MediaLinks WHERE media_id = ?"
+// Returns an empty MediaLink struct if there is an error
+func GetMediaLinkFromID(mediaID int) MediaLink {
+	getMediaLink := "SELECT * FROM MediaLink WHERE media_id = ?"
 	rows, err := db.Query(getMediaLink, mediaID)
 	if err != nil {
 		ErrorPrintf("Error getting the media link from the id: %v\n", err)
-		return MediaLinks{}
+		return MediaLink{}
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
@@ -1246,21 +1247,21 @@ func GetMediaLinkFromID(mediaID int) MediaLinks {
 		}
 	}(rows)
 	if rows.Next() {
-		var mediaLink MediaLinks
+		var mediaLink MediaLink
 		err := rows.Scan(&mediaLink.MediaID, &mediaLink.MediaType, &mediaLink.MediaAddress, &mediaLink.CreationDate)
 		if err != nil {
 			ErrorPrintf("Error scanning the rows in GetMediaLinkFromID: %v\n", err)
-			return MediaLinks{}
+			return MediaLink{}
 		}
 		return mediaLink
 	}
-	return MediaLinks{}
+	return MediaLink{}
 }
 
 // AddMediaLink adds a media link to the database
 // Returns the media id and an error if there is one
 func AddMediaLink(mediaType MediaType, mediaAddress string) (int, error) {
-	insertMediaLink := "INSERT INTO MediaLinks (media_type, media_address) VALUES (?, ?)"
+	insertMediaLink := "INSERT INTO MediaLink (media_type, media_address) VALUES (?, ?)"
 	res, err := db.Exec(insertMediaLink, string(mediaType), mediaAddress)
 	if err != nil {
 		ErrorPrintf("Error inserting the media link into the database: %v\n", err)
@@ -1274,10 +1275,49 @@ func AddMediaLink(mediaType MediaType, mediaAddress string) (int, error) {
 	return int(mediaID), nil
 }
 
+// NewMediaWithIdIsValid checks if the media with the given id is valid
+// It verifies if the id exists in the MediaLink table
+// And if it's a ThreadMessagePicture and not yet in ThreadMessageMediaLinks table
+func NewMediaWithIdIsValid(id int) bool {
+	// Check if the media id exists in the MediaLink table
+	getMediaLink := "SELECT media_id FROM MediaLink WHERE media_id = ? AND media_type = ?"
+	rows, err := db.Query(getMediaLink, id, string(ThreadMessagePicture))
+	if err != nil {
+		ErrorPrintf("Error getting the media link from the id: %v\n", err)
+		return false
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if !rows.Next() {
+		return false
+	}
+	// Check if not already in ThreadMessageMediaLinks
+	checkIfAlreadyInDB := "SELECT media_id FROM ThreadMessageMediaLinks WHERE media_id = ?"
+	rows, err = db.Query(checkIfAlreadyInDB, id)
+	if err != nil {
+		ErrorPrintf("Error checking if the media link is already in the database: %v\n", err)
+		return false
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		return false
+	}
+	return true
+}
+
 // UpdateMediaLink updates the media link in the database
 // Returns an error if there is one
-func UpdateMediaLink(media MediaLinks) error {
-	updateMediaLink := "UPDATE MediaLinks SET media_type = ?, media_address = ? WHERE media_id = ?"
+func UpdateMediaLink(media MediaLink) error {
+	updateMediaLink := "UPDATE MediaLink SET media_type = ?, media_address = ? WHERE media_id = ?"
 	_, err := db.Exec(updateMediaLink, string(media.MediaType), media.MediaAddress, media.MediaID)
 	if err != nil {
 		ErrorPrintf("Error updating the media link in the database: %v\n", err)
@@ -1286,10 +1326,15 @@ func UpdateMediaLink(media MediaLinks) error {
 	return nil
 }
 
+// GetMediaLinkFullPath returns the full path of the media link
+func GetMediaLinkFullPath(mediaLink MediaLink) string {
+	return path.Join(uploadFolder, imgUploadSubFolder, mediaLink.MediaAddress)
+}
+
 // DeleteUselessMediaLinks removes the media links that are not used in any message and are of the type ThreadMessagePicture and are older than 1 hour
 // Returns an error if there is one
 func DeleteUselessMediaLinks() error {
-	deleteUselessMediaLinks := "DELETE FROM MediaLinks WHERE media_id NOT IN (SELECT media_id FROM ThreadMessageMediaLinks) AND media_type = ? AND creation_date < datetime('now', '-1 hour')"
+	deleteUselessMediaLinks := "DELETE FROM MediaLink WHERE media_id NOT IN (SELECT media_id FROM ThreadMessageMediaLinks) AND media_type = ? AND creation_date < datetime('now', '-1 hour')"
 	_, err := db.Exec(deleteUselessMediaLinks, string(ThreadMessagePicture))
 	if err != nil {
 		ErrorPrintf("Error deleting the useless media links: %v\n", err)
@@ -1394,6 +1439,7 @@ func AddMessageInThread(thread ThreadGoForum, title string, content string, user
 			ErrorPrintf("Error inserting the media link into the message: %v\n", err)
 			return -1, err
 		}
+		DebugPrintf("Media link %d added to message %d\n", mediaLinkID, messageID)
 	}
 	return int(messageID), nil
 }
@@ -1673,22 +1719,23 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 		}
 		incompleteMessages = append(incompleteMessages, message)
 	}
+	// Get the media links for each message
 	var Messages []FormattedThreadMessage
 	for _, message := range incompleteMessages {
-		getMessageMediaLinks := "SELECT ml.media_address FROM ThreadMessageMediaLinks tmml JOIN MediaLinks ml ON tmml.media_id = ml.media_id WHERE tmml.message_id = ?;"
+		getMessageMediaLinks := "SELECT ml.media_id, ml.media_type, ml.media_address, ml.creation_date FROM ThreadMessageMediaLinks tmml JOIN MediaLink ml ON tmml.media_id = ml.media_id WHERE tmml.message_id = ?;"
 		rows, err := db.Query(getMessageMediaLinks, message.MessageID)
 		if err != nil {
 			ErrorPrintf("Error getting the incompleteMessages from the thread: %v\n", err)
 			return nil, err
 		}
 		for rows.Next() {
-			var mediaLink string
-			err := rows.Scan(&mediaLink)
+			var mediaLink MediaLink
+			err := rows.Scan(&mediaLink.MediaID, &mediaLink.MediaType, &mediaLink.MediaAddress, &mediaLink.CreationDate)
 			if err != nil {
 				ErrorPrintf("Error scanning the rows in GetMessagesFromThread: %v\n", err)
 				return nil, err
 			}
-			message.MediaLinks = append(message.MediaLinks, mediaLink)
+			message.MediaLinks = append(message.MediaLinks, mediaLink.MediaAddress)
 		}
 		// Sets FormattedThreadMessage.VoteState to -1 if the user disliked the message
 		// Sets FormattedThreadMessage.VoteState to 1 if the user liked the message
@@ -1743,7 +1790,7 @@ func GetThreadModerationTeam(forum ThreadGoForum) []SimplifiedUser {
 		FROM ThreadGoForumMembers tgm
 		    JOIN Users u ON tgm.user_id = u.user_id
 		    JOIN UserConfigs uc ON u.user_id = uc.user_id
-		    JOIN MediaLinks ml ON uc.pfp_id = ml.media_id
+		    JOIN MediaLink ml ON uc.pfp_id = ml.media_id
 		WHERE tgm.thread_id = ? AND tgm.rights_level > 0
 		ORDER BY tgm.rights_level DESC;`
 	rows, err := db.Query(getThreadModerationTeam, forum.ThreadID)
@@ -2155,10 +2202,10 @@ func InitDatabase() {
 		return
 	}
 
-	// The 'MediaLinks' table represents the media links (images, videos, etc.) that are shared in the threads
+	// The 'MediaLink' table represents the media links (images, videos, etc.) that are shared in the threads
 	// For now, we only will do images as stated in the project instructions
 	MediaLinksTableSQL := `
-		CREATE TABLE IF NOT EXISTS MediaLinks (
+		CREATE TABLE IF NOT EXISTS MediaLink (
 			media_id INTEGER PRIMARY KEY AUTOINCREMENT,
 			media_type TEXT NOT NULL,
 			media_address TEXT NOT NULL UNIQUE,
@@ -2167,7 +2214,7 @@ func InitDatabase() {
 		`
 	_, err = db.Exec(MediaLinksTableSQL)
 	if err != nil {
-		ErrorPrintf("Error creating MediaLinks table: %v\n", err)
+		ErrorPrintf("Error creating MediaLink table: %v\n", err)
 		return
 	}
 
@@ -2197,7 +2244,7 @@ func InitDatabase() {
 		    message_id INTEGER NOT NULL,
 		    media_id INTEGER NOT NULL,
 		    FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id),
-		    FOREIGN KEY (media_id) REFERENCES MediaLinks(media_id),
+		    FOREIGN KEY (media_id) REFERENCES MediaLink(media_id),
 		    PRIMARY KEY (message_id, media_id)
 		);
 		`
@@ -2251,7 +2298,7 @@ func InitDatabase() {
 		JOIN ThreadGoForum tg ON tm.thread_id = tg.thread_id
 		JOIN Users u ON tm.user_id = u.user_id
 		LEFT JOIN UserConfigs uc ON u.user_id = uc.user_id
-		LEFT JOIN MediaLinks ml ON uc.pfp_id = ml.media_id
+		LEFT JOIN MediaLink ml ON uc.pfp_id = ml.media_id
 		LEFT JOIN (
 			SELECT 
 				message_id,
@@ -2281,16 +2328,16 @@ func InitDatabase() {
 	}
 
 	// Add the default media links (example: default pfp, default thread icon, etc.)
-	query := "SELECT COUNT(*) FROM MediaLinks"
+	query := "SELECT COUNT(*) FROM MediaLink"
 	var count int
 	err = db.QueryRow(query).Scan(&count)
 	if err != nil {
-		log.Printf("Error checking if MediaLinks table is empty: %v\n", err)
+		log.Printf("Error checking if MediaLink table is empty: %v\n", err)
 	}
 	// If the table is empty, we insert the default media links
 	if count == 0 {
 		insertDefaultMediaLinks := fmt.Sprintf(`
-		INSERT INTO MediaLinks (media_type, media_address) VALUES
+		INSERT INTO MediaLink (media_type, media_address) VALUES
 			('%s', '/img/default_user_icon.png'),
 			('%s', '/img/default_thread_icon.png'),
 			('%s', '/img/default_thread_banner.gif');

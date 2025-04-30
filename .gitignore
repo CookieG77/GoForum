@@ -39,3 +39,6 @@ logs*.zip
 
 # IntelliJ files
 .idea
+
+# Uploaded files from the webapp
+uploads/

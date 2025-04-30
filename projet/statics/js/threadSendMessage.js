@@ -10,9 +10,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const updatedMessageTitle = document.getElementById("updatedMessageTitle");
     const updatedMessageContent = document.getElementById("updatedMessageContent");
 
+    const fileInput = document.getElementById('imageInput');
+    const imagePreviewContainer = document.getElementById("imagePreviewContainer");
+    let MediaIDs = [];
+
     document.getElementById("sendMessageButton").addEventListener("click", function() {
         const threadName = threadSelect.value
-        sendMessage(threadName, messageTitle.value, messageContent.value, null)
+        sendMessage(threadName, messageTitle.value, messageContent.value, MediaIDs, null)
             .then(r => {
                 if (r.ok) {
                     return r.json();
@@ -32,6 +36,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 messageThreadContainer.textContent = threadName;
                 messageIDContainer.textContent = data.messageId;
                 afterMessageSendOptionContainer.classList.remove("hidden");
+                MediaIDs = []; // Clear the MediaIDs array after sending the message
+                while (imagePreviewContainer.firstChild) { // Remove all images from the preview
+                    imagePreviewContainer.removeChild(imagePreviewContainer.firstChild);
+                }
+                imagePreviewContainer.innerHTML = "";
 
             })
             .catch(error => {
@@ -120,4 +129,36 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
     });
 
+    function removeSelfAndChildren(element) {
+        element.remove();
+    }
+
+    fileInput.addEventListener("change", async (e) => {
+        e.preventDefault();
+
+        const res = await UploadImages(fileInput, "message_picture")
+        console.log("============[ Errors ]==============")
+        console.log(res.errors)
+        console.log("============[ Results ]=============")
+        console.log(res.results)
+
+        for (const [url, id] of res.results) {
+            if (url !== null) {
+                const wrapper = document.createElement('div');
+                wrapper.classList.add("image-preview");
+                wrapper.addEventListener('click', () => { // Add click event to remove image
+                    removeSelfAndChildren(wrapper);
+                    MediaIDs.splice(MediaIDs.indexOf(id), 1);
+                });
+                const img = document.createElement('img');
+                img.src = "/upload/" + url;
+                img.alt = "Image preview";
+                img.draggable = false;
+                img.classList.add("unselectable");
+                MediaIDs.push(id);
+                wrapper.appendChild(img);
+                const imgContainer = imagePreviewContainer.appendChild(wrapper);
+            }
+        }
+    });
 });

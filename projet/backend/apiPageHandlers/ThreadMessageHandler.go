@@ -3,15 +3,17 @@ package apiPageHandlers
 import (
 	f "GoForum/functions"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
 )
 
 type jsonMessage struct {
-	Title   string `json:"title"`
-	Content string `json:"content"`
-	Tags    []int  `json:"tags,string"`
+	Title   string   `json:"title"`
+	Content string   `json:"content"`
+	Medias  IntSlice `json:"medias"`
+	Tags    IntSlice `json:"tags"`
 }
 
 type jsonUpdateMessage struct {
@@ -27,6 +29,9 @@ type jsonUpdateMessageMedia struct {
 type jsonMessageDesignator struct {
 	ID int `json:"messageId,string"`
 }
+
+// IntSlice is a custom type for handling string-to-int conversion
+type IntSlice []int
 
 // ThreadMessageHandler handles the thread message requests from ajax calls
 // Its path is /api/thread/{thread}/m/{action}?id={id}
@@ -191,8 +196,22 @@ func sendMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 		return
 	}
 
+	// Check if the given media IDs are valid
+	if len(msg.Medias) > 0 {
+		for _, mediaID := range msg.Medias {
+			if !f.NewMediaWithIdIsValid(mediaID) {
+				f.DebugPrintf("Media ID %d is not valid\n", mediaID)
+				http.Error(w, "Media ID is not valid", http.StatusBadRequest)
+				return
+			}
+		}
+		f.DebugPrintf("All media IDs are valid\n")
+	} else {
+		f.DebugPrintf("No media IDs provided\n")
+	}
+
 	// Send the message
-	messageID, err := f.AddMessageInThread(thread, msg.Title, msg.Content, user)
+	messageID, err := f.AddMessageInThread(thread, msg.Title, msg.Content, user, msg.Medias...)
 	if err != nil {
 		f.ErrorPrintf("Error while sending the message: %v\n", err)
 		http.Error(w, "Error while sending the message", http.StatusInternalServerError)
@@ -658,4 +677,24 @@ func _checkMessageApiCallValidity(w http.ResponseWriter, r *http.Request, thread
 		return -1
 	}
 	return msg.ID
+}
+
+// UnmarshalJSON implement the json.Unmarshaler interface for IntSlice
+func (s *IntSlice) UnmarshalJSON(data []byte) error {
+	var raw []string
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return fmt.Errorf("failed to unmarshal as []string: %w", err)
+	}
+
+	var result []int
+	for _, str := range raw {
+		num, err := strconv.Atoi(str)
+		if err != nil {
+			return fmt.Errorf("failed to convert string to int: %w", err)
+		}
+		result = append(result, num)
+	}
+
+	*s = result
+	return nil
 }

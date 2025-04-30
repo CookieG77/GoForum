@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// TODO : Remove this page as we move the send message in the thread page
 func ThreadSendMessagePage(w http.ResponseWriter, r *http.Request) {
 	PageInfo := f.NewContentInterface("sendMessage", r)
 	// Check the user rights
@@ -26,12 +27,10 @@ func ThreadSendMessagePage(w http.ResponseWriter, r *http.Request) {
 	// Handle the user logout/login
 	ConnectFromHeader(w, r, &PageInfo)
 
-	// TODO : Display the user profile of the 'user'
-
 	PageInfo["UserThreads"] = f.GetUserThreads(f.GetUser(r))
 
 	// Add additional styles to the content interface
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/threadSendMessage.css", "css/generalElementStyling.css")
-	f.AddAdditionalScriptsToContentInterface(&PageInfo, "js/threadScript.js", "js/threadSendMessage.js")
+	f.AddAdditionalScriptsToContentInterface(&PageInfo, "js/threadScript.js", "js/threadSendMessage.js", "js/imgUploader.js")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/threadSendMessage.html")
 }

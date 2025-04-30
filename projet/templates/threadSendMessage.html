@@ -11,15 +11,21 @@
 
   <br>
 
-  <div class="send-message-section">
+  <div id="titleBox">
     <label for="messageTitle">Message title</label>
-    <input type="text" id="messageTitle" placeholder="Type your message title here..." />
+    <input type="text" id="messageTitle" placeholder="Type your message title here..." minlength="5" maxlength="50"/>
   </div>
 
   <br>
-  <div class="send-message-section">
+  <div id="messageBox">
     <label for="messageContent">Message content</label>
-    <input type="text" id="messageContent" placeholder="Type your message here..." />
+    <textarea id="messageContent" placeholder="Type your message here..." minlength="5" maxlength="500"></textarea>
+  </div>
+  <br>
+  <div id="mediaBox">
+    <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif" multiple>
+    <div id="imagePreviewContainer">
+    </div>
   </div>
 
 

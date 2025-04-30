@@ -16,6 +16,7 @@ require (
 require (
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	github.com/go-chi/chi/v5 v5.2.1 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	golang.org/x/oauth2 v0.29.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect

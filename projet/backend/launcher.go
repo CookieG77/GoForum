@@ -65,6 +65,8 @@ func LaunchWebApp() {
 	r.PathPrefix("/img/").Handler(http.StripPrefix("/img", http.FileServer(http.Dir("./statics/img"))))
 	r.PathPrefix("/js/").Handler(http.StripPrefix("/js", http.FileServer(http.Dir("./statics/js"))))
 	r.PathPrefix("/fonts/").Handler(http.StripPrefix("/fonts", http.FileServer(http.Dir("./statics/fonts"))))
+	// Upload folder
+	r.PathPrefix("/upload/").Handler(http.StripPrefix("/upload", http.FileServer(http.Dir(fmt.Sprintf("./%s", f.GetImgUploadFolder())))))
 
 	// Set the base template
 	f.AddBaseTemplate("templates/base.html")
@@ -83,6 +85,7 @@ func LaunchWebApp() {
 	r.HandleFunc("/tnm", pagesHandlers.ThreadSendMessagePage).Methods("GET", "POST")
 	r.HandleFunc("/api/messages", apiPageHandlers.ThreadMessageGetter).Methods("GET")
 	r.HandleFunc("/api/thread/{thread}/{action}", apiPageHandlers.ThreadMessageHandler).Methods("POST")
+	r.HandleFunc("/api/upload/{type}", apiPageHandlers.ImgUploader).Methods("POST")
 
 	// Handle error 404 & 405
 	r.NotFoundHandler = http.HandlerFunc(pagesHandlers.ErrorPage404)
@@ -99,6 +102,9 @@ func LaunchWebApp() {
 
 	// Initialize the mail configuration
 	f.InitMail()
+
+	// Initialize the Uploads directory
+	f.InitUploadsDirectory()
 
 	// Launch the server
 	f.LaunchServer(r, finalPort)

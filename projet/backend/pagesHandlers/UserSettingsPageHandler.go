@@ -55,7 +55,7 @@ func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
 		}
 		userConfig.Lang = lang
 		userConfig.Theme = theme
-		err = f.SaveUserConfig(userConfig)
+		err = f.UpdateUserConfig(userConfig)
 		if err != nil {
 			f.ErrorPrintf("Error while saving the user settings : %s\n", err)
 			ErrorPage(w, r, http.StatusInternalServerError)
