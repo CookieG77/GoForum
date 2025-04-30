@@ -9,7 +9,7 @@
 #thread-container{
     width: 100%;
     background-color: silver;
-    position: relative;
+    position: absolute;
     grid-column: 1/2;
 }
 

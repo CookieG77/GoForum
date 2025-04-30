@@ -39,7 +39,7 @@
 <div id="page-container" class="win95-border">
     <header>
     <section class="logo header-sections" onclick="window.location.href = '/'">
-        <img id="logo-image" class="minimized-image unselectable" src="/img/forumIcon.png" alt="{{ .Lang.pages.base.header.logo_alt }}">
+        <img id="logo-image" class="minimized-image unselectable" draggable="false" src="/img/forumIcon.png" alt="{{ .Lang.pages.base.header.logo_alt }}">
         <span id="logo-title">{{ .Lang.pages.base.header.website_name }}</span>
     </section>
     {{ if not .bareboneBase }}
@@ -53,7 +53,7 @@
         </nav>
         <section class="search-box header-sections">
             <div id="search-container">
-                <img id="search-icon unselectable" src="/img/search.svg" alt="search icon">
+                <img id="search-icon unselectable" src="/img/search.svg" draggable="false" alt="search icon">
                 <form class="search-form" method="Post">
                     <input class="search-input win95-input-indent" type="search" placeholder="{{ .Lang.pages.base.header.search_bar_placeholder }}">
                     <button class="search-button win95-button" type="submit">{{ .Lang.pages.base.header.search_button }}</button> <!--ICI-->
@@ -64,7 +64,7 @@
         <nav class="options header-sections" id="right-nav">
             {{ if .IsAuthenticated }}
                 <button id="user-profile-button" class="invisible">
-                    <img id="user-profile-picture" class="minimized-image unselectable" src="{{ .UserPfpPath }}" alt="profile picture">
+                    <img id="user-profile-picture" class="minimized-image unselectable" draggable="false" src="{{ .UserPfpPath }}" alt="profile picture">
                 </button>
             {{ end }}
         </nav>
@@ -78,9 +78,9 @@
                     <input type="hidden" name="headerForm" value="logout">
                 </form>
                 <ul>
-                    <li onclick="document.location.href='/profile'" class="win95-menu-button"><img class="win95-minor-logo unselectable" src="/img/profileIcon.png">{{ .Lang.pages.base.header.profile_button }}</li>
-                    <li onclick="document.location.href='/settings'" class="win95-menu-button"><img class="win95-minor-logo unselectable" src="/img/settingsIcon.png">{{ .Lang.pages.base.header.settings_button }}</li>
-                    <li onclick="document.logoutForm.submit()" class="win95-menu-button"><img class="win95-minor-logo unselectable" src="/img/logOutIcon.png">{{ .Lang.pages.base.header.logout_button }}</li>
+                    <li onclick="document.location.href='/profile'" class="win95-menu-button"><img class="win95-minor-logo unselectable" draggable="false" src="/img/profileIcon.png">{{ .Lang.pages.base.header.profile_button }}</li>
+                    <li onclick="document.location.href='/settings'" class="win95-menu-button"><img class="win95-minor-logo unselectable" draggable="false" src="/img/settingsIcon.png">{{ .Lang.pages.base.header.settings_button }}</li>
+                    <li onclick="document.logoutForm.submit()" class="win95-menu-button"><img class="win95-minor-logo unselectable" draggable="false" src="/img/logOutIcon.png">{{ .Lang.pages.base.header.logout_button }}</li>
                 </ul>
             </section>
         {{ else }}
@@ -94,31 +94,31 @@
                     <section class="login-popup-section win95-border-indent">
                         <form id="login-popup-form" method="Post">
                             {{ if eq .LoginError "serverError"}}
-                                <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" class="unselectable"> {{ .Lang.pages.base.connection_popup.login_server_error }}</p>
+                                <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" draggable="false" class="unselectable"> {{ .Lang.pages.base.connection_popup.login_server_error }}</p>
                             {{ else if eq .LoginError "invalidCredentials"}}
-                                <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" class="unselectable">{{ .Lang.pages.base.connection_popup.login_invalid_credentials }}</p>
+                                <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" draggable="false" class="unselectable">{{ .Lang.pages.base.connection_popup.login_invalid_credentials }}</p>
                             {{ else if eq .LoginError "missingFields"}}
-                                <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" class="unselectable">{{ .Lang.pages.base.connection_popup.login_missing_fields }}</p>
+                                <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" draggable="false" class="unselectable">{{ .Lang.pages.base.connection_popup.login_missing_fields }}</p>
                             {{ else if eq .LoginError "userIsOAuth"}}
                                 {{ if eq .OAuthProvider "google" }}
-                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" class="unselectable">{{ .Lang.pages.base.connection_popup.login_account_is_google }}</p>
+                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" draggable="false" class="unselectable">{{ .Lang.pages.base.connection_popup.login_account_is_google }}</p>
                                 {{ else if eq .OAuthProvider "github" }}
-                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" class="unselectable">{{ .Lang.pages.base.connection_popup.login_account_is_github }}</p>
+                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" draggable="false" class="unselectable">{{ .Lang.pages.base.connection_popup.login_account_is_github }}</p>
                                 {{ else if eq .OAuthProvider "discord" }}
-                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" class="unselectable">{{ .Lang.pages.base.connection_popup.login_account_is_discord }}</p>
+                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" draggable="false" class="unselectable">{{ .Lang.pages.base.connection_popup.login_account_is_discord }}</p>
                                 {{ end }}
                             {{ end }}
                             <input type="hidden" class="win95-input-indent" name="headerForm" value="login">
                             {{ range .LoginMissingField }}
                                 {{ if eq . "email" }}
-                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" class="unselectable">{{ .Lang.pages.base.connection_popup.login_missing_fields }}"</p>
+                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" draggable="false" class="unselectable">{{ .Lang.pages.base.connection_popup.login_missing_fields }}"</p>
                                 {{ end }}
                             {{ end }}
                             <label for="login-popup-mail-or-username">{{ .Lang.pages.base.connection_popup.email_field_label }}</label>
                             <input id="login-popup-mail-or-username" type="text"  class="win95-input-indent" name="email_or_username" required>
                             {{ range .LoginMissingField }}
                                 {{ if eq . "password" }}
-                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" class="unselectable">{{ .Lang.pages.base.connection_popup.login_missing_field_password }}</p>
+                                    <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" draggable="false" class="unselectable">{{ .Lang.pages.base.connection_popup.login_missing_field_password }}</p>
                                 {{ end }}
                             {{ end }}
                             <label for="login-popup-password">{{ .Lang.pages.base.connection_popup.password_field_label }}</label>
@@ -140,27 +140,27 @@
                         <p>{{ .Lang.pages.base.connection_popup.login_with }}</p>
                         <div id="login-popup-connect-with">
                             <button onclick="document.location.href = '/auth/google'" class="win95-button">
-                                <img src="/img/googleIconMini.png" alt="google icon" class="unselectable">
+                                <img src="/img/googleIconMini.png" alt="google icon" draggable="false" class="unselectable">
                                 <span>Google</span>
                             </button>
                             <button onclick="document.location.href = '/auth/github'" class="win95-button">
-                                <img src="/img/githubIconMini.png" alt="github icon" class="unselectable">
+                                <img src="/img/githubIconMini.png" alt="github icon" draggable="false" class="unselectable">
                                 <span>GitHub</span>
                             </button>
                             <button onclick="document.location.href = '/auth/discord'" class="win95-button">
-                                <img src="/img/discordIconMini.png" alt="discord icon" class="unselectable">
+                                <img src="/img/discordIconMini.png" alt="discord icon" draggable="false" class="unselectable">
                                 <span>Discord</span>
                             </button>
                             <button onclick="document.location.href = '/auth/discord'" class="win95-button">
-                                <img src="/img/discordIconMini.png" alt="discord icon" class="unselectable">
+                                <img src="/img/discordIconMini.png" alt="discord icon" draggable="false" class="unselectable">
                                 <span>Discord</span>
                             </button>
                             <button onclick="document.location.href = '/auth/discord'" class="win95-button">
-                                <img src="/img/discordIconMini.png" alt="discord icon" class="unselectable">
+                                <img src="/img/discordIconMini.png" alt="discord icon" draggable="false" class="unselectable">
                                 <span>Discord</span>
                             </button>
                             <button onclick="document.location.href = '/auth/discord'" class="win95-button">
-                                <img src="/img/discordIconMini.png" alt="discord icon" class="unselectable">
+                                <img src="/img/discordIconMini.png" alt="discord icon" draggable="false" class="unselectable">
                                 <span>Discord</span>
                             </button>
                         </div>

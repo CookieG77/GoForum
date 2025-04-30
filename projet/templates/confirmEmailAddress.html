@@ -10,10 +10,10 @@
             <p> A new confirmation mail has been sent to your email address.</p>
             {{ end }}
             {{ if eq .Error "alreadyVerified" }}
-            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png">Your email address has already been verified. You can now enjoy GoForum !</p>
+            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" src="/img/warningIcon.png">Your email address has already been verified. You can now enjoy GoForum !</p>
             {{ end }}
             {{ if eq .Error "invalidToken" }}
-            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo" src="/img/warningIcon.png">The link you used is either incorrect or expired !</p>
+            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" src="/img/warningIcon.png">The link you used is either incorrect or expired !</p>
             {{ end }}
         </div>
 
