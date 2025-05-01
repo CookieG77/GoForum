@@ -109,7 +109,6 @@ type MediaLink struct {
 
 type FormattedThreadMessage struct {
 	MessageID      int       `json:"message_id"`
-	ThreadName     string    `json:"thread_name"`
 	MessageTitle   string    `json:"message_title"`
 	MessageContent string    `json:"message_content"`
 	WasEdited      bool      `json:"was_edited"`
@@ -1736,7 +1735,6 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 		var message FormattedThreadMessage
 		err := rows.Scan(
 			&message.MessageID,
-			&message.ThreadName,
 			&message.MessageTitle,
 			&message.MessageContent,
 			&message.WasEdited,
@@ -2317,7 +2315,6 @@ func InitDatabase() {
 		CREATE VIEW IF NOT EXISTS ViewThreadMessagesWithVotes AS
 		SELECT 
 			tm.message_id,
-			tg.thread_name,
 			tm.message_title,
 			tm.message_content,
 			tm.was_edited,

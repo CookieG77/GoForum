@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const threadName = getCurrentThreadName()
     let offset= 0;
+    let hasReachedEnd = false;
     let orderSelect = document.getElementById("order")
     const examplePostContainer = document.getElementById("example-post-container")
     const postsContainer = document.getElementById("posts-container");
@@ -19,11 +20,20 @@ document.addEventListener("DOMContentLoaded", function () {
      * @description Then it adds the posts to the posts container.
      */
     function loadMorePosts() {
+        if (hasReachedEnd) {
+            return;
+        }
         let res = getMessage(threadName, offset, orderSelect.value);
         res.then(async (response) => {
             if (response.ok) {
                 const data = await response.json();
                 console.log(data);
+                if (data == null) {
+                    hasReachedEnd = true;
+                    loadMorePostsButton.disabled = true;
+                    loadMorePostsButton.innerText = "No more posts";
+                    return;
+                }
                 for (let i = 0; i < data.length; i++) {
                     const post = data[i];
                     const postElement = createNewPost(post);
