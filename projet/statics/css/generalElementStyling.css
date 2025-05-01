@@ -100,6 +100,14 @@
     box-shadow: inset 1px 1px 0 0 #808080;
 }
 
+.win95-button:disabled {
+    border-top-color: #404040;
+    border-left-color: #404040;
+    border-right-color: #ffffff;
+    border-bottom-color: #ffffff;
+    box-shadow: inset 1px 1px 0 0 #808080;
+}
+
 .win95-button-space {
     margin-left: auto;
     display: flex;
