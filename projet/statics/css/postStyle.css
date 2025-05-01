@@ -1,43 +1,37 @@
 .post-box {
-    box-sizing: border-box;
-    background-color: red;
+    position: relative;
+    background-color: silver;
     width: 100%;
     display: grid;
-    grid-template-rows: 80px 1fr auto;
+    grid-template-rows: auto auto auto;
     gap: 8px;
     padding: 8px;
 }
 
 .post-box * {
-    box-sizing: border-box;
-}
-
-.post-section {
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
 }
 
 .post-header {
+    position: relative;
     width: 100%;
-    height: 100%;
-    background-color: green;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
 }
 
 .post-content {
     width: 100%;
     height: 100%;
-    background-color: blue;
+    overflow: hidden;
 }
 
-.post-action {
+.post-vote {
     width: 100%;
-    height: 100%;
-    background-color: yellow;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
 }
 
 .post-header {
@@ -47,31 +41,64 @@
 .post-profile {
     position: relative;
     display: flex;
-    height: 100%;
     align-items: center;
+    height: 100%;
 }
 
 .post-profile-picture {
     position: relative;
-    height: 100%;
+    height: 64px;
+    width: 64px;
     border-radius: 50%;
     margin-right: 8px;
+    overflow: hidden;
 }
 
 .post-content{
+    position: relative;
     display: flex;
     align-items: center;
-    padding: 16px;
-}
-
-.post-vote {
-    align-items: center;
-}
-
-.post-action {
-    gap: 50px;
 }
 
 .post-picture {
     height: 500px;
+    width: auto;
+    overflow: hidden;
+}
+
+.post-title{
+    grid-row: 2;
+    grid-column: 1/-1;
+    font-size: 32px;
+}
+
+.post-vote-field{
+    display: grid;
+    grid-template-columns: 46px auto;
+    gap: 8px;
+    width: auto;
+}
+
+.post-vote-image{
+    position: relative;
+    height: 32px;
+    width: 32px;
+}
+
+.post-vote-button{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.post-vote-value{
+    font-size: 32px;
+}
+
+.post-medias{
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
