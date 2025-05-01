@@ -22,3 +22,116 @@
 #change-settings {
     position: relative;
 }
+
+#pfp-settings {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: left;
+    gap: 1rem;
+    margin: 1rem;
+}
+
+#pfp-container {
+    width: 10rem;
+    height: 10rem;
+    cursor: pointer;
+}
+
+#pfp-container div {
+    width: 10rem;
+    height: 10rem;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    border: #000 solid 0.25rem;
+    background-color: #f5f5f5;
+}
+
+#pfp-container div:hover::before {
+    content: '';
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: absolute;
+    backdrop-filter: blur(5px);
+}
+
+#pfp-container div img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#change-pfp-popup-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+}
+
+#change-pfp-popup {
+    position: absolute;
+    width: 30rem;
+    height: 40rem;
+    background-color: silver;
+    z-index: 51;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#change-pfp-popup-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 1rem;
+    gap: 1rem;
+    overflow: hidden;
+}
+
+#new-pfp-dropzone {
+    width: 15rem;
+    height: 15rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    background-color: #f5f5f5;
+}
+
+#new-pfp-dropzone::before {
+    content: '';
+    position: absolute;
+    width: 12.5rem;
+    height: 12.5rem;
+    border-radius: 50%;
+    border: 0.25rem dashed #bbb;
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
+}
+
+#new-pfp-dropzone span {
+    font-size: 10rem;
+    color: #999;
+    z-index: 52;
+    pointer-events: none;
+    font-family: initial !important;
+    font-weight: bolder;
+}

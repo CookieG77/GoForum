@@ -3,6 +3,14 @@
         <div class="win95-header">
             <p>Welcome to the user settings page !</p>
         </div>
+        <div id="pfp-settings">
+            <p>Change your profile picture :</p>
+            <div id="pfp-container">
+                <div>
+                    <img id="pfp" class="unselectable" draggable="false" src="/upload/{{ .UserPfpPath }}" alt="profile picture">
+                </div>
+            </div>
+        </div>
         <div id="settings-content" class="win95-border-indent">
             <div id="current-settings">
                 <div class="settings-field">
@@ -66,6 +74,23 @@
                 <button id="close-change-settings-button" class="win95-button">Close</button>
             </div>
         </div>
-
+    </div>
+    <div id="change-pfp-popup-bg" class="hidden">
+    </div>
+    <div id="change-pfp-popup" class="win95-border hidden">
+        <div class="win95-header">
+            <p>Change Personal Profile Picture</p>
+        </div>
+        <div id="change-pfp-popup-content">
+            <p>Click to select a file</p>
+            <p>Accepted formats are : .png .jpeg .gif</p>
+            <p>Image size must be under 20Mo !</p>
+            <div id="new-pfp-container">
+                <div id="new-pfp-dropzone">
+                    <span>+</span>
+                </div>
+                <input type="file" id="new-pfp-input" accept="image/png, image/jpeg, image/gif" class="hidden">
+            </div>
+        </div>
     </div>
 {{ end }}

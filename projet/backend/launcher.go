@@ -30,6 +30,9 @@ func LaunchWebApp() {
 	// Initialize the default theme
 	f.InitDefaultThemeConfig()
 
+	// Initialize the Uploads directory
+	f.InitUploadsDirectory()
+
 	// Initialize the database
 	f.InitDatabaseConnection()
 
@@ -102,9 +105,6 @@ func LaunchWebApp() {
 
 	// Initialize the mail configuration
 	f.InitMail()
-
-	// Initialize the Uploads directory
-	f.InitUploadsDirectory()
 
 	// Launch the server
 	f.LaunchServer(r, finalPort)

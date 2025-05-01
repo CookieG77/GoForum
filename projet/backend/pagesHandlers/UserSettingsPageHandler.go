@@ -77,6 +77,6 @@ func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
 
 	// Add additional styles to the content interface
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/userSettings.css")
-	f.AddAdditionalScriptsToContentInterface(&PageInfo, "js/userSettingsScript.js")
+	f.AddAdditionalScriptsToContentInterface(&PageInfo, "js/userSettingsScript.js", "js/imgUploader.js")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/userSettings.html")
 }

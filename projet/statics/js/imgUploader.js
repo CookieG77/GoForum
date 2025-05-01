@@ -46,6 +46,14 @@ async function UploadImages(imageHolder, imgType) {
  * @returns {Promise<any>}
  */
 function UploadImg(file, imgType) {
+    if (!allowedTypes.includes(file.type)) {
+        alert("Format non autorisé (PNG, JPEG, GIF)");
+        return null;
+    }
+    if (file.size > maxSize) {
+        alert("Taille de fichier trop grande (max 20 Mo)");
+        return null;
+    }
     const formData = new FormData();
     formData.append(`image` , file);
     return fetch(`/api/upload/${imgType}`, {

@@ -6,10 +6,7 @@
 function getCurrentThreadName() {
     const path = window.location.pathname;
     const segments = path.split("/");
-    const threadName = segments[2];
-    // TODO: Remove the print statement
-    console.log("Thread ID:", threadName);
-    return threadName;
+    return segments[2];
 }
 
 /**
@@ -199,6 +196,15 @@ function leaveThread(threadName) {
     });
 }
 
+/**
+ * Get the messages from the current thread.
+ * @description This function sends a request to get the messages from the current thread. It does not handle the response.
+ * @description But a success response means that the messages have been retrieved.
+ * @param threadName {string} - The name of the thread to get the messages from.
+ * @param offset {number} - The offset to start getting the messages from.
+ * @param order {string} - The order to get the messages in.
+ * @returns {Promise<Response>}
+ */
 function getMessage(threadName, offset, order) {
     return fetch( `/api/messages?thread=${threadName}&offset=${offset}&order=${order}`, {
         method: "GET",

@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
+	"io"
 	"log"
 	mr "math/rand"
 	"net/http"
@@ -703,7 +704,8 @@ func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
 		}
 
 		// Give the user his Pfp
-		(*PageInfo)["UserPfpPath"] = GetMediaLinkFromID(GetUserConfig(r).PfpID).MediaAddress
+		userConfig := GetUserConfig(r)
+		(*PageInfo)["UserPfpPath"] = GetMediaLinkFromID(userConfig.PfpID).MediaAddress
 		return
 	}
 }
@@ -1334,8 +1336,38 @@ func GetMediaLinkFullPath(mediaLink MediaLink) string {
 // DeleteUselessMediaLinks removes the media links that are not used in any message and are of the type ThreadMessagePicture and are older than 1 hour
 // Returns an error if there is one
 func DeleteUselessMediaLinks() error {
+	// Delete the media links files before deleting their link from the database
+	getUselessMediaLinks := "SELECT media_address FROM MediaLink WHERE media_id NOT IN (SELECT media_id FROM ThreadMessageMediaLinks) AND media_type = ? AND creation_date < datetime('now', '-1 hour')"
+	rows, err := db.Query(getUselessMediaLinks, string(ThreadMessagePicture))
+	if err != nil {
+		ErrorPrintf("Error getting the useless media links: %v\n", err)
+		return err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	var mediaAddress string
+	for rows.Next() {
+		err := rows.Scan(&mediaAddress)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in DeleteUselessMediaLinks: %v\n", err)
+			continue
+		}
+		fullPath := GetMediaLinkFullPath(MediaLink{MediaAddress: mediaAddress})
+		res := RemoveImg(fullPath)
+		if res == false {
+			ErrorPrintf("Error removing the media link file: %v\n", err)
+			continue
+		}
+		DebugPrintf("Removed the media link file: %s\n", fullPath)
+	}
+
+	// Delete the media links
 	deleteUselessMediaLinks := "DELETE FROM MediaLink WHERE media_id NOT IN (SELECT media_id FROM ThreadMessageMediaLinks) AND media_type = ? AND creation_date < datetime('now', '-1 hour')"
-	_, err := db.Exec(deleteUselessMediaLinks, string(ThreadMessagePicture))
+	_, err = db.Exec(deleteUselessMediaLinks, string(ThreadMessagePicture))
 	if err != nil {
 		ErrorPrintf("Error deleting the useless media links: %v\n", err)
 		return err
@@ -2336,11 +2368,29 @@ func InitDatabase() {
 	}
 	// If the table is empty, we insert the default media links
 	if count == 0 {
+		// clone the default media files from the assets folder to the media folder
+		defaultMediaFiles := []string{
+			"default_user_icon.png",
+			"default_thread_icon.png",
+			"default_thread_banner.gif",
+		}
+
+		for _, file := range defaultMediaFiles {
+			origin := fmt.Sprintf("statics/img/%s", file)
+			destination := fmt.Sprintf("%s/%s", GetImgUploadFolder(), file)
+			err := copyFile(origin, destination)
+			if err != nil {
+				ErrorPrintf("Error copying default media file %s: %v\n", file, err)
+				return
+			}
+		}
+
+		// Insert default media links
 		insertDefaultMediaLinks := fmt.Sprintf(`
 		INSERT INTO MediaLink (media_type, media_address) VALUES
-			('%s', '/img/default_user_icon.png'),
-			('%s', '/img/default_thread_icon.png'),
-			('%s', '/img/default_thread_banner.gif');
+			('%s', 'default_user_icon.png'),
+			('%s', 'default_thread_icon.png'),
+			('%s', 'default_thread_banner.gif');
 		`,
 			string(UserProfilePicture),
 			string(ThreadIcon),
@@ -2361,6 +2411,40 @@ func InitDatabase() {
 	go AutoDeleteUselessMediaLinks()
 
 	InfoPrintln("Database initialised")
+}
+
+// copyFile copies a file from src to dst.
+// It creates a new file in the destination path and copies the contents of the source file to it.
+// If the destination file already exists, it will be overwritten.
+// It returns an error if there is one.
+func copyFile(src, dst string) error {
+	// Open the source file
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	// Create the destination file
+	destinationFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destinationFile.Close()
+
+	// Copy the contents from source to destination
+	_, err = io.Copy(destinationFile, sourceFile)
+	if err != nil {
+		return err
+	}
+
+	// Flush the destination file to ensure all data is written
+	err = destinationFile.Sync()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // FillDatabase fills the database with test data.

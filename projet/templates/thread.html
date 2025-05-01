@@ -3,21 +3,12 @@
     <div id="thread-container" class="win95-border">
         <div id="thread-header" class="win95-header">
             <div class="thread-title">
-                {{if eq .ThreadIcon "default"}}
-                    <img class="thread-icon unselectable" draggable="false" src="/img/default_thread_icon.png" alt="Thread Icon">
-                {{ else }}
-                    <img class="thread-icon unselectable" draggable="false" src="{{ .ThreadIcon }}" alt="Thread Icon">
-                {{ end }}
-                <h1>{{ .ThreadInfos.ThreadName }}</h1>
+                <img class="thread-icon unselectable" draggable="false" src="/upload/{{ .ThreadIcon }}" alt="Thread Icon">
             </div>
         </div>
         <div id="thread-info" class="win95-description">
             <div class="thread-banner-container">
-                {{if eq .ThreadBanner "default"}}
-                    <img class="thread-banner unselectable" draggable="false" src="/img/default_thread_banner.gif" alt="Thread Banner">
-                {{ else }}
-                    <img class="thread-banner unselectable" draggable="false" src="{{ .ThreadBanner }}" alt="Thread Banner">
-                {{ end }}
+                <img class="thread-banner unselectable" draggable="false" src="/upload/{{ .ThreadBanner }}" alt="Thread Banner">
             </div>
             <div id="thread-description" class="win95-border-indent">
                 <p>{{ .ThreadComplementaryInfos.ThreadDescription }}</p>
@@ -73,20 +64,43 @@
                     <p>{{ .Lang.pages.thread.must_join_thread_message }}</p>
                 {{ end }}
             {{ end }}
-        </div>
-        <div id="example-message-container" class="hidden">
-            <div class="message">
-                <img class="unselectable" draggable="false" src="/img/default_user_icon.png" alt="User Icon">
+            <div id="example-post-container" class="hidden">
+                <div class="post-box">
+                    <section class="post-header post-section">
+                        <div class="post-profile">
+                            <img class="post-profile-picture unselectable" draggable="false">
+                            <span class="post-profile-username">Username</span>
+                        </div>
+                        <button class="post-option" type="button">...</button>
+                    </section>
+                    <section class="post-content post-section">
+                        <img class="post-picture unselectable" draggable="false">
+                    </section>
+                    <section class="post-action post-section">
+                        <div class="post-vote">
+                            <button class="upvote">
+                                <img class="unselectable" draggable="false" src="/img/upvote.png" alt="upvote">
+                            </button>
+                            <span class="vote-number">78541455259856594</span>
+                            <button class="downvote">
+                                <img class="unselectable" draggable="false" src="/img/downvote.png" alt="downvote">
+                            </button>
+                        </div>
+                    </section>
+                </div>
             </div>
-        </div>
-        <div id="messages-container">
+            <div id="posts-container">
+            </div>
+            <button id="load-more-posts-button" class="win95-button" type="button">
+                Load More Posts
+            </button>
         </div>
     </div>
     <div id="thread-sidebar" class=win95-border>
         <section class="thread-sidebar-section win95-border-indent">
             {{ range $modTeamMember := .ThreadModerationTeam }}
-                <div class="thread-moderation-team-member win95-border-bulge">
-                    <img class="moderation-icon unselectable" draggable="false" src="{{ $modTeamMember.PfpAddress }}" alt="User Icon">
+                <div class="thread-moderation-team-member win95-border-bulge" onclick="window.location='/profile/{{ $modTeamMember.Username }}'">
+                    <img class="moderation-icon unselectable" draggable="false" src="/upload/{{ $modTeamMember.PfpAddress }}" alt="User Icon">
                     <div class="thread-sidebar-team-member-name">
                         <h4>{{ $modTeamMember.Username }}</h4>
                         <p class="moderation-title">

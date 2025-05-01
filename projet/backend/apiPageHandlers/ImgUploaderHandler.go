@@ -65,6 +65,14 @@ func ImgUploader(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		threadConfigs = f.GetThreadConfigFromThread(thread)
+	} else if imgType == f.UserProfilePicture {
+		// Check if the user is authenticated
+		user = f.GetUser(r)
+		if (user == f.User{}) {
+			f.DebugPrintf("User is not authenticated\n")
+			http.Error(w, "User is not authenticated", http.StatusUnauthorized)
+			return
+		}
 		userConfigs = f.GetUserConfig(r)
 	}
 
@@ -184,7 +192,7 @@ func ImgUploader(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	f.DebugPrintf("File uploaded: %s\n", fullPath)
+	f.DebugPrintf("File uploaded '%s' : %s\n", rawImgType, fullPath)
 
 	// Creating the MediaLink
 	mediaID, err := f.AddMediaLink(imgType, uniqueName)
@@ -197,6 +205,7 @@ func ImgUploader(w http.ResponseWriter, r *http.Request) {
 	switch imgType {
 	case f.UserProfilePicture:
 		// Update the user profile picture
+		f.DebugPrintf("Changing user \"%s\" profile picture to %s\n", user.Username, uniqueName)
 		userConfigs.PfpID = mediaID
 		err := f.UpdateUserConfig(userConfigs)
 		if err != nil {
@@ -206,6 +215,7 @@ func ImgUploader(w http.ResponseWriter, r *http.Request) {
 		}
 	case f.ThreadBanner:
 		// Update the thread banner
+		f.DebugPrintf("Changing thread \"%s\" banner to %s\n", thread.ThreadName, uniqueName)
 		threadConfigs.ThreadBannerID = mediaID
 		err := f.UpdateThreadConfigs(threadConfigs)
 		if err != nil {
@@ -215,6 +225,7 @@ func ImgUploader(w http.ResponseWriter, r *http.Request) {
 		}
 	case f.ThreadIcon:
 		// Update the thread icon
+		f.DebugPrintf("Changing thread \"%s\" icon to %s\n", thread.ThreadName, uniqueName)
 		threadConfigs.ThreadIconID = mediaID
 		err := f.UpdateThreadConfigs(threadConfigs)
 		if err != nil {

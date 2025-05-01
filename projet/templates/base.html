@@ -64,7 +64,7 @@
         <nav class="options header-sections" id="right-nav">
             {{ if .IsAuthenticated }}
                 <button id="user-profile-button" class="invisible">
-                    <img id="user-profile-picture" class="minimized-image unselectable" draggable="false" src="{{ .UserPfpPath }}" alt="profile picture">
+                    <img id="user-profile-picture" class="minimized-image" draggable="false" src="/upload/{{ .UserPfpPath }}" alt="profile picture">
                 </button>
             {{ end }}
         </nav>
