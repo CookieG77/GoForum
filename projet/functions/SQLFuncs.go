@@ -1706,17 +1706,69 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 	}
 	var getMessages string
 	switch order {
+	//	    message_id,
+	//		thread_name,
+	//		message_content,
+	//		was_edited,
+	//		creation_date,
+	//	    username,
+	//		ml.media_address
+	//		pfp_media_address,
 	case "desc": // descending order
-		getMessages = "SELECT * FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY creation_date DESC LIMIT ? OFFSET ?"
+		getMessages = `
+			SELECT
+				message_id,
+				message_title,
+				message_content,
+				was_edited,
+				creation_date,
+				username,
+				pfp_media_address,
+				upvotes,
+				downvotes
+			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY creation_date DESC LIMIT ? OFFSET ?`
 		break
 	case "popular": // popular order
-		getMessages = "SELECT * FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY (upvotes - downvotes) DESC LIMIT ? OFFSET ?"
+		getMessages = `
+			SELECT
+				message_id,
+				message_title,
+				message_content,
+				was_edited,
+				creation_date,
+				username,
+				pfp_media_address,
+				upvotes,
+				downvotes
+			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY (upvotes - downvotes) DESC LIMIT ? OFFSET ?`
 		break
 	case "unpopular": // unpopular order
-		getMessages = "SELECT * FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY (upvotes - downvotes) ASC LIMIT ? OFFSET ?"
+		getMessages = `
+			SELECT
+				message_id,
+				message_title,
+				message_content,
+				was_edited,
+				creation_date,
+				username,
+				pfp_media_address,
+				upvotes,
+				downvotes
+			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY (upvotes - downvotes) ASC LIMIT ? OFFSET ?`
 		break
 	default: // ascending order
-		getMessages = "SELECT * FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY creation_date ASC LIMIT ? OFFSET ?"
+		getMessages = `
+			SELECT
+				message_id,
+				message_title,
+				message_content,
+				was_edited,
+				creation_date,
+				username,
+				pfp_media_address,
+				upvotes,
+				downvotes
+			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY creation_date ASC LIMIT ? OFFSET ?`
 		break
 	}
 	rows, err := db.Query(getMessages, thread.ThreadName, maxMessagesPerPageLoad, offset)
@@ -2315,6 +2367,7 @@ func InitDatabase() {
 		CREATE VIEW IF NOT EXISTS ViewThreadMessagesWithVotes AS
 		SELECT 
 			tm.message_id,
+			tg.thread_name,
 			tm.message_title,
 			tm.message_content,
 			tm.was_edited,
@@ -2420,14 +2473,24 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer sourceFile.Close()
+	defer func(sourceFile *os.File) {
+		err := sourceFile.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the source file: %v\n", err)
+		}
+	}(sourceFile)
 
 	// Create the destination file
 	destinationFile, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
-	defer destinationFile.Close()
+	defer func(destinationFile *os.File) {
+		err := destinationFile.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the destination file: %v\n", err)
+		}
+	}(destinationFile)
 
 	// Copy the contents from source to destination
 	_, err = io.Copy(destinationFile, sourceFile)
