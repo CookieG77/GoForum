@@ -74,7 +74,7 @@
 
 .post-vote-field{
     display: grid;
-    grid-template-columns: 46px auto;
+    grid-template-columns: 46px min(5ch) 46px;
     gap: 8px;
     width: auto;
 }
@@ -93,6 +93,7 @@
 
 .post-vote-value{
     font-size: 32px;
+    text-align: center;
 }
 
 .post-medias{

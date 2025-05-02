@@ -46,6 +46,48 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    function updateUpvote(currentVoteState, currentVoteCount, upvoteImg, downvoteImg) {
+        let state = parseInt(currentVoteState);
+        let count = currentVoteCount;
+        if (state === 1){
+            state = 0;
+            count -= 1;
+            upvoteImg.src = `/img/upvote_empty.png`
+            downvoteImg.src = `/img/downvote_empty.png`
+        } else if(state === 0 || state === -1){
+            state = 1;
+            count += (currentVoteState === -1 ? 2 : 1);
+            upvoteImg.src = `/img/upvote.png`
+            downvoteImg.src = `/img/downvote_empty.png`
+        } else {
+            state = 422;
+        }
+        console.log("Current Vote State: ", state);
+        console.log("Current Vote Count: ", count);
+        return {state, count};
+    }
+
+    function updateDownvote(currentVoteState, currentVoteCount, upvoteImg, downvoteImg) {
+        let state = parseInt(currentVoteState);
+        let count = currentVoteCount;
+        if (state === -1){
+            state = 0;
+            count += 1;
+            upvoteImg.src = `/img/upvote_empty.png`
+            downvoteImg.src = `/img/downvote_empty.png`
+        } else if(state === 0 || state === 1){
+            state = -1;
+            count -= (currentVoteState === 1 ? 2 : 1);
+            upvoteImg.src = `/img/upvote_empty.png`
+            downvoteImg.src = `/img/downvote.png`
+        } else {
+            state = 422;
+        }
+        console.log("Current Vote State: ", state);
+        return {state, count};
+    }
+
+
     /**
      * Create a new post element.
      * @description This function creates a new post element from the given data.
@@ -55,39 +97,58 @@ document.addEventListener("DOMContentLoaded", function () {
     function createNewPost(data) {
 
         const container = document.createElement("div");
+        const postHeader = document.createElement("section");
+        const postAuthor = document.createElement("div");
+        const authorPfp = document.createElement("img");
+        const author = document.createElement("span");
+        const optionButton = document.createElement("button");
+        const title = document.createElement("span");
+        const tags = document.createElement("p");
+        const postContent = document.createElement("section");
+        const medias = document.createElement("div");
+        const postVote = document.createElement("section");
+        const voteField = document.createElement("div");
+        const upvoteButton = document.createElement("button");
+        const upvoteImg = document.createElement("img");
+        const vote = document.createElement("span");
+        const downvoteButton = document.createElement("button");
+        const downvoteImg = document.createElement("img");
+        const messageID = document.createElement("p");
+        const message = document.createElement("p");
+        const wasEdited = document.createElement("p");
+        const date = document.createElement("p");
+        const voteState = document.createElement("p");
+        const br = document.createElement("br");
+
+        let currentVoteState = data.vote_state;
+        let currentVoteCount = data.up_votes - data.down_votes;
+
         container.classList.add("post-box", "win95-border");
 
-        const postHeader = document.createElement("section");
         postHeader.classList.add("post-header");
         container.appendChild(postHeader);
 
-        const postAuthor = document.createElement("div");
         postAuthor.classList.add('post-profile');
         postHeader.appendChild(postAuthor);
 
-        const authorPfp = document.createElement("img");
         authorPfp.src = `/upload/${data.user_pfp_address}`;
         authorPfp.alt = "Author profile picture";
         authorPfp.classList.add("post-profile-picture", "unselectable");
         authorPfp.draggable = false;
         postAuthor.appendChild(authorPfp);
 
-        const author = document.createElement("span");
         author.innerText = `${data.user_name}`;
         postAuthor.appendChild(author);
 
-        const optionButton = document.createElement("button");
         optionButton.innerText = "...";
         optionButton.type = "button";
         optionButton.classList.add("win95-button");
         postHeader.appendChild(optionButton);
 
-        const title = document.createElement("span");
         title.innerText = `${data.message_title}`;
         title.classList.add("post-title");
         postHeader.appendChild(title);
 
-        const tags = document.createElement("p");
         if (data.message_tags != null) {
             for (let i = 0; i < data.message_tags; i++) {
                 const tag = data.message_tags[i];
@@ -98,11 +159,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         postHeader.appendChild(tags);
 
-        const postContent = document.createElement("section");
         postContent.classList.add("post-content");
         container.appendChild(postContent);
 
-        const medias = document.createElement("div");
         medias.classList.add("post-medias");
         if (data.media_links != null) {
             postContent.classList.add("win95-border-bulge");
@@ -118,70 +177,91 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         postContent.appendChild(medias);
 
-        const postVote = document.createElement("section");
         postVote.classList.add("post-vote");
         container.appendChild(postVote);
 
-        const upvote = document.createElement("div");
-        upvote.classList.add("post-vote-field");
-        postVote.appendChild(upvote);
+        voteField.classList.add("post-vote-field");
+        postVote.appendChild(voteField);
 
-        const upvoteButton = document.createElement("button");
         upvoteButton.type = "button";
         upvoteButton.classList.add("win95-button", "post-vote-button");
-        upvote.appendChild(upvoteButton);
+        upvoteButton.addEventListener("click", function () {
+            const messageId = data.message_id.toString();
+            upvoteMessage(threadName, messageId)
+                .then(r => {
+                    if (r.ok) {
+                        return r.json();
+                    } else {
+                        throw new Error("Error while upvoting message");
+                    }
+                })
+                .then(data => {
+                    console.log("Message upvoted successfully", data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            const {state, count} = updateUpvote(currentVoteState, currentVoteCount, upvoteImg, downvoteImg);
+            currentVoteState = state;
+            currentVoteCount = count;
+            vote.innerText = currentVoteCount;
+        });
+        voteField.appendChild(upvoteButton);
 
-        const upvotes = document.createElement("span");
-        upvotes.innerText = `${data.up_votes}`;
-        upvotes.classList.add("post-vote-value")
-        upvote.appendChild(upvotes);
-
-        const upvoteImg = document.createElement("img");
         upvoteImg.src = `/img/upvote_empty.png`;
         upvoteImg.alt = "Upvote image";
         upvoteImg.classList.add("post-vote-image", "unselectable");
         upvoteImg.draggable = false;
         upvoteButton.appendChild(upvoteImg);
 
-        const downvote = document.createElement("div");
-        downvote.classList.add("post-vote-field");
-        postVote.appendChild(downvote);
+        vote.classList.add("post-vote-value");
+        vote.innerText = `${data.up_votes - data.down_votes}`;
+        voteField.appendChild(vote);
 
-        const downvoteButton = document.createElement("button");
         downvoteButton.type = "button";
         downvoteButton.classList.add("win95-button", "post-vote-button");
-        downvote.appendChild(downvoteButton);
+        downvoteButton.addEventListener("click", function () {
+            const messageId = data.message_id.toString();
+            downvoteMessage(threadName, messageId)
+                .then(r => {
+                    if (r.ok) {
+                        return r.json();
+                    } else {
+                        throw new Error("Error while downvoting message");
+                    }
+                })
+                .then(data => {
+                    console.log("Message downvoted successfully", data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            const {state, count} = updateDownvote(currentVoteState, currentVoteCount, upvoteImg, downvoteImg);
+            currentVoteState = state;
+            currentVoteCount = count;
+            vote.innerText = currentVoteCount;
+        });
+        voteField.appendChild(downvoteButton);
 
-        const downvotes = document.createElement("span");
-        downvotes.innerText = `${data.down_votes}`;
-        downvotes.classList.add("post-vote-value")
-        downvote.appendChild(downvotes);
-
-        const downvoteImg = document.createElement("img");
         downvoteImg.src = `/img/downvote_empty.png`;
         downvoteImg.alt = "Downvote image";
         downvoteImg.classList.add("post-vote-image", "unselectable");
         downvoteImg.draggable = false;
         downvoteButton.appendChild(downvoteImg);
 
-        const messageID = document.createElement("p");
+        messageID.classList.add("hidden", "messageId");
         messageID.innerText = `Message ID : ${data.message_id}`;
         container.appendChild(messageID);
 
-        const message = document.createElement("p");
         message.innerText = `Message content : ${data.message_content}`;
         container.appendChild(message);
-        const wasEdited = document.createElement("p");
         wasEdited.innerText = `Was edited : ${data.was_edited}`;
         container.appendChild(wasEdited);
-        const date = document.createElement("p");
         date.innerText = `Date : ${data.creation_date}`;
         container.appendChild(date);
 
-        const voteState = document.createElement("p");
         voteState.innerText = `Vote state : ${data.vote_state}`;
         container.appendChild(voteState);
-        const br = document.createElement("br");
         container.appendChild(br);
 
         return container;
