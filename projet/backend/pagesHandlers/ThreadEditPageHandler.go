@@ -9,7 +9,7 @@ import (
 
 func ThreadEditPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	threadName := vars["thread"]
+	threadName := vars["threadName"]
 
 	PageInfo := f.NewContentInterface("thread_creation", r)
 	// Check the user rights
@@ -48,7 +48,7 @@ func ThreadEditPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	PageInfo["ErrorEditingThread"] = false
-	
+
 	// Handle the thread edit form
 	if r.Method == "POST" {
 		// parse the form

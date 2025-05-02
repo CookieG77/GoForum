@@ -83,11 +83,13 @@ func LaunchWebApp() {
 	r.HandleFunc("/reset-password", pagesHandlers.ResetPasswordPage).Methods("GET", "POST")
 	r.HandleFunc("/confirm-email-address", pagesHandlers.ConfirmMailPage).Methods("GET", "POST")
 	r.HandleFunc("/nt", pagesHandlers.ThreadCreationPage).Methods("GET", "POST")
-	r.HandleFunc("/t/{thread}", pagesHandlers.ThreadPage).Methods("GET", "POST")
-	r.HandleFunc("/t/{thread}/edit", pagesHandlers.ThreadEditPage).Methods("GET", "POST")
+	r.HandleFunc("/t/{threadName}", pagesHandlers.ThreadPage).Methods("GET", "POST")
+	r.HandleFunc("/t/{threadName}/edit", pagesHandlers.ThreadEditPage).Methods("GET", "POST")
+	r.HandleFunc("/p/{threadName}/{post}", pagesHandlers.ThreadPostPage).Methods("GET", "POST")
 	r.HandleFunc("/tnm", pagesHandlers.ThreadSendMessagePage).Methods("GET", "POST")
 	r.HandleFunc("/api/messages", apiPageHandlers.ThreadMessageGetter).Methods("GET")
-	r.HandleFunc("/api/thread/{thread}/{action}", apiPageHandlers.ThreadMessageHandler).Methods("POST")
+	r.HandleFunc("/api/comments", apiPageHandlers.ThreadMessageCommentGetter).Methods("GET")
+	r.HandleFunc("/api/thread/{threadName}/{action}", apiPageHandlers.ThreadContentHandler).Methods("POST")
 	r.HandleFunc("/api/upload/{type}", apiPageHandlers.ImgUploader).Methods("POST")
 
 	// Handle error 404 & 405

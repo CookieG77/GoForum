@@ -107,6 +107,8 @@ type MediaLink struct {
 	CreationDate time.Time
 }
 
+// FormattedThreadMessage is a struct used to represent a thread message with limited information
+// It is used to display the thread message in the thread page
 type FormattedThreadMessage struct {
 	MessageID      int       `json:"message_id"`
 	MessageTitle   string    `json:"message_title"`
@@ -119,6 +121,19 @@ type FormattedThreadMessage struct {
 	Downvotes      int       `json:"down_votes"`
 	MediaLinks     []string  `json:"media_links"`
 	MessageTags    []string  `json:"message_tags"`
+	VoteState      int       `json:"vote_state"`
+}
+
+// FormattedMessageComment is a struct used to represent a message comment with limited information
+type FormattedMessageComment struct {
+	CommentID      int       `json:"comment_id"`
+	CommentContent string    `json:"comment_content"`
+	WasEdited      bool      `json:"was_edited"`
+	CreationDate   time.Time `json:"creation_date"`
+	UserName       string    `json:"user_name"`
+	UserPfpAddress string    `json:"user_pfp_address"`
+	Upvotes        int       `json:"up_votes"`
+	Downvotes      int       `json:"down_votes"`
 	VoteState      int       `json:"vote_state"`
 }
 
@@ -1448,6 +1463,46 @@ func IsUserAllowedToEditMessageInThread(thread ThreadGoForum, user User, message
 	return false
 }
 
+// IsUserAllowedToDeleteMessage checks if the user is allowed to delete the message
+// Returns true if the user is allowed to delete the message and false otherwise
+// A user is allowed to delete a message if he is the owner of the message or if he is the owner or an admin of the thread
+func IsUserAllowedToDeleteMessage(thread ThreadGoForum, user User, messageID int) bool {
+	if thread.OwnerID == user.UserID {
+		return true
+	}
+	if IsThreadOwner(thread, user) {
+		return true
+	}
+	if IsThreadAdmin(thread, user) {
+		return true
+	}
+	// Check if the user is the owner of the message
+	checkIfMessageOwner := "SELECT user_id FROM ThreadMessages WHERE thread_id = ? AND message_id = ?"
+	rows, err := db.Query(checkIfMessageOwner, thread.ThreadID, messageID)
+	if err != nil {
+		ErrorPrintf("Error checking if the user is the owner of the message: %v\n", err)
+		return false
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var messageOwnerID int
+		err := rows.Scan(&messageOwnerID)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in IsUserAllowedToDeleteMessage: %v\n", err)
+			return false
+		}
+		if messageOwnerID == user.UserID {
+			return true
+		}
+	}
+	return false
+}
+
 // AddMessageInThread adds a message to the thread
 // Returns an error if there is one
 func AddMessageInThread(thread ThreadGoForum, title string, content string, user User, mediaLinksID ...int) (int, error) {
@@ -1484,11 +1539,11 @@ func IsMessageTitleValid(messageTitle string) bool {
 	return messageTitleRegex.MatchString(messageTitle)
 }
 
-// IsMessageContentValid checks if the message content is valid
+// IsMessageContentOrCommentContentValid checks if the message content is valid
 // Message content must be at least 5 characters long
 // Message content must be at most 500 characters long
 // Message content must only contain letters, numbers, underscores, hyphens, spaces, punctuation, most special characters, accents and emojis
-func IsMessageContentValid(messageContent string) bool {
+func IsMessageContentOrCommentContentValid(messageContent string) bool {
 	messageContentRegex := regexp.MustCompile(`^[a-zA-Z0-9 _\-.,;:!?(){}\[\]<>@#$%^&*+=~|\\"'/éèêëôçàâäïîùûü]{5,500}$`)
 	return messageContentRegex.MatchString(messageContent)
 }
@@ -1577,6 +1632,143 @@ func GetNumberOfMessagesInThread(thread ThreadGoForum) (int, error) {
 	return 0, nil
 }
 
+// IsUserAllowedToEditComment checks if the user is allowed to edit a comment
+// Returns true if the user is allowed to edit a comment and false otherwise
+func IsUserAllowedToEditComment(thread ThreadGoForum, user User, commentID int) bool {
+	if thread.ThreadID <= 0 {
+		return false
+	}
+	if IsUserInThread(thread, user) {
+		if IsUserBannedFromThread(thread, user) {
+			return false
+		}
+		checkIfOwner := "SELECT comment_id FROM ThreadComments WHERE comment_id = ? AND user_id = ?"
+		rows, err := db.Query(checkIfOwner, thread.ThreadID, commentID, user.UserID)
+		if err != nil {
+			ErrorPrintf("Error checking if the user is the owner of the comment: %v\n", err)
+			return false
+		}
+		defer func(rows *sql.Rows) {
+			err := rows.Close()
+			if err != nil {
+				ErrorPrintf("Error closing the rows: %v\n", err)
+			}
+		}(rows)
+		if rows.Next() {
+			return true
+		}
+	}
+	return false
+}
+
+// IsUserAllowedToDeleteComment checks if the user is allowed to delete a comment
+// Returns true if the user is allowed to delete a comment and false otherwise
+// A user is allowed to delete a comment if he is the owner of the comment or if he is the owner or an admin of the thread
+func IsUserAllowedToDeleteComment(thread ThreadGoForum, user User, commentID int) bool {
+	if thread.OwnerID == user.UserID {
+		return true
+	}
+	if IsThreadOwner(thread, user) {
+		return true
+	}
+	if IsThreadAdmin(thread, user) {
+		return true
+	}
+	// Check if the user is the owner of the comment
+	checkIfCommentOwner := "SELECT user_id FROM ThreadComments WHERE thread_id = ? AND comment_id = ?"
+	rows, err := db.Query(checkIfCommentOwner, thread.ThreadID, commentID)
+	if err != nil {
+		ErrorPrintf("Error checking if the user is the owner of the comment: %v\n", err)
+		return false
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var commentOwnerID int
+		err := rows.Scan(&commentOwnerID)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in IsUserAllowedToDeleteComment: %v\n", err)
+			return false
+		}
+		if commentOwnerID == user.UserID {
+			return true
+		}
+	}
+	return false
+}
+
+// AddCommentToPost adds a comment to the post
+// Returns the comment id and an error if there is one
+func AddCommentToPost(messageID int, user User, content string) (int, error) {
+	insertComment := "INSERT INTO ThreadComments (message_id, user_id, comment_content) VALUES (?, ?, ?, ?)"
+	res, err := db.Exec(insertComment, messageID, user.UserID, content)
+	if err != nil {
+		ErrorPrintf("Error inserting the comment into the database: %v\n", err)
+		return -1, err
+	}
+	commentID, err := res.LastInsertId()
+	if err != nil {
+		ErrorPrintf("Error getting the last insert id: %v\n", err)
+		return -1, err
+	}
+	return int(commentID), nil
+}
+
+// RemoveCommentFromPost removes the comment from the post
+// Returns an error if there is one
+func RemoveCommentFromPost(commentID int) error {
+	removeComment := "DELETE FROM ThreadComments WHERE comment_id = ?"
+	_, err := db.Exec(removeComment, commentID)
+	if err != nil {
+		ErrorPrintf("Error removing the comment from the database: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// EditCommentFromPost edits the comment in the post
+// Returns an error if there is one
+func EditCommentFromPost(commentID int, newContent string) error {
+	editComment := "UPDATE ThreadComments SET comment_content = ?, was_edited = true WHERE comment_id = ?"
+	_, err := db.Exec(editComment, newContent, commentID)
+	if err != nil {
+		ErrorPrintf("Error editing the comment in the database: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// GetNumberOfCommentsInMessage returns the number of comments in the message
+// Returns the number of comments and an error if there is one
+func GetNumberOfCommentsInMessage(messageID int) (int, error) {
+	getNumberOfComments := "SELECT COUNT(*) FROM ThreadComments WHERE message_id = ?"
+	rows, err := db.Query(getNumberOfComments, messageID)
+	if err != nil {
+		ErrorPrintf("Error getting the number of comments in the message: %v\n", err)
+		return 0, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var numberOfComments int
+		err := rows.Scan(&numberOfComments)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetNumberOfCommentsInMessage: %v\n", err)
+			return 0, err
+		}
+		return numberOfComments, nil
+	}
+	return 0, nil
+}
+
 // MessageExistsInThread checks if the message exists in the thread
 // Returns true if the message exists and false otherwise
 func MessageExistsInThread(thread ThreadGoForum, messageID int) bool {
@@ -1598,49 +1790,9 @@ func MessageExistsInThread(thread ThreadGoForum, messageID int) bool {
 	return false
 }
 
-// IsUserAllowedToDeleteMessage checks if the user is allowed to delete the message
-// Returns true if the user is allowed to delete the message and false otherwise
-// A user is allowed to delete a message if he is the owner of the message or if he is the owner or an admin of the thread
-func IsUserAllowedToDeleteMessage(thread ThreadGoForum, user User, messageID int) bool {
-	if thread.OwnerID == user.UserID {
-		return true
-	}
-	if IsThreadOwner(thread, user) {
-		return true
-	}
-	if IsThreadAdmin(thread, user) {
-		return true
-	}
-	// Check if the user is the owner of the message
-	checkIfMessageOwner := "SELECT user_id FROM ThreadMessages WHERE thread_id = ? AND message_id = ?"
-	rows, err := db.Query(checkIfMessageOwner, thread.ThreadID, messageID)
-	if err != nil {
-		ErrorPrintf("Error checking if the user is the owner of the message: %v\n", err)
-		return false
-	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			ErrorPrintf("Error closing the rows: %v\n", err)
-		}
-	}(rows)
-	if rows.Next() {
-		var messageOwnerID int
-		err := rows.Scan(&messageOwnerID)
-		if err != nil {
-			ErrorPrintf("Error scanning the rows in IsUserAllowedToDeleteMessage: %v\n", err)
-			return false
-		}
-		if messageOwnerID == user.UserID {
-			return true
-		}
-	}
-	return false
-}
-
-// HasUserAlreadyVoted checks if the user has already voted for the message
+// HasUserAlreadyVotedOnMessage checks if the user has already voted for the message
 // Returns 0 if the user has not voted, 1 if the user has upvoted and -1 if the user has downvoted
-func HasUserAlreadyVoted(user User, messageID int) int {
+func HasUserAlreadyVotedOnMessage(user User, messageID int) int {
 	checkIfUserVoted := "SELECT is_upvote FROM ThreadMessageVotes WHERE user_id = ? AND message_id = ?"
 	rows, err := db.Query(checkIfUserVoted, user.UserID, messageID)
 	if err != nil {
@@ -1650,14 +1802,14 @@ func HasUserAlreadyVoted(user User, messageID int) int {
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			ErrorPrintf("Error closing the rows in HasUserAlreadyVoted: %v\n", err)
+			ErrorPrintf("Error closing the rows in HasUserAlreadyVotedOnMessage: %v\n", err)
 		}
 	}(rows)
 	if rows.Next() {
 		var isUpvote bool
 		err := rows.Scan(&isUpvote)
 		if err != nil {
-			ErrorPrintf("Error scanning the rows in HasUserAlreadyVoted: %v\n", err)
+			ErrorPrintf("Error scanning the rows in HasUserAlreadyVotedOnMessage: %v\n", err)
 			return 0
 		}
 		if isUpvote {
@@ -1667,6 +1819,145 @@ func HasUserAlreadyVoted(user User, messageID int) int {
 		}
 	}
 	return 0
+}
+
+// HasUserAlreadyVotedOnComment checks if the user has already voted for the message
+// Returns 0 if the user has not voted, 1 if the user has upvoted and -1 if the user has downvoted
+func HasUserAlreadyVotedOnComment(user User, commentID int) int {
+	checkIfUserVoted := "SELECT is_upvote FROM ThreadCommentVotes WHERE user_id = ? AND comment_id = ?"
+	rows, err := db.Query(checkIfUserVoted, user.UserID, commentID)
+	if err != nil {
+		ErrorPrintf("Error checking if the user has already voted: %v\n", err)
+		return 0
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows in HasUserAlreadyVotedOnComment: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var isUpvote bool
+		err := rows.Scan(&isUpvote)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in HasUserAlreadyVotedOnComment: %v\n", err)
+			return 0
+		}
+		if isUpvote {
+			return 1
+		} else {
+			return -1
+		}
+	}
+	return 0
+}
+
+// GetMessagesFromThread returns the messages from the thread
+// Returns a slice of messages and an error if there is one
+// The messages are ordered by the given order (from the OrderingList)
+// The offset is used to paginate the messages
+// By default the function returns a maximum of 10 messages or is equal to the environment variable 'MAX_MESSAGES_PER_PAGE_LOAD'
+func GetMessageByID(messageID int) (FormattedThreadMessage, error) {
+	return GetMessageByIDWithPOV(messageID, User{})
+}
+
+// GetMessageByIDWithPOV returns the message from the thread with the given id view from the point of view of the user
+// Returns the message and an error if there is one
+func GetMessageByIDWithPOV(messageID int, user User) (FormattedThreadMessage, error) {
+	getMessage := `
+		SELECT
+			message_id,
+			message_title,
+			message_content,
+			was_edited,
+			creation_date,
+			username,
+			pfp_media_address,
+			upvotes,
+			downvotes
+		FROM ViewThreadMessagesWithVotes WHERE message_id = ?`
+	rows, err := db.Query(getMessage, messageID)
+	if err != nil {
+		ErrorPrintf("Error getting the message from the thread: %v\n", err)
+		return FormattedThreadMessage{}, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var message FormattedThreadMessage
+		err := rows.Scan(
+			&message.MessageID,
+			&message.MessageTitle,
+			&message.MessageContent,
+			&message.WasEdited,
+			&message.CreationDate,
+			&message.UserName,
+			&message.UserPfpAddress,
+			&message.Upvotes,
+			&message.Downvotes)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetMessageFromThreadWithID: %v\n", err)
+			return FormattedThreadMessage{}, err
+		}
+		// Get the media links for the message
+		getMessageMediaLinks := `
+			SELECT ml.media_address
+			FROM ThreadMessageMediaLinks tmml
+			JOIN MediaLink ml ON tmml.media_id = ml.media_id
+			WHERE tmml.message_id = ?;`
+		rows, err := db.Query(getMessageMediaLinks, message.MessageID)
+		if err != nil {
+			ErrorPrintf("Error getting the media links for the message: %v\n", err)
+			return FormattedThreadMessage{}, err
+		}
+		defer func(rows *sql.Rows) {
+			err := rows.Close()
+			if err != nil {
+				ErrorPrintf("Error closing the rows: %v\n", err)
+			}
+		}(rows)
+
+		// Add the media links to the message
+		var mediaLinksAddresses []string
+		for rows.Next() {
+			var mediaLinkAddress string
+			err := rows.Scan(&mediaLinkAddress)
+			if err != nil {
+				ErrorPrintf("Error scanning the rows in GetMessageFromThreadWithID: %v\n", err)
+				return FormattedThreadMessage{}, err
+			}
+			mediaLinksAddresses = append(mediaLinksAddresses, mediaLinkAddress)
+		}
+		message.MediaLinks = mediaLinksAddresses
+
+		// Add the tags to the message
+		tags, err := GetMessageTags(message.MessageID)
+		if err != nil {
+			ErrorPrintf("Error getting the tags for the message: %v\n", err)
+			return FormattedThreadMessage{}, err
+		}
+		stringTags := make([]string, len(tags))
+		for i, tag := range tags {
+			stringTags[i] = tag.TagName
+		}
+		message.MessageTags = stringTags
+
+		// Add the message pov (point of view) to the message
+		// Sets FormattedThreadMessage.VoteState to -1 if the user disliked the message
+		// Sets FormattedThreadMessage.VoteState to 1 if the user liked the message
+		// Sets FormattedThreadMessage.VoteState to 0 if the user has not voted
+		if user.UserID != 0 {
+			message.VoteState = HasUserAlreadyVotedOnMessage(user, message.MessageID)
+		} else {
+			message.VoteState = 0
+		}
+		return message, nil
+	}
+	return FormattedThreadMessage{}, nil
 }
 
 // GetMessagesFromThread returns the messages from the thread
@@ -1684,36 +1975,28 @@ func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]Fo
 // The offset is used to paginate the messages
 // By default the function returns a maximum of 10 messages or is equal to the environment variable 'MAX_MESSAGES_PER_PAGE_LOAD'
 func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string, user User) ([]FormattedThreadMessage, error) {
-	// Check if there is still incompleteMessages to load
+	// Check if there is still Messages to load
 	numberOfMessages, err := GetNumberOfMessagesInThread(thread)
 	if err != nil {
-		ErrorPrintf("Error getting the number of incompleteMessages in the thread: %v\n", err)
+		ErrorPrintf("Error getting the number of Messages in the thread: %v\n", err)
 		return nil, err
 	}
 	if offset >= numberOfMessages {
 		return nil, nil
 	}
 
-	// Get the max incompleteMessages per page load from the environment variable
+	// Get the max Messages per page load from the environment variable
 	maxMessagesPerPageLoad := 10
 	if os.Getenv("MAX_MESSAGES_PER_PAGE_LOAD") != "" {
 		var err error
 		maxMessagesPerPageLoad, err = strconv.Atoi(os.Getenv("MAX_MESSAGES_PER_PAGE_LOAD"))
 		if err != nil {
-			ErrorPrintf("Error parsing the max incompleteMessages per page load: %v\n", err)
+			ErrorPrintf("Error parsing the max Messages per page load: %v\n", err)
 			maxMessagesPerPageLoad = 10
 		}
 	}
 	var getMessages string
 	switch order {
-	//	    message_id,
-	//		thread_name,
-	//		message_content,
-	//		was_edited,
-	//		creation_date,
-	//	    username,
-	//		ml.media_address
-	//		pfp_media_address,
 	case "desc": // descending order
 		getMessages = `
 			SELECT
@@ -1804,36 +2087,137 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 	// Get the media links for each message
 	var Messages []FormattedThreadMessage
 	for _, message := range incompleteMessages {
-		getMessageMediaLinks := "SELECT ml.media_id, ml.media_type, ml.media_address, ml.creation_date FROM ThreadMessageMediaLinks tmml JOIN MediaLink ml ON tmml.media_id = ml.media_id WHERE tmml.message_id = ?;"
+		// Add the media links to the message
+		getMessageMediaLinks := `
+			SELECT ml.media_address 
+			FROM ThreadMessageMediaLinks tmml JOIN MediaLink ml ON tmml.media_id = ml.media_id
+			WHERE tmml.message_id = ?;`
 		rows, err := db.Query(getMessageMediaLinks, message.MessageID)
 		if err != nil {
 			ErrorPrintf("Error getting the incompleteMessages from the thread: %v\n", err)
 			return nil, err
 		}
 		for rows.Next() {
-			var mediaLink MediaLink
-			err := rows.Scan(&mediaLink.MediaID, &mediaLink.MediaType, &mediaLink.MediaAddress, &mediaLink.CreationDate)
+			var mediaLinkAddress string
+			err := rows.Scan(&mediaLinkAddress)
 			if err != nil {
 				ErrorPrintf("Error scanning the rows in GetMessagesFromThread: %v\n", err)
 				return nil, err
 			}
-			message.MediaLinks = append(message.MediaLinks, mediaLink.MediaAddress)
+			message.MediaLinks = append(message.MediaLinks, mediaLinkAddress)
 		}
-		// Sets FormattedThreadMessage.VoteState to -1 if the user disliked the message
-		// Sets FormattedThreadMessage.VoteState to 1 if the user liked the message
-		// Sets FormattedThreadMessage.VoteState to 0 if the user has not voted
-		if user.UserID != 0 {
-			message.VoteState = HasUserAlreadyVoted(user, message.MessageID)
-		} else {
-			message.VoteState = 0
-		}
-		Messages = append(Messages, message)
 		err = rows.Close()
 		if err != nil {
 			ErrorPrintf("Error closing the rows: %v\n", err)
 		}
+		// Add the tags to the message
+		tags, err := GetMessageTags(message.MessageID)
+		if err != nil {
+			ErrorPrintf("Error getting the tags for the message: %v\n", err)
+			return nil, err
+		}
+		stringTags := make([]string, len(tags))
+		for i, tag := range tags {
+			stringTags[i] = tag.TagName
+		}
+		message.MessageTags = stringTags
+
+		// Adding the message pov (point of view) to the message
+		// Sets FormattedThreadMessage.VoteState to -1 if the user disliked the message
+		// Sets FormattedThreadMessage.VoteState to 1 if the user liked the message
+		// Sets FormattedThreadMessage.VoteState to 0 if the user has not voted
+		if user.UserID != 0 {
+			message.VoteState = HasUserAlreadyVotedOnMessage(user, message.MessageID)
+		} else {
+			message.VoteState = 0
+		}
+		Messages = append(Messages, message)
 	}
 	return Messages, nil
+}
+
+// GetCommentsFromMessage returns the comments from the message
+// Returns a slice of comments and an error if there is one
+// The offset is used to paginate the comments
+// By default the function returns a maximum of 10 comments or is equal to the environment variable 'MAX_COMMENTS_PER_PAGE_LOAD'
+func GetCommentsFromMessage(messageID int, offset int) ([]FormattedMessageComment, error) {
+	return GetCommentsFromMessageWithPOV(messageID, offset, User{})
+}
+
+// GetCommentsFromMessageWithPOV returns the comments from the message
+// Returns a slice of comments and an error if there is one
+// The offset is used to paginate the comments
+// By default the function returns a maximum of 10 comments or is equal to the environment variable 'MAX_COMMENTS_PER_PAGE_LOAD'
+func GetCommentsFromMessageWithPOV(messageID int, offset int, user User) ([]FormattedMessageComment, error) {
+	// Check if there is still comments to load
+	numberOfComments, err := GetNumberOfCommentsInMessage(messageID)
+	if err != nil {
+		ErrorPrintf("Error getting the number of comments in the Message: %v\n", err)
+		return nil, err
+	}
+	if offset >= numberOfComments {
+		return nil, nil
+	}
+
+	// Get the max comments per page load from the environment variable
+	maxCommentsPerPageLoad := 10
+	if os.Getenv("MAX_COMMENTS_PER_PAGE_LOAD") != "" {
+		var err error
+		maxCommentsPerPageLoad, err = strconv.Atoi(os.Getenv("MAX_COMMENTS_PER_PAGE_LOAD"))
+		if err != nil {
+			ErrorPrintf("Error parsing the max comments per page load: %v\n", err)
+			maxCommentsPerPageLoad = 10
+		}
+	}
+	getComments := `
+		SELECT
+			comment_id,
+			comment_content,
+			was_edited,
+			creation_date,
+			username,
+			pfp_media_address,
+			upvotes,
+			downvotes
+		FROM ViewMessageCommentsWithVotes
+		WHERE message_id = ? ORDER BY creation_date ASC LIMIT ? OFFSET ?`
+	rows, err := db.Query(getComments, messageID, maxCommentsPerPageLoad, offset)
+	if err != nil {
+		ErrorPrintf("Error getting all the incompleteMessages from the thread: %v\n", err)
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+
+	var comments []FormattedMessageComment
+	for rows.Next() {
+		var comment FormattedMessageComment
+		err := rows.Scan(
+			&comment.CommentID,
+			&comment.CommentContent,
+			&comment.WasEdited,
+			&comment.CreationDate,
+			&comment.UserName,
+			&comment.UserPfpAddress,
+			&comment.Upvotes,
+			&comment.Downvotes)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetCommentsFromMessageWithPOV: %v\n", err)
+			return nil, err
+		}
+		if (user != User{}) {
+			comment.VoteState = HasUserAlreadyVotedOnMessage(user, comment.CommentID)
+		} else {
+			comment.VoteState = 0
+		}
+		comments = append(comments, comment)
+	}
+
+	return comments, nil
 }
 
 // GetUserRankInThread returns the rights_level of the user in the thread
@@ -2150,7 +2534,7 @@ func GetMessageTags(messageID int) ([]ThreadTag, error) {
 // InitDatabase initialises the database.
 // It creates the tables if they do not exist.
 func InitDatabase() {
-	UserTableTableSQL := `
+	GoForumUserDataBase := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS Users (
 			user_id INTEGER PRIMARY KEY AUTOINCREMENT,
 			email TEXT NOT NULL UNIQUE,
@@ -2163,26 +2547,18 @@ func InitDatabase() {
 			oauth_id TEXT,
 			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-		`
-	_, err := db.Exec(UserTableTableSQL)
-	if err != nil {
-		ErrorPrintf("Error creating Users table: %v\n", err)
-		return
-	}
-
-	UserConfigsTableSQL := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS UserConfigs (
 			user_id INTEGER PRIMARY KEY,
 			lang TEXT DEFAULT '%s' NOT NULL,
 			theme TEXT DEFAULT '%s' NOT NULL,
 			pfp_id INTEGER DEFAULT 1 NOT NULL,
-			FOREIGN KEY (user_id) REFERENCES Users(id)
+			FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 		);
 		`, string(DefaultLang),
 		string(DefaultTheme))
-	_, err = db.Exec(UserConfigsTableSQL)
+	_, err := db.Exec(GoForumUserDataBase)
 	if err != nil {
-		ErrorPrintf("Error creating UserConfigs table: %v\n", err)
+		ErrorPrintf("Error creating Users or UserConfigs table: %v\n", err)
 		return
 	}
 
@@ -2196,7 +2572,7 @@ func InitDatabase() {
 			user_id INTEGER NOT NULL,
 			email_type TEXT NOT NULL,
 			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (user_id) REFERENCES Users(user_id)
+			FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 		);
 		`
 	// Before creating the EmailIdentification table, we want to be sure that if it already exists, it is empty
@@ -2217,16 +2593,8 @@ func InitDatabase() {
 		    thread_name TEXT NOT NULL UNIQUE,
 		    owner_id INTEGER NOT NULL,
 		    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		    FOREIGN KEY (owner_id) REFERENCES Users(user_id)
+		    FOREIGN KEY (owner_id) REFERENCES Users(user_id) ON DELETE CASCADE
 		);
-		`
-	_, err = db.Exec(ThreadGoForumTableSQL)
-	if err != nil {
-		ErrorPrintf("Error creating ThreadGoForum table: %v\n", err)
-		return
-	}
-
-	ThreadGoForumConfigsTableSQL := `
 		CREATE TABLE IF NOT EXISTS ThreadGoForumConfigs (
 		    thread_id INTEGER PRIMARY KEY UNIQUE,
 		    thread_description TEXT NOT NULL,
@@ -2236,12 +2604,15 @@ func InitDatabase() {
 		    is_open_to_non_connected_Users BOOLEAN DEFAULT TRUE NOT NULL,
 		    allow_images BOOLEAN DEFAULT TRUE NOT NULL,
 		    allow_links BOOLEAN DEFAULT TRUE NOT NULL,
-		    allow_text_formatting BOOLEAN DEFAULT TRUE NOT NULL		    
+		    allow_text_formatting BOOLEAN DEFAULT TRUE NOT NULL,
+			FOREIGN KEY (thread_id) REFERENCES ThreadGoForum(thread_id) ON DELETE CASCADE,
+		    FOREIGN KEY (thread_icon_id) REFERENCES MediaLink(media_id) ON DELETE CASCADE,
+		    FOREIGN KEY (thread_banner_id) REFERENCES MediaLink(media_id) ON DELETE CASCADE
 		);
 		`
-	_, err = db.Exec(ThreadGoForumConfigsTableSQL)
+	_, err = db.Exec(ThreadGoForumTableSQL)
 	if err != nil {
-		ErrorPrintf("Error creating ThreadGoForumConfigs table: %v\n", err)
+		ErrorPrintf("Error creating ThreadGoForum or ThreadGoForumConfigs table: %v\n", err)
 		return
 	}
 
@@ -2253,7 +2624,7 @@ func InitDatabase() {
 		    thread_id INTEGER NOT NULL,
 		    tag_name TEXT NOT NULL,
 		    tag_color TEXT NOT NULL,
-		    FOREIGN KEY (thread_id) REFERENCES ThreadGoForum(thread_id)
+		    FOREIGN KEY (thread_id) REFERENCES ThreadGoForum(thread_id) ON DELETE CASCADE
 		);
 		`
 	_, err = db.Exec(ThreadGoForumTagsTableSQL)
@@ -2275,7 +2646,7 @@ func InitDatabase() {
 			rights_level INTEGER DEFAULT 0 NOT NULL,
 			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY (user_id, thread_id),
-		    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+		    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 		);
 		`
 	_, err = db.Exec(ThreadGoForumMembersTableSQL)
@@ -2301,6 +2672,9 @@ func InitDatabase() {
 	}
 
 	// The 'ThreadMessages' table represents the messages that are sent in the threads
+	// The 'ThreadMessageMediaLinks' table represents the media links that are shared in the messages
+	// The 'ThreadMessageVotes' table represents the votes that are sent in the messages
+	// The 'ThreadMessageTags' table represents the tags that are sent in the messages
 	ThreadMessagesTableSQL := `
 		CREATE TABLE IF NOT EXISTS ThreadMessages (
 			message_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2310,56 +2684,35 @@ func InitDatabase() {
 			message_content TEXT NOT NULL,
 			was_edited BOOLEAN DEFAULT FALSE NOT NULL,
 			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		    FOREIGN KEY (user_id) REFERENCES Users(user_id),
-		    FOREIGN KEY (thread_id) REFERENCES ThreadGoForum(thread_id)
+		    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE, 
+		    FOREIGN KEY (thread_id) REFERENCES ThreadGoForum(thread_id) ON DELETE CASCADE
+		);
+		CREATE TABLE IF NOT EXISTS ThreadMessageMediaLinks (
+		    message_id INTEGER NOT NULL,
+		    media_id INTEGER NOT NULL,
+		    FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id) ON DELETE CASCADE,
+		    FOREIGN KEY (media_id) REFERENCES MediaLink(media_id) ON DELETE CASCADE,
+		    PRIMARY KEY (message_id, media_id)
+		);
+		CREATE TABLE IF NOT EXISTS ThreadMessageVotes (
+		    message_id INTEGER NOT NULL,
+		    user_id INTEGER NOT NULL,
+		    is_upvote BOOLEAN NOT NULL,
+			FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id) ON DELETE CASCADE,
+		    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+		    PRIMARY KEY (message_id, user_id)
+		);
+		CREATE TABLE IF NOT EXISTS ThreadMessageTags (
+		    message_id INTEGER NOT NULL,
+		    tag_id INTEGER NOT NULL,
+		    FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id) ON DELETE CASCADE,
+		    FOREIGN KEY (tag_id) REFERENCES ThreadGoForumTags(tag_id) ON DELETE CASCADE,
+		    PRIMARY KEY (message_id, tag_id)
 		);
 		`
 	_, err = db.Exec(ThreadMessagesTableSQL)
 	if err != nil {
-		ErrorPrintf("Error creating ThreadMessages table: %v\n", err)
-		return
-	}
-
-	// The 'ThreadMessageMediaLinks' table represents the media links that are shared in the messages
-	ThreadMessageMediaLinksTableSQL := `
-		CREATE TABLE IF NOT EXISTS ThreadMessageMediaLinks (
-		    message_id INTEGER NOT NULL,
-		    media_id INTEGER NOT NULL,
-		    FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id),
-		    FOREIGN KEY (media_id) REFERENCES MediaLink(media_id),
-		    PRIMARY KEY (message_id, media_id)
-		);
-		`
-	_, err = db.Exec(ThreadMessageMediaLinksTableSQL)
-	if err != nil {
-		ErrorPrintf("Error creating ThreadMessageMediaLinks table: %v\n", err)
-		return
-	}
-	ThreadMessageVotesTableSQL := `
-		CREATE TABLE IF NOT EXISTS ThreadMessageVotes (
-		    message_id INTEGER NOT NULL,
-		    user_id INTEGER NOT NULL,
-		    is_upvote BOOLEAN NOT NULL
-		);
-		`
-	_, err = db.Exec(ThreadMessageVotesTableSQL)
-	if err != nil {
-		ErrorPrintf("Error creating ThreadMessageVotes table: %v\n", err)
-		return
-	}
-
-	ThreadMessageTagsTableSQL := `
-		CREATE TABLE IF NOT EXISTS ThreadMessageTags (
-		    message_id INTEGER NOT NULL,
-		    tag_id INTEGER NOT NULL,
-		    FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id),
-		    FOREIGN KEY (tag_id) REFERENCES ThreadGoForumTags(tag_id),
-		    PRIMARY KEY (message_id, tag_id)
-		);
-		`
-	_, err = db.Exec(ThreadMessageTagsTableSQL)
-	if err != nil {
-		ErrorPrintf("Error creating ThreadMessageTags table: %v\n", err)
+		ErrorPrintf("Error creating the ThreadMessage tables (ThreadMessages / ThreadMessageMediaLinks / ThreadMessageVotes / ThreadMessageTags): %v\n", err)
 		return
 	}
 
@@ -2393,6 +2746,64 @@ func InitDatabase() {
 	_, err = db.Exec(ViewThreadMessageWithLikesTableSQL)
 	if err != nil {
 		ErrorPrintf("Error creating ViewThreadMessagesWithVotes view: %v\n", err)
+		return
+	}
+
+	// The 'ThreadComments' table represents the comments that are sent in the messages
+	// The 'ThreadCommentVotes' table represents the votes that are sent in the comments
+	ThreadCommentsTableSQL := `
+		CREATE TABLE IF NOT EXISTS ThreadComments (
+			comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			message_id INTEGER NOT NULL,
+			user_id INTEGER NOT NULL,
+			comment_content TEXT NOT NULL,
+			was_edited BOOLEAN DEFAULT FALSE NOT NULL,
+			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id) ON DELETE CASCADE,
+			FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+		);
+		CREATE TABLE IF NOT EXISTS ThreadCommentVotes (
+		    comment_id INTEGER NOT NULL,
+		    user_id INTEGER NOT NULL,
+		    is_upvote BOOLEAN NOT NULL,
+		    FOREIGN KEY (comment_id) REFERENCES ThreadComments(comment_id) ON DELETE CASCADE,
+		    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+		    PRIMARY KEY (comment_id, user_id)
+		);`
+	_, err = db.Exec(ThreadCommentsTableSQL)
+	if err != nil {
+		ErrorPrintf("Error creating ThreadComments or ThreadCommentVotes table: %v\n", err)
+		return
+	}
+
+	ViewMessageCommentWithLikesTableSQL := `
+		CREATE VIEW IF NOT EXISTS ViewMessageCommentsWithVotes AS
+		SELECT
+			tc.comment_id,
+			tc.message_id,
+			tc.comment_content,
+			tc.was_edited,
+			tc.creation_date,
+			u.username,
+			ml.media_address AS pfp_media_address,
+			COALESCE(v.upvotes, 0) AS upvotes,
+			COALESCE(v.downvotes, 0) AS downvotes
+		FROM ThreadComments tc
+		JOIN Users u ON tc.user_id = u.user_id
+		LEFT JOIN UserConfigs uc ON u.user_id = uc.user_id
+		LEFT JOIN MediaLink ml ON uc.pfp_id = ml.media_id
+		LEFT JOIN (
+			SELECT
+				comment_id,
+				SUM(CASE WHEN is_upvote = 1 THEN 1 ELSE 0 END) AS upvotes,
+				SUM(CASE WHEN is_upvote = 0 THEN 1 ELSE 0 END) AS downvotes
+			FROM ThreadCommentVotes
+			GROUP BY comment_id
+		) v ON tc.comment_id = v.comment_id;
+		`
+	_, err = db.Exec(ViewMessageCommentWithLikesTableSQL)
+	if err != nil {
+		ErrorPrintf("Error creating ViewMessageCommentsWithVotes view: %v\n", err)
 		return
 	}
 

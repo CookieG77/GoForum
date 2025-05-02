@@ -10,7 +10,7 @@ import (
 
 func ThreadPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	threadName := vars["thread"]
+	threadName := vars["threadName"]
 
 	PageInfo := f.NewContentInterface("thread", r)
 	// Check the user rights

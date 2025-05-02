@@ -33,16 +33,16 @@ type jsonMessageDesignator struct {
 // IntSlice is a custom type for handling string-to-int conversion
 type IntSlice []int
 
-// ThreadMessageHandler handles the thread message requests from ajax calls
+// ThreadContentHandler handles the thread message requests from ajax calls
 // Its path is /api/thread/{thread}/m/{action}?id={id}
 // The "thread" is the name of the thread
 // The "action" can be "sendMessage", "deleteMessage", "editMessage", "reportMessage", "upvoteMessage", "downvoteMessage"
 // The "id" is the id of the message to edit/delete/report
-func ThreadMessageHandler(w http.ResponseWriter, r *http.Request) {
-	f.DebugPrintln("ThreadMessageHandler called")
+func ThreadContentHandler(w http.ResponseWriter, r *http.Request) {
+	f.DebugPrintln("ThreadContentHandler called")
 
 	vars := mux.Vars(r)
-	threadName := vars["thread"]
+	threadName := vars["threadName"]
 	action := vars["action"]
 	// Check if the thread name is empty or does not exist
 	if threadName == "" || !f.CheckIfThreadNameExists(threadName) {
@@ -67,7 +67,13 @@ func ThreadMessageHandler(w http.ResponseWriter, r *http.Request) {
 		action == "upvoteMessage" ||
 		action == "downvoteMessage" ||
 		action == "joinThread" ||
-		action == "leaveThread") {
+		action == "leaveThread" ||
+		action == "sendComment" ||
+		action == "deleteComment" ||
+		action == "editComment" ||
+		action == "reportComment" ||
+		action == "upvoteComment" ||
+		action == "downvoteComment") {
 
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
 		http.Error(w, "Action is empty or does not exist !", http.StatusNotFound)
@@ -128,6 +134,24 @@ func ThreadMessageHandler(w http.ResponseWriter, r *http.Request) {
 	case "leaveThread":
 		leaveThread(w, r, thread, user)
 		return
+	case "sendComment":
+		// TODO : Implement the sendComment action
+		return
+	case "deleteComment":
+		// TODO : Implement the deleteComment action
+		return
+	case "editComment":
+		// TODO : Implement the editComment action
+		return
+	case "reportComment":
+		// TODO : Implement the reportComment action
+		return
+	case "upvoteComment":
+		// TODO : Implement the upvoteComment action
+		return
+	case "downvoteComment":
+		// TODO : Implement the downvoteComment action
+		return
 	default:
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
 		http.Error(w, "Action does not exist !", http.StatusNotFound)
@@ -183,7 +207,7 @@ func sendMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 	}
 
 	// Check if the message content is valid
-	if !f.IsMessageContentValid(msg.Content) {
+	if !f.IsMessageContentOrCommentContentValid(msg.Content) {
 		f.DebugPrintf("Message content is not valid\n")
 		http.Error(w, "Message content is not valid", http.StatusBadRequest)
 		return
@@ -413,7 +437,7 @@ func editMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 	}
 
 	// Check if the message content is valid
-	if !f.IsMessageContentValid(msg.Content) {
+	if !f.IsMessageContentOrCommentContentValid(msg.Content) {
 		f.DebugPrintf("Message content is not valid\n")
 		http.Error(w, "Message content is not valid", http.StatusBadRequest)
 		return
@@ -476,7 +500,7 @@ func upVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 	}
 
 	// Check if the user has already up/downvoted the message
-	vote := f.HasUserAlreadyVoted(user, id)
+	vote := f.HasUserAlreadyVotedOnMessage(user, id)
 
 	if vote == 0 { // User has not voted yet
 		// Add the upvote
@@ -522,7 +546,7 @@ func downVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoFo
 	}
 
 	// Check if the user has already up/downvoted the message
-	vote := f.HasUserAlreadyVoted(user, id)
+	vote := f.HasUserAlreadyVotedOnMessage(user, id)
 
 	if vote == 0 { // User has not voted yet
 		// Add the downvote
