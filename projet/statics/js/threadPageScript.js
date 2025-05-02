@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Debug button
     const loadMorePostsButton = document.getElementById("load-more-posts-button");
 
-    const threadName = getCurrentThreadName()
+    const threadName = getCurrentThreadNameOrPostID()
     let offset= 0;
     let hasReachedEnd = false;
     let orderSelect = document.getElementById("order")
@@ -270,7 +270,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Add each button its event listener if it exists
     if (leaveButton) {
         leaveButton.addEventListener("click", function() {
-            const result = leaveThread(getCurrentThreadName());
+            const result = leaveThread(getCurrentThreadNameOrPostID());
             result.then(async (response) => {
                 if (response.ok) {
                     joinButton.classList.remove("hidden");
@@ -284,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (joinButton) {
         joinButton.addEventListener("click", function() {
-            const result = joinThread(getCurrentThreadName())
+            const result = joinThread(getCurrentThreadNameOrPostID())
             result.then(async (response) => {
                 if (response.ok) {
                     joinButton.classList.add("hidden");
@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (editThreadButton) {
         editThreadButton.addEventListener("click", function() {
-            window.location = `/t/${getCurrentThreadName()}/edit`;
+            window.location = `/t/${getCurrentThreadNameOrPostID()}/edit`;
         });
     }
 
