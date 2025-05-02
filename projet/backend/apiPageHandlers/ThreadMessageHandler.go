@@ -474,12 +474,6 @@ func upVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 	if id < 0 {
 		return
 	}
-	// Check if the user is allowed to upvote the message (if the user is a member of the thread)
-	if !f.IsUserInThread(thread, user) {
-		f.DebugPrintf("User is not allowed to downvote this message\n")
-		http.Error(w, "User is not allowed to downvote this message", http.StatusForbidden)
-		return
-	}
 
 	// Check if the user has already up/downvoted the message
 	vote := f.HasUserAlreadyVoted(user, id)
@@ -524,12 +518,6 @@ func upVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 func downVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
 	id := _checkMessageApiCallValidity(w, r, thread)
 	if id < 0 {
-		return
-	}
-	// Check if the user is allowed to downvote the message (if the user is a member of the thread)
-	if !f.IsUserInThread(thread, user) {
-		f.DebugPrintf("User is not allowed to downvote this message\n")
-		http.Error(w, "User is not allowed to downvote this message", http.StatusForbidden)
 		return
 	}
 
