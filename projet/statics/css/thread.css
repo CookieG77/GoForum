@@ -111,3 +111,10 @@
     align-items: center;
     margin-top: 4px;
 }
+
+#posts-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+}

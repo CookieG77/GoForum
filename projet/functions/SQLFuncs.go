@@ -149,6 +149,35 @@ type ThreadTag struct {
 // PossibleMessageOrderingList is a list of possible message ordering
 var PossibleMessageOrderingList = []string{"asc", "desc", "popular", "unpopular"}
 
+// ReportType is a type used to determine the type of the report
+type ReportType string
+
+// Constants used to determine the type of the report
+const (
+	SpamReport      ReportType = "spam"      // Spam report
+	OffensiveReport ReportType = "offensive" // Offensive report
+	IllegalReport   ReportType = "illegal"   // Illegal report
+	OtherReport     ReportType = "other"     // Other report
+)
+
+// ReportTypes is a list of possible report types
+var ReportTypes = []ReportType{
+	SpamReport,
+	OffensiveReport,
+	IllegalReport,
+	OtherReport,
+}
+
+// ReportedContent is a struct used to represent a reported content
+type ReportedContent struct {
+	ReportID              int        `json:"report_id"`
+	UserID                int        `json:"user_id"`
+	ReportedContentID     int        `json:"reported_content_id"`
+	IsAPostAndNotAComment bool       `json:"is_a_post_and_not_a_comment"`
+	ReportType            ReportType `json:"report_type"`
+	ReportContent         string     `json:"report_content"`
+}
+
 // InitDatabaseConnection initialises the database connection
 func InitDatabaseConnection() {
 	if !databaseInitialised {
@@ -1247,6 +1276,27 @@ func GetMediaTypeFromString(mediaType string) (MediaType, error) {
 	return "", fmt.Errorf("invalid media type: %s", mediaType)
 }
 
+// IsAReportType checks if the string is a report type
+func IsAReportType(reportType string) bool {
+	for _, v := range ReportTypes {
+		if string(v) == reportType {
+			return true
+		}
+	}
+	return false
+}
+
+// GetReportTypeFromString returns the report type from the string
+// Returns an error if the report type is not valid
+func GetReportTypeFromString(reportType string) (ReportType, error) {
+	for _, v := range ReportTypes {
+		if string(v) == reportType {
+			return v, nil
+		}
+	}
+	return "", fmt.Errorf("invalid report type: %s", reportType)
+}
+
 // GetMediaLinkFromID returns the media link from the media id
 // Returns an empty MediaLink struct if there is an error
 func GetMediaLinkFromID(mediaID int) MediaLink {
@@ -1503,6 +1553,16 @@ func IsUserAllowedToDeleteMessage(thread ThreadGoForum, user User, messageID int
 	return false
 }
 
+// IsUserAllowedToBanUserInThread checks if the user is allowed to ban a user in the thread
+// Returns true if the user is allowed to ban a user and false otherwise
+// A user is allowed to ban a user if he is the owner or an admin of the thread
+func IsUserAllowedToBanUserInThread(thread ThreadGoForum, user User) bool {
+	if GetThreadMemberRightsLevel(thread, user) > 1 {
+		return true
+	}
+	return false
+}
+
 // AddMessageInThread adds a message to the thread
 // Returns an error if there is one
 func AddMessageInThread(thread ThreadGoForum, title string, content string, user User, mediaLinksID ...int) (int, error) {
@@ -1703,7 +1763,7 @@ func IsUserAllowedToDeleteComment(thread ThreadGoForum, user User, commentID int
 
 // AddCommentToPost adds a comment to the post
 // Returns the comment id and an error if there is one
-func AddCommentToPost(messageID int, user User, content string) (int, error) {
+func AddCommentToPost(user User, messageID int, content string) (int, error) {
 	insertComment := "INSERT INTO ThreadComments (message_id, user_id, comment_content) VALUES (?, ?, ?, ?)"
 	res, err := db.Exec(insertComment, messageID, user.UserID, content)
 	if err != nil {
@@ -1793,7 +1853,7 @@ func MessageExistsInThread(thread ThreadGoForum, messageID int) bool {
 // HasUserAlreadyVotedOnMessage checks if the user has already voted for the message
 // Returns 0 if the user has not voted, 1 if the user has upvoted and -1 if the user has downvoted
 func HasUserAlreadyVotedOnMessage(user User, messageID int) int {
-	checkIfUserVoted := "SELECT is_upvote FROM ThreadMessageVotes WHERE user_id = ? AND message_id = ?"
+	checkIfUserVoted := "SELECT is_upvote FROM ThreadVotes WHERE user_id = ? AND message_id = ?"
 	rows, err := db.Query(checkIfUserVoted, user.UserID, messageID)
 	if err != nil {
 		ErrorPrintf("Error checking if the user has already voted: %v\n", err)
@@ -1824,7 +1884,7 @@ func HasUserAlreadyVotedOnMessage(user User, messageID int) int {
 // HasUserAlreadyVotedOnComment checks if the user has already voted for the message
 // Returns 0 if the user has not voted, 1 if the user has upvoted and -1 if the user has downvoted
 func HasUserAlreadyVotedOnComment(user User, commentID int) int {
-	checkIfUserVoted := "SELECT is_upvote FROM ThreadCommentVotes WHERE user_id = ? AND comment_id = ?"
+	checkIfUserVoted := "SELECT is_upvote FROM ThreadVotes WHERE user_id = ? AND comment_id = ?"
 	rows, err := db.Query(checkIfUserVoted, user.UserID, commentID)
 	if err != nil {
 		ErrorPrintf("Error checking if the user has already voted: %v\n", err)
@@ -1852,7 +1912,19 @@ func HasUserAlreadyVotedOnComment(user User, commentID int) int {
 	return 0
 }
 
-// GetMessagesFromThread returns the messages from the thread
+// BanUserFromThread bans the user from the thread
+// Returns an error if there is one
+func BanUserFromThread(thread ThreadGoForum, user User) error {
+	banUser := "UPDATE ThreadGoForumMembers SET rights_level = -1 WHERE thread_id = ? AND user_id = ?"
+	_, err := db.Exec(banUser, thread.ThreadID, user.UserID)
+	if err != nil {
+		ErrorPrintf("Error banning the user from the thread: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// GetMessageByID returns the messages from the thread
 // Returns a slice of messages and an error if there is one
 // The messages are ordered by the given order (from the OrderingList)
 // The offset is used to paginate the messages
@@ -2220,6 +2292,27 @@ func GetCommentsFromMessageWithPOV(messageID int, offset int, user User) ([]Form
 	return comments, nil
 }
 
+// CommentExistsOnMessage checks if the comment exists on the message
+// Returns true if the comment exists and false otherwise
+func CommentExistsOnMessage(messageID int, commentID int) bool {
+	checkIfCommentExists := "SELECT comment_id FROM ThreadComments WHERE message_id = ? AND comment_id = ?"
+	rows, err := db.Query(checkIfCommentExists, messageID, commentID)
+	if err != nil {
+		ErrorPrintf("Error checking if the comment exists on the message: %v\n", err)
+		return false
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		return true
+	}
+	return false
+}
+
 // GetUserRankInThread returns the rights_level of the user in the thread
 // ( 0 = member, 1 = moderator, 2 = admin, 3 = owner, -1 = banned )
 // Returns the rights_level of the user in the thread
@@ -2313,8 +2406,10 @@ func GetUserThreads(user User) []ThreadGoForum {
 
 // ThreadMessageAddVote adds a vote to the message
 // Returns an error if there is one
+// if voteType is true, it means the user upvoted the message
+// if voteType is false, it means the user downvoted the message
 func ThreadMessageAddVote(messageID int, userID int, voteType bool) error {
-	addVote := "INSERT INTO ThreadMessageVotes (message_id, user_id, is_upvote) VALUES (?, ?, ?)"
+	addVote := "INSERT INTO ThreadVotes (message_id, user_id, is_upvote) VALUES (?, ?, ?)"
 	_, err := db.Exec(addVote, messageID, userID, voteType)
 	if err != nil {
 		ErrorPrintf("Error adding the vote to the message: %v\n", err)
@@ -2338,7 +2433,7 @@ func ThreadMessageDownVote(messageID int, userID int) error {
 // ThreadMessageRemoveVote removes the vote from the message
 // Returns an error if there is one
 func ThreadMessageRemoveVote(messageID int, userID int) error {
-	removeVote := "DELETE FROM ThreadMessageVotes WHERE message_id = ? AND user_id = ?"
+	removeVote := "DELETE FROM ThreadVotes WHERE message_id = ? AND user_id = ?"
 	_, err := db.Exec(removeVote, messageID, userID)
 	if err != nil {
 		ErrorPrintf("Error removing the vote from the message: %v\n", err)
@@ -2350,13 +2445,62 @@ func ThreadMessageRemoveVote(messageID int, userID int) error {
 // ThreadMessageUpdateVote updates the vote of the message
 // Returns an error if there is one
 // It updates the vote of the message to the new vote
-// if voteType is true, it means the user upvoted the message
-// if voteType is false, it means the user downvoted the message
 func ThreadMessageUpdateVote(messageID int, userID int, voteType bool) error {
-	updateVote := "UPDATE ThreadMessageVotes SET is_upvote = ? WHERE message_id = ? AND user_id = ?"
+	updateVote := "UPDATE ThreadVotes SET is_upvote = ? WHERE message_id = ? AND user_id = ?"
 	_, err := db.Exec(updateVote, voteType, messageID, userID)
 	if err != nil {
 		ErrorPrintf("Error updating the vote of the message: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// MessageCommentVote adds a vote to the comment
+// Returns an error if there is one
+// if voteType is true, it means the user upvoted the comment
+// if voteType is false, it means the user downvoted the comment
+func MessageCommentVote(commentID int, userID int, voteType bool) error {
+	addVote := "INSERT INTO ThreadVotes (comment_id, user_id, is_upvote) VALUES (?, ?, ?)"
+	_, err := db.Exec(addVote, commentID, userID, voteType)
+	if err != nil {
+		ErrorPrintf("Error adding the vote to the comment: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// MessageCommentUpVote adds a vote to the comment
+// Returns an error if there is one
+func MessageCommentUpVote(commentID int, userID int) error {
+	return MessageCommentVote(commentID, userID, true)
+}
+
+// MessageCommentDownVote adds a downvote to the comment
+// Returns an error if there is one
+func MessageCommentDownVote(commentID int, userID int) error {
+	return MessageCommentVote(commentID, userID, false)
+}
+
+// MessageCommentRemoveVote removes the vote from the comment
+// Returns an error if there is one
+func MessageCommentRemoveVote(commentID int, userID int) error {
+	removeVote := "DELETE FROM ThreadVotes WHERE comment_id = ? AND user_id = ?"
+	_, err := db.Exec(removeVote, commentID, userID)
+	if err != nil {
+		ErrorPrintf("Error removing the vote from the comment: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// MessageCommentUpdateVote updates the vote of the comment
+// Returns an error if there is one
+// It updates the vote of the comment to the new vote
+func MessageCommentUpdateVote(commentID int, userID int, voteType bool) error {
+	updateVote := "UPDATE ThreadVotes SET is_upvote = ? WHERE comment_id = ? AND user_id = ?"
+	_, err := db.Exec(updateVote, voteType, commentID, userID)
+	if err != nil {
+		ErrorPrintf("Error updating the vote of the comment: %v\n", err)
 		return err
 	}
 	return nil
@@ -2531,6 +2675,113 @@ func GetMessageTags(messageID int) ([]ThreadTag, error) {
 	return tags, nil
 }
 
+// SetReportAsResolved sets the report as resolved
+// Returns an error if there is one
+func SetReportAsResolved(reportID int) error {
+	setReportAsResolved := "UPDATE Reports SET is_resolved = 1 WHERE report_id = ?"
+	_, err := db.Exec(setReportAsResolved, reportID)
+	if err != nil {
+		ErrorPrintf("Error setting the report as resolved: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// AddReportedMessage adds the reported message to the database
+// Returns an error if there is one
+func AddReportedMessage(user User, messageID int, reportType ReportType, content string) error {
+	addReport := "INSERT INTO Reports (user_id, message_id, report_type, report_content) VALUES (?, ?, ?, ?)"
+	_, err := db.Exec(addReport, messageID, user.UserID, string(reportType), content)
+	if err != nil {
+		ErrorPrintf("Error adding the reported message to the database: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// AddReportedComment adds the reported comment to the database
+// Returns an error if there is one
+func AddReportedComment(user User, commentID int, reportType ReportType, content string) error {
+	addReport := "INSERT INTO Reports (user_id, comment_id, report_type, report_content) VALUES (?, ?, ?, ?)"
+	_, err := db.Exec(addReport, commentID, user.UserID, string(reportType), content)
+	if err != nil {
+		ErrorPrintf("Error adding the reported comment to the database: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// GetReportedContentInThread returns the reported messages and comments in the thread
+// Returns a slice of ReportedContent and an error if there is one
+func GetReportedContentInThread(thread ThreadGoForum) ([]ReportedContent, error) {
+	getReports := "SELECT * FROM Reports WHERE thread_id = ?"
+	rows, err := db.Query(getReports, thread.ThreadID)
+	if err != nil {
+		ErrorPrintf("Error getting the reported content from the database: %v\n", err)
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	var reports []ReportedContent
+	var messageID, commentID int
+	for rows.Next() {
+		var report ReportedContent
+		err := rows.Scan(&report.ReportID, &report.UserID, &messageID, &commentID, &report.ReportType, &report.ReportContent)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetReportedContent: %v\n", err)
+			return nil, err
+		}
+		// Fill the remaining fields of the report
+		if messageID != 0 {
+			report.ReportID = messageID
+			report.IsAPostAndNotAComment = true
+		} else if commentID != 0 {
+			report.ReportID = commentID
+			report.IsAPostAndNotAComment = false
+		} else {
+			ErrorPrintf("Error: message_id and comment_id are both 0 in GetReportedContent\n")
+			continue
+		}
+		reports = append(reports, report)
+	}
+	return reports, nil
+}
+
+// RemoveReportedContent removes the reported content from the database
+// Returns an error if there is one
+func RemoveReportedContent(reportID int) error {
+	removeReport := "DELETE FROM Reports WHERE report_id = ?"
+	_, err := db.Exec(removeReport, reportID)
+	if err != nil {
+		ErrorPrintf("Error removing the reported content from the database: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+func ReportExistsInThread(thread ThreadGoForum, reportID int) bool {
+	getReport := "SELECT report_id FROM Reports WHERE thread_id = ? AND report_id = ?"
+	rows, err := db.Query(getReport, thread.ThreadID, reportID)
+	if err != nil {
+		ErrorPrintf("Error checking if the report exists in the thread: %v\n", err)
+		return false
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		return true
+	}
+	return false
+}
+
 // InitDatabase initialises the database.
 // It creates the tables if they do not exist.
 func InitDatabase() {
@@ -2673,7 +2924,7 @@ func InitDatabase() {
 
 	// The 'ThreadMessages' table represents the messages that are sent in the threads
 	// The 'ThreadMessageMediaLinks' table represents the media links that are shared in the messages
-	// The 'ThreadMessageVotes' table represents the votes that are sent in the messages
+	// The 'ThreadVotes' table represents the votes that are sent in the messages
 	// The 'ThreadMessageTags' table represents the tags that are sent in the messages
 	ThreadMessagesTableSQL := `
 		CREATE TABLE IF NOT EXISTS ThreadMessages (
@@ -2687,6 +2938,16 @@ func InitDatabase() {
 		    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE, 
 		    FOREIGN KEY (thread_id) REFERENCES ThreadGoForum(thread_id) ON DELETE CASCADE
 		);
+		CREATE TABLE IF NOT EXISTS ThreadComments (
+			comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			message_id INTEGER NOT NULL,
+			user_id INTEGER NOT NULL,
+			comment_content TEXT NOT NULL,
+			was_edited BOOLEAN DEFAULT FALSE NOT NULL,
+			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id) ON DELETE CASCADE,
+			FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+		);
 		CREATE TABLE IF NOT EXISTS ThreadMessageMediaLinks (
 		    message_id INTEGER NOT NULL,
 		    media_id INTEGER NOT NULL,
@@ -2694,13 +2955,15 @@ func InitDatabase() {
 		    FOREIGN KEY (media_id) REFERENCES MediaLink(media_id) ON DELETE CASCADE,
 		    PRIMARY KEY (message_id, media_id)
 		);
-		CREATE TABLE IF NOT EXISTS ThreadMessageVotes (
-		    message_id INTEGER NOT NULL,
+		CREATE TABLE IF NOT EXISTS ThreadVotes (
+		    message_id INTEGER,
+		    comment_id INTEGER,
 		    user_id INTEGER NOT NULL,
 		    is_upvote BOOLEAN NOT NULL,
 			FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id) ON DELETE CASCADE,
+		    FOREIGN KEY (comment_id) REFERENCES ThreadComments(comment_id) ON DELETE CASCADE,
 		    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-		    PRIMARY KEY (message_id, user_id)
+		    PRIMARY KEY (message_id, comment_id, user_id)
 		);
 		CREATE TABLE IF NOT EXISTS ThreadMessageTags (
 		    message_id INTEGER NOT NULL,
@@ -2712,7 +2975,29 @@ func InitDatabase() {
 		`
 	_, err = db.Exec(ThreadMessagesTableSQL)
 	if err != nil {
-		ErrorPrintf("Error creating the ThreadMessage tables (ThreadMessages / ThreadMessageMediaLinks / ThreadMessageVotes / ThreadMessageTags): %v\n", err)
+		ErrorPrintf("Error creating the ThreadMessage tables (ThreadMessages / ThreadMessageMediaLinks / ThreadVotes / ThreadMessageTags): %v\n", err)
+		return
+	}
+
+	// The 'Reports' table represents the reports about a messages or a comment
+	// The 'report_type' column is used to determine the type of the report (e.g. spam, harassment, etc...)
+	// The 'report_content' column is used to determine the additional content given by the report owner (e.g. information about the report)
+	ReportsTableSQL := `
+		CREATE TABLE IF NOT EXISTS Reports (
+		    report_id INTEGER PRIMARY KEY AUTOINCREMENT,
+		    user_id INTEGER NOT NULL,
+		    message_id INTEGER,
+		    comment_id INTEGER,
+		    report_type TEXT NOT NULL,
+		    report_content TEXT NOT NULL,
+		    is_resolved BOOLEAN DEFAULT FALSE NOT NULL,
+		    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+		    FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id) ON DELETE CASCADE,
+		    FOREIGN KEY (comment_id) REFERENCES ThreadComments(comment_id) ON DELETE CASCADE
+		);`
+	_, err = db.Exec(ReportsTableSQL)
+	if err != nil {
+		ErrorPrintf("Error creating the Reports table: %v\n", err)
 		return
 	}
 
@@ -2739,40 +3024,13 @@ func InitDatabase() {
 				message_id,
 				SUM(CASE WHEN is_upvote = 1 THEN 1 ELSE 0 END) AS upvotes,
 				SUM(CASE WHEN is_upvote = 0 THEN 1 ELSE 0 END) AS downvotes
-			FROM ThreadMessageVotes
+			FROM ThreadVotes
 			GROUP BY message_id
 		) v ON tm.message_id = v.message_id;
 		`
 	_, err = db.Exec(ViewThreadMessageWithLikesTableSQL)
 	if err != nil {
 		ErrorPrintf("Error creating ViewThreadMessagesWithVotes view: %v\n", err)
-		return
-	}
-
-	// The 'ThreadComments' table represents the comments that are sent in the messages
-	// The 'ThreadCommentVotes' table represents the votes that are sent in the comments
-	ThreadCommentsTableSQL := `
-		CREATE TABLE IF NOT EXISTS ThreadComments (
-			comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-			message_id INTEGER NOT NULL,
-			user_id INTEGER NOT NULL,
-			comment_content TEXT NOT NULL,
-			was_edited BOOLEAN DEFAULT FALSE NOT NULL,
-			creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id) ON DELETE CASCADE,
-			FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
-		);
-		CREATE TABLE IF NOT EXISTS ThreadCommentVotes (
-		    comment_id INTEGER NOT NULL,
-		    user_id INTEGER NOT NULL,
-		    is_upvote BOOLEAN NOT NULL,
-		    FOREIGN KEY (comment_id) REFERENCES ThreadComments(comment_id) ON DELETE CASCADE,
-		    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-		    PRIMARY KEY (comment_id, user_id)
-		);`
-	_, err = db.Exec(ThreadCommentsTableSQL)
-	if err != nil {
-		ErrorPrintf("Error creating ThreadComments or ThreadCommentVotes table: %v\n", err)
 		return
 	}
 
@@ -2797,7 +3055,7 @@ func InitDatabase() {
 				comment_id,
 				SUM(CASE WHEN is_upvote = 1 THEN 1 ELSE 0 END) AS upvotes,
 				SUM(CASE WHEN is_upvote = 0 THEN 1 ELSE 0 END) AS downvotes
-			FROM ThreadCommentVotes
+			FROM ThreadVotes
 			GROUP BY comment_id
 		) v ON tc.comment_id = v.comment_id;
 		`

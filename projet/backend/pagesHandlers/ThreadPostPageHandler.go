@@ -35,14 +35,14 @@ func ThreadPostPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if the post ID is empty or does not exist
+	// Check if the post MessageID is empty or does not exist
 	if postID == "" {
 		ErrorPage404(w, r)
 		return
 	}
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
-		f.ErrorPrintf("Error converting post ID \"%s\" to int: %s\n", postID, err)
+		f.ErrorPrintf("Error converting post MessageID \"%s\" to int: %s\n", postID, err)
 		ErrorPage404(w, r)
 		return
 	}

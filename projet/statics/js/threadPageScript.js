@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const loadMorePostsButton = document.getElementById("load-more-posts-button");
 
     const threadName = getCurrentThreadNameOrPostID()
+    let userIsAuthenticated = document.getElementById("isAuthenticated").textContent === "true";
     let offset= 0;
     let hasReachedEnd = false;
     let orderSelect = document.getElementById("order")
@@ -46,46 +47,54 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function updateUpvote(currentVoteState, currentVoteCount, upvoteImg, downvoteImg) {
+    function updateVoteVisual(currentVoteState, upvoteImg, downvoteImg) {
+        let state = parseInt(currentVoteState);
+        if (state === 1){
+            upvoteImg.src = `/img/upvote.png`
+            downvoteImg.src = `/img/downvote_empty.png`
+        } else if(state === 0){
+            upvoteImg.src = `/img/upvote_empty.png`
+            downvoteImg.src = `/img/downvote_empty.png`
+        } else if(state === -1){
+            upvoteImg.src = `/img/upvote_empty.png`
+            downvoteImg.src = `/img/downvote.png`
+        }
+    }
+
+    function updateVoteState(currentVoteState, currentVoteCount, IsUpvoting, upvoteImg, downvoteImg) {
         let state = parseInt(currentVoteState);
         let count = currentVoteCount;
         if (state === 1){
-            state = 0;
-            count -= 1;
-            upvoteImg.src = `/img/upvote_empty.png`
-            downvoteImg.src = `/img/downvote_empty.png`
-        } else if(state === 0 || state === -1){
-            state = 1;
-            count += (currentVoteState === -1 ? 2 : 1);
-            upvoteImg.src = `/img/upvote.png`
-            downvoteImg.src = `/img/downvote_empty.png`
-        } else {
-            state = 422;
+            if (IsUpvoting){ // upvoting when already upvoted so we remove the upvote
+                state = 0;
+                count -= 1;
+            } else { // downvoting when already upvoted so we remove the upvote and add a downvote
+                state = -1;
+                count -= 2;
+            }
+        } else if(state === 0){
+            if (IsUpvoting){ // upvoting when not voted so we add an upvote
+                state = 1;
+                count += 1;
+            } else { // downvoting when not voted so we add a downvote
+                state = -1;
+                count -= 1;
+            }
+        } else if(state === -1){
+            if (IsUpvoting){ // upvoting when already downvoted so we remove the downvote and add an upvote
+                state = 1;
+                count += 2;
+            } else { // downvoting when already downvoted so we remove the downvote
+                state = 0;
+                count += 1;
+            }
         }
+        updateVoteVisual(state, upvoteImg, downvoteImg);
         console.log("Current Vote State: ", state);
         console.log("Current Vote Count: ", count);
         return {state, count};
     }
 
-    function updateDownvote(currentVoteState, currentVoteCount, upvoteImg, downvoteImg) {
-        let state = parseInt(currentVoteState);
-        let count = currentVoteCount;
-        if (state === -1){
-            state = 0;
-            count += 1;
-            upvoteImg.src = `/img/upvote_empty.png`
-            downvoteImg.src = `/img/downvote_empty.png`
-        } else if(state === 0 || state === 1){
-            state = -1;
-            count -= (currentVoteState === 1 ? 2 : 1);
-            upvoteImg.src = `/img/upvote_empty.png`
-            downvoteImg.src = `/img/downvote.png`
-        } else {
-            state = 422;
-        }
-        console.log("Current Vote State: ", state);
-        return {state, count};
-    }
 
     /**
      * Create a new post element.
@@ -127,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         container.classList.add("post-box", "win95-border");
 
-        postHeader.classList.add("post-header");
+        postHeader.classList.add("post-header", "win95-header");
         container.appendChild(postHeader);
 
         postAuthor.classList.add('post-profile');
@@ -196,7 +205,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         medias.classList.add("post-medias");
         if (data.media_links != null) {
-            postContent.classList.add("win95-border-bulge");
+            postContent.classList.add("win95-border-indent");
             for (let i = 0; i < data.media_links.length; i++) {
                 const media = data.media_links[i];
                 var mediaElement = document.createElement("img");
@@ -282,27 +291,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
         upvoteButton.type = "button";
         upvoteButton.classList.add("win95-button", "post-vote-button");
-        upvoteButton.addEventListener("click", function () {
-            const messageId = data.message_id.toString();
-            upvoteMessage(threadName, messageId)
-                .then(r => {
-                    if (r.ok) {
-                        return r.json();
-                    } else {
-                        throw new Error("Error while upvoting message");
-                    }
-                })
-                .then(data => {
-                    console.log("Message upvoted successfully", data);
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                });
-            const {state, count} = updateUpvote(currentVoteState, currentVoteCount, upvoteImg, downvoteImg);
-            currentVoteState = state;
-            currentVoteCount = count;
-            vote.innerText = currentVoteCount;
-        });
+        if (userIsAuthenticated) {
+            upvoteButton.addEventListener("click", function () {
+                const messageId = data.message_id.toString();
+                upvoteMessage(threadName, messageId)
+                    .then(r => {
+                        if (r.ok) {
+                            return r.json();
+                        } else {
+                            throw new Error("Error while upvoting message");
+                        }
+                    })
+                    .then(data => {
+                        console.log("Message upvoted successfully", data);
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+                const {state, count} = updateVoteState(currentVoteState, currentVoteCount, true, upvoteImg, downvoteImg);
+                currentVoteState = state;
+                currentVoteCount = count;
+                vote.innerText = currentVoteCount;
+            });
+        } else {
+            upvoteButton.disabled = true;
+        }
         voteField.appendChild(upvoteButton);
 
         upvoteImg.src = `/img/upvote_empty.png`;
@@ -317,28 +330,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
         downvoteButton.type = "button";
         downvoteButton.classList.add("win95-button", "post-vote-button");
-        downvoteButton.addEventListener("click", function () {
-            const messageId = data.message_id.toString();
-            downvoteMessage(threadName, messageId)
-                .then(r => {
-                    if (r.ok) {
-                        return r.json();
-                    } else {
-                        throw new Error("Error while downvoting message");
-                    }
-                })
-                .then(data => {
-                    console.log("Message downvoted successfully", data);
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                });
-            const {state, count} = updateDownvote(currentVoteState, currentVoteCount, upvoteImg, downvoteImg);
-            currentVoteState = state;
-            currentVoteCount = count;
-            vote.innerText = currentVoteCount;
-        });
+        if (userIsAuthenticated) {
+            downvoteButton.addEventListener("click", function () {
+                const messageId = data.message_id.toString();
+                downvoteMessage(threadName, messageId)
+                    .then(r => {
+                        if (r.ok) {
+                            return r.json();
+                        } else {
+                            throw new Error("Error while downvoting message");
+                        }
+                    })
+                    .then(data => {
+                        console.log("Message downvoted successfully", data);
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+                const {state, count} = updateVoteState(currentVoteState, currentVoteCount, false, upvoteImg, downvoteImg);
+                currentVoteState = state;
+                currentVoteCount = count;
+                vote.innerText = currentVoteCount;
+            });
+        } else {
+            downvoteButton.disabled = true;
+        }
         voteField.appendChild(downvoteButton);
+
+        // Make sure to update the vote visual when the post is created so that if the user is already upvoting or downvoting the post, the visual is correct
+        updateVoteVisual(currentVoteState, upvoteImg, downvoteImg);
 
         downvoteImg.src = `/img/downvote_empty.png`;
         downvoteImg.alt = "Downvote image";
