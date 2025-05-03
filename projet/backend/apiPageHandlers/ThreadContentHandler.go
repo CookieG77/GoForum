@@ -27,17 +27,50 @@ type jsonUpdateMessageMedia struct {
 	MediaID int `json:"mediaId,string"`
 }
 type jsonMessageDesignator struct {
-	ID int `json:"messageId,string"`
+	MessageID int `json:"messageId,string"`
+}
+
+type jsonComment struct {
+	MessageID int    `json:"messageId,string"`
+	Content   string `json:"content"`
+}
+
+type jsonUpdateComment struct {
+	CommentID int    `json:"commentId,string"`
+	MessageID int    `json:"messageId,string"`
+	Content   string `json:"content"`
+}
+
+type jsonCommentDesignator struct {
+	CommentID int `json:"commentId,string"`
+	MessageID int `json:"messageId,string"`
 }
 
 // IntSlice is a custom type for handling string-to-int conversion
 type IntSlice []int
 
+// jsonReport is a custom type used to handle ajax calls that create a report
+type jsonReport struct {
+	ID         int    `json:"contentToReportID,string"`
+	ReportType string `json:"reportType"`
+	Content    string `json:"content"`
+}
+
+// jsonReportDesignator is a custom type used to handle ajax calls that target a report
+type jsonReportDesignator struct {
+	ReportID int `json:"reportId,string"`
+}
+
+// jsonUserDesignator is a custom type used to handle ajax calls that target a user
+type jsonUserDesignator struct {
+	Username string `json:"username"`
+}
+
 // ThreadContentHandler handles the thread message requests from ajax calls
-// Its path is /api/thread/{thread}/m/{action}?id={id}
+// Its path is /api/thread/{thread}/{action}?id={id}
 // The "thread" is the name of the thread
-// The "action" can be "sendMessage", "deleteMessage", "editMessage", "reportMessage", "upvoteMessage", "downvoteMessage"
-// The "id" is the id of the message to edit/delete/report
+// The "action" can be "sendMessage", "deleteMessage", "editMessage", "reportMessage", "upvoteMessage", "downvoteMessage", and other actions...
+// The "id" is the id of the message/comment to edit/delete/report
 func ThreadContentHandler(w http.ResponseWriter, r *http.Request) {
 	f.DebugPrintln("ThreadContentHandler called")
 
@@ -73,7 +106,9 @@ func ThreadContentHandler(w http.ResponseWriter, r *http.Request) {
 		action == "editComment" ||
 		action == "reportComment" ||
 		action == "upvoteComment" ||
-		action == "downvoteComment") {
+		action == "downvoteComment" ||
+		action == "banUser" ||
+		action == "setReportToResolved") {
 
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
 		http.Error(w, "Action is empty or does not exist !", http.StatusNotFound)
@@ -135,22 +170,28 @@ func ThreadContentHandler(w http.ResponseWriter, r *http.Request) {
 		leaveThread(w, r, thread, user)
 		return
 	case "sendComment":
-		// TODO : Implement the sendComment action
+		sendComment(w, r, thread, user)
 		return
 	case "deleteComment":
-		// TODO : Implement the deleteComment action
+		deleteComment(w, r, thread, user)
 		return
 	case "editComment":
-		// TODO : Implement the editComment action
+		editComment(w, r, thread, user)
 		return
 	case "reportComment":
-		// TODO : Implement the reportComment action
+		reportComment(w, r, thread, user)
 		return
 	case "upvoteComment":
-		// TODO : Implement the upvoteComment action
+		upvoteComment(w, r, thread, user)
 		return
 	case "downvoteComment":
-		// TODO : Implement the downvoteComment action
+		downvoteComment(w, r, thread, user)
+		return
+	case "banUser":
+		banUser(w, r, thread, user)
+		return
+	case "setReportToResolved":
+		setReportToResolved(w, r, thread, user)
 		return
 	default:
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
@@ -224,8 +265,8 @@ func sendMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 	if len(msg.Medias) > 0 {
 		for _, mediaID := range msg.Medias {
 			if !f.NewMediaWithIdIsValid(mediaID) {
-				f.DebugPrintf("Media ID %d is not valid\n", mediaID)
-				http.Error(w, "Media ID is not valid", http.StatusBadRequest)
+				f.DebugPrintf("Media MessageID %d is not valid\n", mediaID)
+				http.Error(w, "Media MessageID is not valid", http.StatusBadRequest)
 				return
 			}
 		}
@@ -241,15 +282,15 @@ func sendMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 		http.Error(w, "Error while sending the message", http.StatusInternalServerError)
 		return
 	}
-	f.DebugPrintf("Message sent with ID: %d\n", messageID)
+	f.DebugPrintf("Message sent with MessageID: %d\n", messageID)
 
 	// Add the tags to the message
 	if len(msg.Tags) > 0 {
 		for _, tagID := range msg.Tags {
 			isCorrect, err := f.IsTagIDAssociatedWithThread(thread, tagID)
 			if !isCorrect {
-				f.DebugPrintf("Tag ID %d is not associated with thread %s\n", tagID, thread.ThreadID)
-				http.Error(w, "Tag ID is not associated with thread", http.StatusBadRequest)
+				f.DebugPrintf("Tag MessageID %d is not associated with thread %s\n", tagID, thread.ThreadID)
+				http.Error(w, "Tag MessageID is not associated with thread", http.StatusBadRequest)
 			} else {
 				err = f.AddTagToMessage(messageID, tagID)
 				if err != nil {
@@ -259,12 +300,12 @@ func sendMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 				}
 			}
 		}
-		f.DebugPrintf("Tags added to message with ID: %d\n", messageID)
+		f.DebugPrintf("Tags added to message with MessageID: %d\n", messageID)
 	} else {
-		f.DebugPrintf("No tags to add to the message with ID: %d\n", messageID)
+		f.DebugPrintf("No tags to add to the message with MessageID: %d\n", messageID)
 	}
 
-	// Return the response with the message ID
+	// Return the response with the message MessageID
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success", "messageId":` + strconv.Itoa(messageID) + `}`))
 	if err != nil {
@@ -297,10 +338,10 @@ func deleteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 		return
 	}
 
-	f.DebugPrintf("Message with ID \"%d\" deleted by %s\n", msgID, user.Username)
+	f.DebugPrintf("Message with MessageID \"%d\" deleted by %s\n", msgID, user.Username)
 
 	// Return the response
-	// Return the message ID
+	// Return the message MessageID
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success"}`))
 	if err != nil {
@@ -336,31 +377,31 @@ func removeMedia(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 		return
 	}
 
-	// Check if the message ID is empty
+	// Check if the message MessageID is empty
 	if msg.ID < 1 {
-		f.DebugPrintf("Message ID is empty\n")
-		http.Error(w, "Message ID is empty", http.StatusBadRequest)
+		f.DebugPrintf("Message MessageID is empty\n")
+		http.Error(w, "Message MessageID is empty", http.StatusBadRequest)
 		return
 	}
 
-	// Check if the message ID is valid
+	// Check if the message MessageID is valid
 	if !f.MessageExistsInThread(thread, msg.ID) {
-		f.DebugPrintf("Message ID is not valid\n")
-		http.Error(w, "Message ID is not valid", http.StatusBadRequest)
+		f.DebugPrintf("Message MessageID is not valid\n")
+		http.Error(w, "Message MessageID is not valid", http.StatusBadRequest)
 		return
 	}
 
-	// Check if the media ID is empty
+	// Check if the media MessageID is empty
 	if msg.MediaID < 1 {
-		f.DebugPrintf("Media ID is empty\n")
-		http.Error(w, "Media ID is empty", http.StatusBadRequest)
+		f.DebugPrintf("Media MessageID is empty\n")
+		http.Error(w, "Media MessageID is empty", http.StatusBadRequest)
 		return
 	}
 
-	// Check if the media ID is valid
+	// Check if the media MessageID is valid
 	if !f.MediaExistsInMessage(msg.ID, msg.MediaID) {
-		f.DebugPrintf("Media ID is not valid\n")
-		http.Error(w, "Media ID is not valid", http.StatusBadRequest)
+		f.DebugPrintf("Media MessageID is not valid\n")
+		http.Error(w, "Media MessageID is not valid", http.StatusBadRequest)
 		return
 	}
 
@@ -378,7 +419,7 @@ func removeMedia(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 		http.Error(w, "Error while removing the media", http.StatusInternalServerError)
 		return
 	}
-	f.DebugPrintf("Media with ID \"%d\" removed from message with ID \"%d\" by %s\n", msg.MediaID, msg.ID, user.Username)
+	f.DebugPrintf("Media with MessageID \"%d\" removed from message with MessageID \"%d\" by %s\n", msg.MediaID, msg.ID, user.Username)
 	// Return the response
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success"}`))
@@ -443,17 +484,17 @@ func editMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 		return
 	}
 
-	// Check if the message ID is empty
+	// Check if the message MessageID is empty
 	if msg.ID < 1 {
-		f.DebugPrintf("Message ID is empty\n")
-		http.Error(w, "Message ID is empty", http.StatusBadRequest)
+		f.DebugPrintf("Message MessageID is empty\n")
+		http.Error(w, "Message MessageID is empty", http.StatusBadRequest)
 		return
 	}
 
-	// Check if the message ID is valid
+	// Check if the message MessageID is valid
 	if !f.MessageExistsInThread(thread, msg.ID) {
-		f.DebugPrintf("Message ID is not valid\n")
-		http.Error(w, "Message ID is not valid", http.StatusBadRequest)
+		f.DebugPrintf("Message MessageID is not valid\n")
+		http.Error(w, "Message MessageID is not valid", http.StatusBadRequest)
 		return
 	}
 
@@ -472,8 +513,8 @@ func editMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 		http.Error(w, "Error while sending the message", http.StatusInternalServerError)
 		return
 	}
-	f.DebugPrintf("Message with ID \"%d\" was edited by %s\n", msg.ID, user.Username)
-	// Return the response with the message ID
+	f.DebugPrintf("Message with MessageID \"%d\" was edited by %s\n", msg.ID, user.Username)
+	// Return the response with the message MessageID
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success"}`))
 	if err != nil {
@@ -486,9 +527,98 @@ func editMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 // reportMessage handles the report message action
 // This action is used to report a message
 func reportMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
-	// TODO : Implement the reportMessage action
-	f.DebugPrintf("Report message action not implemented yet\n")
-	http.Error(w, "Report message action not implemented yet", http.StatusNotImplemented)
+	// Check if the user is allowed to report the message
+	if !f.IsUserAllowedToSendMessageInThread(thread, user) { // Same check as sendMessage
+		f.DebugPrintf("User is not allowed to report this message\n")
+		http.Error(w, "User is not allowed to report this message", http.StatusForbidden)
+		return
+	}
+
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	// Getting the form values
+	var message jsonReport
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&message); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the message MessageID is empty
+	if message.ID < 1 {
+		f.DebugPrintf("Message MessageID is empty\n")
+		http.Error(w, "Message MessageID is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the message MessageID is valid
+	if !f.MessageExistsInThread(thread, message.ID) {
+		f.DebugPrintf("Message MessageID is not valid\n")
+		http.Error(w, "Message MessageID is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the reason is empty
+	if message.ReportType == "" {
+		f.DebugPrintf("Report reason is empty\n")
+		http.Error(w, "Report reason is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the reason is valid
+	if !f.IsAReportType(message.ReportType) {
+		f.DebugPrintf("Report reason is not valid\n")
+		http.Error(w, "Report reason is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment is empty
+	if message.Content == "" {
+		f.DebugPrintf("Report comment is empty\n")
+		http.Error(w, "Report comment is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment is valid
+	if !f.IsMessageContentOrCommentContentValid(message.Content) { // Same check as IsMessageContentOrCommentContentValid
+		f.DebugPrintf("Report comment is not valid\n")
+		http.Error(w, "Report comment is not valid", http.StatusBadRequest)
+		return
+	}
+
+	reportType, _ := f.GetReportTypeFromString(message.ReportType)
+
+	// Send the report
+	err = f.AddReportedMessage(user, message.ID, reportType, message.Content)
+	if err != nil {
+		f.ErrorPrintf("Error while sending the report: %v\n", err)
+		http.Error(w, "Error while sending the report", http.StatusInternalServerError)
+		return
+	}
+
+	f.DebugPrintf("Message with MessageID \"%d\" was reported by %s\n", message.ID, user.Username)
+
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // upVoteMessage handles the upvote message action
@@ -511,10 +641,7 @@ func upVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 			return
 		}
 		f.DebugPrintf("User %s upvoted message %d\n", user.Username, id)
-		return
-	}
-
-	if vote == 1 { // User has already upvoted the message so we remove the vote
+	} else if vote == 1 { // User has already upvoted the message so we remove the vote
 		err := f.ThreadMessageRemoveVote(id, user.UserID)
 		if err != nil {
 			f.ErrorPrintf("Error while removing the vote: %v\n", err)
@@ -522,10 +649,7 @@ func upVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 			return
 		}
 		f.DebugPrintf("User %s removed his upvote on message %d\n", user.Username, id)
-		return
-	}
-
-	if vote == -1 { // User has already downvoted the message so we change the vote to upvote
+	} else if vote == -1 { // User has already downvoted the message so we change the vote to upvote
 		err := f.ThreadMessageUpdateVote(id, user.UserID, true)
 		if err != nil {
 			f.ErrorPrintf("Error while updating the vote: %v\n", err)
@@ -533,6 +657,17 @@ func upVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 			return
 		}
 		f.DebugPrintf("User %s changed his downvote to upvote on message %d\n", user.Username, id)
+	} else {
+		f.DebugPrintf("User %s has an unknown vote value: %d\n", user.Username, vote)
+		http.Error(w, "Unknown vote value", http.StatusInternalServerError)
+		return
+	}
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
 		return
 	}
 }
@@ -557,10 +692,7 @@ func downVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoFo
 			return
 		}
 		f.DebugPrintf("User %s downvoted message %d\n", user.Username, id)
-		return
-	}
-
-	if vote == -1 { // User has already downvoted the message so we remove the vote
+	} else if vote == -1 { // User has already downvoted the message so we remove the vote
 		err := f.ThreadMessageRemoveVote(id, user.UserID)
 		if err != nil {
 			f.ErrorPrintf("Error while removing the vote: %v\n", err)
@@ -568,10 +700,7 @@ func downVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoFo
 			return
 		}
 		f.DebugPrintf("User %s removed his downvote on message %d\n", user.Username, id)
-		return
-	}
-
-	if vote == 1 { // User has already upvoted the message so we change the vote to downvote
+	} else if vote == 1 { // User has already upvoted the message so we change the vote to downvote
 		err := f.ThreadMessageUpdateVote(id, user.UserID, false)
 		if err != nil {
 			f.ErrorPrintf("Error while updating the vote: %v\n", err)
@@ -579,6 +708,17 @@ func downVoteMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoFo
 			return
 		}
 		f.DebugPrintf("User %s changed his upvote to downvote on message %d\n", user.Username, id)
+	} else {
+		f.DebugPrintf("User %s has an unknown vote value: %d\n", user.Username, vote)
+		http.Error(w, "Unknown vote value", http.StatusInternalServerError)
+		return
+	}
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
 		return
 	}
 }
@@ -648,9 +788,537 @@ func leaveThread(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 	}
 }
 
+// sendComment handles the edit comment action
+// This action is used to send a comment
+func sendComment(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	// Check if the method is POST
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	// Getting the form values
+	var comment jsonComment
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&comment); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment MessageID is empty
+	if comment.MessageID < 1 {
+		f.DebugPrintf("Content MessageID is empty\n")
+		http.Error(w, "Content MessageID is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment MessageID is valid
+	if !f.MessageExistsInThread(thread, comment.MessageID) {
+		f.DebugPrintf("Content MessageID is not valid\n")
+		http.Error(w, "Content MessageID is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment content is empty
+	if comment.Content == "" {
+		f.DebugPrintf("Content content is empty\n")
+		http.Error(w, "Content content is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment content is valid
+	if !f.IsMessageContentOrCommentContentValid(comment.Content) {
+		f.DebugPrintf("Content content is not valid\n")
+		http.Error(w, "Content content is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user is allowed to send a comment
+	if !f.IsUserAllowedToSendMessageInThread(thread, user) {
+		f.DebugPrintf("User is not allowed to send a comment in this thread\n")
+		http.Error(w, "User is not allowed to send a comment in this thread", http.StatusForbidden)
+		return
+	}
+
+	// Send the comment
+	commentID, err := f.AddCommentToPost(user, comment.MessageID, comment.Content)
+	if err != nil {
+		f.ErrorPrintf("Error while sending the comment: %v\n", err)
+		http.Error(w, "Error while sending the comment", http.StatusInternalServerError)
+		return
+	}
+
+	f.DebugPrintf("Content sent with CommentID '%d' on message '%d'\n", commentID, comment.MessageID)
+	// Return the response with the comment CommentID
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(`{"status":"success", "commentId":` + strconv.Itoa(commentID) + `}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+// editComment handles the edit comment action
+// This action is used to edit a comment
+func editComment(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	// Check if the method is POST
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	// Getting the form values
+	var comment jsonUpdateComment
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&comment); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment MessageID is empty
+	if comment.MessageID < 1 {
+		f.DebugPrintf("Content MessageID is empty\n")
+		http.Error(w, "Content MessageID is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment MessageID is valid
+	if !f.MessageExistsInThread(thread, comment.MessageID) {
+		f.DebugPrintf("Content MessageID is not valid\n")
+		http.Error(w, "Content MessageID is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment CommentID is empty
+	if comment.CommentID < 1 {
+		f.DebugPrintf("Content CommentID is empty\n")
+		http.Error(w, "Content CommentID is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment CommentID is valid
+	if !f.CommentExistsOnMessage(comment.MessageID, comment.CommentID) {
+		f.DebugPrintf("Content CommentID is not valid\n")
+		http.Error(w, "Content CommentID is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user is allowed to edit the comment
+	if !f.IsUserAllowedToEditComment(thread, user, comment.CommentID) {
+		f.DebugPrintf("User is not allowed to edit this comment\n")
+		http.Error(w, "User is not allowed to edit this comment", http.StatusForbidden)
+		return
+	}
+
+	// Update the comment
+	err = f.EditCommentFromPost(comment.CommentID, comment.Content)
+	if err != nil {
+		f.ErrorPrintf("Error while updating the comment: %v\n", err)
+		http.Error(w, "Error while updating the comment", http.StatusInternalServerError)
+		return
+	}
+
+	f.DebugPrintf("Content with CommentID \"%d\" was edited by %s\n", comment.CommentID, user.Username)
+
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+// deleteComment handles the delete comment action
+// This action is used to delete a comment
+func deleteComment(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	commentID := _checkCommentApiCallValidity(w, r, thread)
+	if commentID <= 0 {
+		return
+	}
+	// Check if the user is allowed to delete the comment
+	if !f.IsUserAllowedToDeleteComment(thread, user, commentID) {
+		f.DebugPrintf("User is not allowed to delete this comment\n")
+		http.Error(w, "User is not allowed to delete this comment", http.StatusForbidden)
+		return
+	}
+
+	// Delete the comment
+	err := f.RemoveCommentFromPost(commentID)
+	if err != nil {
+		f.ErrorPrintf("Error while deleting the comment: %v\n", err)
+		http.Error(w, "Error while deleting the comment", http.StatusInternalServerError)
+		return
+	}
+}
+
+// reportComment handles the report comment action
+// This action is used to report a comment
+func reportComment(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	// Check if the user is allowed to report the comment
+	if !f.IsUserAllowedToSendMessageInThread(thread, user) { // Same check as sendMessage
+		f.DebugPrintf("User is not allowed to report this comment\n")
+		http.Error(w, "User is not allowed to report this comment", http.StatusForbidden)
+		return
+	}
+
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	// Getting the form values
+	var comment jsonReport
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&comment); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the message MessageID is empty
+	if comment.ID < 1 {
+		f.DebugPrintf("comment CommentID is empty\n")
+		http.Error(w, "comment CommentID is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the message MessageID is valid
+	if !f.MessageExistsInThread(thread, comment.ID) {
+		f.DebugPrintf("comment CommentID is not valid\n")
+		http.Error(w, "comment CommentID is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the reason is empty
+	if comment.ReportType == "" {
+		f.DebugPrintf("Report reason is empty\n")
+		http.Error(w, "Report reason is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the reason is valid
+	if !f.IsAReportType(comment.ReportType) {
+		f.DebugPrintf("Report reason is not valid\n")
+		http.Error(w, "Report reason is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment is empty
+	if comment.Content == "" {
+		f.DebugPrintf("Report comment is empty\n")
+		http.Error(w, "Report comment is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the comment is valid
+	if !f.IsMessageContentOrCommentContentValid(comment.Content) { // Same check as IsMessageContentOrCommentContentValid
+		f.DebugPrintf("Report comment is not valid\n")
+		http.Error(w, "Report comment is not valid", http.StatusBadRequest)
+		return
+	}
+
+	reportType, _ := f.GetReportTypeFromString(comment.ReportType)
+
+	// Send the report
+	err = f.AddReportedComment(user, comment.ID, reportType, comment.Content)
+	if err != nil {
+		f.ErrorPrintf("Error while sending the report: %v\n", err)
+		http.Error(w, "Error while sending the report", http.StatusInternalServerError)
+		return
+	}
+
+	f.DebugPrintf("Message with MessageID \"%d\" was reported by %s\n", comment.ID, user.Username)
+
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+// upvoteComment handles the upvote comment action
+// This action is used to upvote a comment
+func upvoteComment(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	id := _checkCommentApiCallValidity(w, r, thread)
+	if id <= 0 {
+		return
+	}
+
+	// Check if the user has already up/downvoted the comment
+	vote := f.HasUserAlreadyVotedOnComment(user, id)
+
+	if vote == 0 { // User has not voted yet
+		// Add the upvote
+		err := f.MessageCommentUpVote(id, user.UserID)
+		if err != nil {
+			f.ErrorPrintf("Error while upvoting the comment: %v\n", err)
+			http.Error(w, "Error while upvoting the comment", http.StatusInternalServerError)
+			return
+		}
+		f.DebugPrintf("User %s upvoted comment %d\n", user.Username, id)
+	} else if vote == 1 { // User has already upvoted the comment so we remove the vote
+		err := f.MessageCommentRemoveVote(id, user.UserID)
+		if err != nil {
+			f.ErrorPrintf("Error while removing the vote: %v\n", err)
+			http.Error(w, "Error while removing the vote", http.StatusInternalServerError)
+			return
+		}
+		f.DebugPrintf("User %s removed his upvote on comment %d\n", user.Username, id)
+	} else if vote == -1 { // User has already downvoted the comment so we change the vote to upvote
+		err := f.MessageCommentUpdateVote(id, user.UserID, true)
+		if err != nil {
+			f.ErrorPrintf("Error while updating the vote: %v\n", err)
+			http.Error(w, "Error while updating the vote", http.StatusInternalServerError)
+			return
+		}
+		f.DebugPrintf("User %s changed his downvote to upvote on comment %d\n", user.Username, id)
+	} else {
+		f.DebugPrintf("User %s has an unknown vote value: %d\n", user.Username, vote)
+		http.Error(w, "Unknown vote value", http.StatusInternalServerError)
+		return
+	}
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+// downvoteComment handles the downvote comment action
+// This action is used to downvote a comment
+func downvoteComment(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	id := _checkCommentApiCallValidity(w, r, thread)
+	if id <= 0 {
+		return
+	}
+
+	// Check if the user has already up/downvoted the comment
+	vote := f.HasUserAlreadyVotedOnComment(user, id)
+
+	if vote == 0 { // User has not voted yet
+		// Add the downvote
+		err := f.MessageCommentDownVote(id, user.UserID)
+		if err != nil {
+			f.ErrorPrintf("Error while downvoting the comment: %v\n", err)
+			http.Error(w, "Error while downvoting the comment", http.StatusInternalServerError)
+			return
+		}
+		f.DebugPrintf("User %s downvoted comment %d\n", user.Username, id)
+	} else if vote == -1 { // User has already downvoted the comment so we remove the vote
+		err := f.MessageCommentRemoveVote(id, user.UserID)
+		if err != nil {
+			f.ErrorPrintf("Error while removing the vote: %v\n", err)
+			http.Error(w, "Error while removing the vote", http.StatusInternalServerError)
+			return
+		}
+		f.DebugPrintf("User %s removed his downvote on comment %d\n", user.Username, id)
+	} else if vote == 1 { // User has already upvoted the comment so we change the vote to downvote
+		err := f.MessageCommentUpdateVote(id, user.UserID, false)
+		if err != nil {
+			f.ErrorPrintf("Error while updating the vote: %v\n", err)
+			http.Error(w, "Error while updating the vote", http.StatusInternalServerError)
+			return
+		}
+		f.DebugPrintf("User %s changed his upvote to downvote on comment %d\n", user.Username, id)
+	} else {
+		f.DebugPrintf("User %s has an unknown vote value: %d\n", user.Username, vote)
+		http.Error(w, "Unknown vote value", http.StatusInternalServerError)
+		return
+	}
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+// banUser handles the ban user action
+// This action is used to ban a user from the thread
+func banUser(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	// Check if the user is allowed to ban a user
+	if !f.IsUserAllowedToBanUserInThread(thread, user) {
+		f.DebugPrintf("User is not allowed to ban a user in this thread\n")
+		http.Error(w, "User is not allowed to ban a user in this thread", http.StatusForbidden)
+		return
+	}
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	// Getting the form values
+	var msg jsonUserDesignator
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&msg); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user username is empty
+	if msg.Username < "" {
+		f.DebugPrintf("User MessageID is empty\n")
+		http.Error(w, "User MessageID is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user username is valid
+	userToBan, err := f.GetUserFromUsername(msg.Username)
+	if err != nil {
+		f.DebugPrintf("User MessageID is not valid\n")
+		http.Error(w, "User MessageID is not valid", http.StatusBadRequest)
+		return
+	}
+	if (userToBan == f.User{}) {
+		f.DebugPrintf("User MessageID is not valid\n")
+		http.Error(w, "User MessageID is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user is already banned from the thread
+	if f.IsUserBannedFromThread(thread, userToBan) {
+		f.DebugPrintf("User is already banned from the thread\n")
+		http.Error(w, "User is already banned from the thread", http.StatusBadRequest)
+		return
+	}
+
+	// Ban the user
+	err = f.BanUserFromThread(thread, userToBan)
+	if err != nil {
+		f.ErrorPrintf("Error while banning the user: %v\n", err)
+		http.Error(w, "Error while banning the user", http.StatusInternalServerError)
+		return
+	}
+
+	f.DebugPrintf("User %s was banned from thread %s by %s\n", userToBan.Username, thread.ThreadID, user.Username)
+
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func setReportToResolved(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	// Check if the user is allowed to set the report to resolved
+	if !f.IsUserAllowedToBanUserInThread(thread, user) { // Same check as banUser
+		f.DebugPrintf("User is not allowed to set the report to resolved in this thread\n")
+		http.Error(w, "User is not allowed to set the report to resolved in this thread", http.StatusForbidden)
+		return
+	}
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	// Getting the form values
+	var report jsonReportDesignator
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&report); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the report ReportID is empty
+	if report.ReportID < 1 {
+		f.DebugPrintf("Report ReportID is empty\n")
+		http.Error(w, "Report ReportID is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the report ReportID is valid
+	if !f.ReportExistsInThread(thread, report.ReportID) {
+		f.DebugPrintf("Report ReportID is not valid\n")
+		http.Error(w, "Report ReportID is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Set the report to resolved
+	err = f.SetReportAsResolved(report.ReportID)
+	if err != nil {
+		f.ErrorPrintf("Error while setting the report as resolved: %v\n", err)
+		http.Error(w, "Error while setting the report as resolved", http.StatusInternalServerError)
+		return
+	}
+
+	f.DebugPrintf("Report %d was set to resolved by %s\n", report.ReportID, user.Username)
+
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
 // _checkMessageApiCallValidity checks if the message API call is valid
-// It checks if the method is POST, if the form is valid and if the message ID is valid
-// It returns the message ID if valid, -1 if not
+// It checks if the method is POST, if the form is valid and if the message MessageID is valid
+// It returns the message MessageID if valid, -1 if not
 func _checkMessageApiCallValidity(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum) int {
 	if r.Method != "POST" {
 		f.DebugPrintf("Method is not POST\n")
@@ -675,20 +1343,70 @@ func _checkMessageApiCallValidity(w http.ResponseWriter, r *http.Request, thread
 		return -1
 	}
 
-	// Check if the message ID is empty
-	if msg.ID == 0 {
-		f.DebugPrintf("Message ID is empty\n")
-		http.Error(w, "Message ID is empty", http.StatusBadRequest)
+	// Check if the message MessageID is empty
+	if msg.MessageID == 0 {
+		f.DebugPrintf("Message MessageID is empty\n")
+		http.Error(w, "Message MessageID is empty", http.StatusBadRequest)
 		return -1
 	}
 
-	// Check if the message ID is valid
-	if !f.MessageExistsInThread(thread, msg.ID) {
-		f.DebugPrintf("Message ID is not valid\n")
-		http.Error(w, "Message ID is not valid", http.StatusBadRequest)
+	// Check if the message MessageID is valid
+	if !f.MessageExistsInThread(thread, msg.MessageID) {
+		f.DebugPrintf("Message MessageID is not valid\n")
+		http.Error(w, "Message MessageID is not valid", http.StatusBadRequest)
 		return -1
 	}
-	return msg.ID
+	return msg.MessageID
+}
+
+// _checkCommentApiCallValidity checks if the comment API call is valid
+// It checks if the method is POST, if the form is valid and if the comment CommentID and MessageID is valid
+// It returns the comment CommentID if valid, -1 if not
+func _checkCommentApiCallValidity(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum) int {
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return -1
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return -1
+	}
+
+	// Getting the form values
+	var msg jsonCommentDesignator
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&msg); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return -1
+	}
+
+	// Check if the message CommentID is empty
+	if msg.CommentID == 0 {
+		f.DebugPrintf("Message CommentID is empty\n")
+		http.Error(w, "Message CommentID is empty", http.StatusBadRequest)
+		return -1
+	}
+
+	// Check if the message MessageID is empty
+	if msg.MessageID == 0 {
+		f.DebugPrintf("Message MessageID is empty\n")
+		http.Error(w, "Message MessageID is empty", http.StatusBadRequest)
+		return -1
+	}
+
+	// Check if the message MessageID is valid
+	if !f.CommentExistsOnMessage(msg.MessageID, msg.CommentID) {
+		f.DebugPrintf("Content ID or Message ID is not valid\n")
+		http.Error(w, "Content ID or Message ID is not valid", http.StatusBadRequest)
+		return -1
+	}
+	return msg.CommentID
 }
 
 // UnmarshalJSON implement the json.Unmarshaler interface for IntSlice

@@ -107,17 +107,20 @@ function editMessage(threadName, messageId, newMessageTitle, newMessageContent) 
  * @description But a success response means that the message has been reported.
  * @param threadName {string} - The name of the thread to report the message in.
  * @param messageId {string} - The ID of the message to report.
+ * @param reportReason {string} - The reason for reporting the message.
+ * @param reportDescription {string} - The description of the report.
  * @returns {Promise<Response>} - The response from the server.
  */
-function reportMessage(threadName, messageId) {
-    // TODO : Not implemented yet in the backend
+function reportMessage(threadName, messageId, reportReason, reportDescription) {
     return fetch( `/api/thread/${threadName}/reportMessage`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            messageId: messageId
+            contentToReportID: messageId,
+            reportType: reportReason,
+            content: reportDescription
         })
     });
 }
@@ -167,8 +170,8 @@ function downvoteMessage(threadName, messageId) {
  * @description This function sends a request to join a thread. It does not handle the response.
  * @description But a success response means that the thread has been joined.
  * @description A BadRequest response means that the user already joined the thread.
- * @param threadName
- * @returns {Promise<Response>}
+ * @param threadName {string} - The name of the thread to join.
+ * @returns {Promise<Response>} - The response from the server.
  */
 function joinThread(threadName) {
     return fetch( `/api/thread/${threadName}/joinThread`, {
@@ -184,8 +187,8 @@ function joinThread(threadName) {
  * @description This function sends a request to leave a thread. It does not handle the response.
  * @description But a success response means that the thread has been left.
  * @description A BadRequest response means that the user is already not in the thread.
- * @param threadName
- * @returns {Promise<Response>}
+ * @param threadName {string} - The name of the thread to leave.
+ * @returns {Promise<Response>} - The response from the server.
  */
 function leaveThread(threadName) {
     return fetch( `/api/thread/${threadName}/leaveThread`, {
@@ -203,7 +206,7 @@ function leaveThread(threadName) {
  * @param threadName {string} - The name of the thread to get the messages from.
  * @param offset {number} - The offset to start getting the messages from.
  * @param order {string} - The order to get the messages in.
- * @returns {Promise<Response>}
+ * @returns {Promise<Response>} - The response from the server.
  */
 function getMessage(threadName, offset, order) {
     return fetch( `/api/messages?thread=${threadName}&offset=${offset}&order=${order}`, {
@@ -214,3 +217,167 @@ function getMessage(threadName, offset, order) {
     });
 }
 
+/**
+ * Send a comment to the message with the given id in the given thread.
+ * @description This function sends a request to send a comment to a message in the current thread. It does not handle the response.
+ * @param threadName {string} - The name of the thread to send the comment to.
+ * @param messageId {string} - The ID of the message to send the comment to.
+ * @param commentContent {string} - The content of the comment.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function sendComment(threadName, messageId, commentContent) {
+    return fetch( `/api/thread/${threadName}/sendComment`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            messageId: messageId,
+            content: commentContent
+        })
+    });
+}
+
+/**
+ * Delete a comment from the message with the given id in the given thread.
+ * @description This function sends a request to delete a comment from a message in the current thread. It does not handle the response.
+ * @param threadName {string} - The name of the thread to delete the comment from.
+ * @param messageId {string} - The ID of the message to delete the comment from.
+ * @param commentId {string} - The ID of the comment to delete.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function deleteComment(threadName, messageId, commentId) {
+    return fetch( `/api/thread/${threadName}/deleteComment`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            commentId: commentId,
+            messageId: messageId
+        })
+    });
+}
+
+/**
+ * Edit the comment with the given id in the given thread.
+ * @description This function sends a request to edit a comment in the current thread. It does not handle the response.
+ * @param threadName {string} - The name of the thread to edit the comment in.
+ * @param messageId {string} - The ID of the message to edit the comment in.
+ * @param commentId {string} - The ID of the comment to edit.
+ * @param newCommentContent {string} - The new content of the comment.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function editComment(threadName, messageId, commentId, newCommentContent) {
+    return fetch( `/api/thread/${threadName}/editComment`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            commentId: commentId,
+            messageId: messageId,
+            content: newCommentContent
+        })
+    });
+}
+
+/**
+ * Report the comment with the given id in the given thread.
+ * @description This function sends a request to report a comment in the current thread. It does not handle the response.
+ * @param threadName {string} - The name of the thread to report the comment in.
+ * @param messageId {string} - The ID of the message to report the comment in.
+ * @param commentId {string} - The ID of the comment to report.
+ * @param reportReason {string} - The reason for reporting the comment.
+ * @param reportDescription {string} - The description of the report.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function reportComment(threadName, messageId, commentId, reportReason, reportDescription) {
+    return fetch( `/api/thread/${threadName}/reportComment`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            contentToReportID: commentId,
+            reportType: reportReason,
+            content: reportDescription
+        })
+    });
+}
+
+/**
+ * Upvote the comment with the given id in the given thread.
+ * @description This function sends a request to upvote a comment in the current thread. It does not handle the response.
+ * @param threadName {string} - The name of the thread to upvote the comment in.
+ * @param messageId {string} - The ID of the message to upvote the comment in.
+ * @param commentId {string} - The ID of the comment to upvote.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function upvoteComment(threadName, messageId, commentId) {
+    return fetch( `/api/thread/${threadName}/upvoteComment`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            commentId: commentId,
+            messageId: messageId
+        })
+    });
+}
+
+/**
+ * Downvote the comment with the given id in the given thread.
+ * @description This function sends a request to downvote a comment in the current thread. It does not handle the response.
+ * @param threadName {string} - The name of the thread to downvote the comment in.
+ * @param messageId {string} - The ID of the message to downvote the comment in.
+ * @param commentId {string} - The ID of the comment to downvote.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+
+function downvoteComment(threadName, messageId, commentId) {
+    return fetch( `/api/thread/${threadName}/downvoteComment`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            commentId: commentId,
+            messageId: messageId
+        })
+    });
+}
+
+/**
+ * Ban the user with the given username from the given thread.
+ * @description This function sends a request to ban a user from the current thread. It does not handle the response.
+ * @description But a success response means that the user has been banned.
+ * @description If you're not a dev looking at this code, you won't be able to use this function, the server double checks if the user has the right to do so. (●'◡'●)
+ * @param threadName {string} - The name of the thread to ban the user from.
+ * @param username {string} - The username of the user to ban.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function banUser(threadName, username) {
+    return fetch( `/api/thread/${threadName}/banUser`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            username: username
+        })
+    });
+}
+
+function setReportToResolved(threadName, reportId) {
+    return fetch( `/api/thread/${threadName}/setReportToResolved`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            reportId: reportId
+        })
+    });
+}

@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func ThreadMessageCommentGetter(w http.ResponseWriter, r *http.Request) {
+func MessageCommentGetter(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	threadName := query.Get("thread")
 	messageId := query.Get("message")
@@ -22,23 +22,23 @@ func ThreadMessageCommentGetter(w http.ResponseWriter, r *http.Request) {
 	thread := f.GetThreadFromName(threadName)
 	threadConfig := f.GetThreadConfigFromThread(thread)
 
-	// Check if the message ID is empty or not a number
+	// Check if the message MessageID is empty or not a number
 	if messageId == "" {
-		f.DebugPrintf("Message ID is empty\n")
-		http.Error(w, "Message ID is empty", http.StatusBadRequest)
+		f.DebugPrintf("Message MessageID is empty\n")
+		http.Error(w, "Message MessageID is empty", http.StatusBadRequest)
 		return
 	}
 	messageIdInt, err := strconv.Atoi(messageId)
 	if err != nil {
-		f.ErrorPrintf("Error parsing message ID: %s\n", err)
-		http.Error(w, "Message ID is not a number", http.StatusBadRequest)
+		f.ErrorPrintf("Error parsing message MessageID: %s\n", err)
+		http.Error(w, "Message MessageID is not a number", http.StatusBadRequest)
 		return
 	}
 
-	// Check if the message ID exists
+	// Check if the message MessageID exists
 	if !f.MessageExistsInThread(thread, messageIdInt) {
-		f.DebugPrintf("Message ID \"%s\" does not exist\n", messageId)
-		http.Error(w, "Message ID does not exist", http.StatusNotFound)
+		f.DebugPrintf("Message MessageID \"%s\" does not exist\n", messageId)
+		http.Error(w, "Message MessageID does not exist", http.StatusNotFound)
 		return
 	}
 
