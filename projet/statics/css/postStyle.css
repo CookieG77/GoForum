@@ -64,6 +64,7 @@
     height: 500px;
     width: auto;
     overflow: hidden;
+    display: none;
 }
 
 .post-title{
@@ -96,10 +97,48 @@
     text-align: center;
 }
 
+.post-media-container{
+    display: grid;
+    grid-template-rows: auto auto;
+    justify-content: center;
+}
+
 .post-medias{
-    position: relative;
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 8px;
+    overflow: hidden;
+}
+
+.prev-button,
+.next-button {
+    position: absolute;
+    cursor: url('../img/pointer95.cur'), pointer;
+    width: auto;
+    transform: translateY(-50%);
+    top: 50%;
+}
+.prev-button { left: 8px; }
+.next-button { right: 8px; }
+
+/* dots */
+.dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
+}
+.dot {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin: 0 4px;
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+.dot.active { background: #717171; }
+
+.prev-img, .next-img{
+    width: 32px;
 }

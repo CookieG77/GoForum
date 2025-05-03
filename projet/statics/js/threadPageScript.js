@@ -105,6 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const title = document.createElement("span");
         const tags = document.createElement("p");
         const postContent = document.createElement("section");
+        const mediaContainer = document.createElement("div")
         const medias = document.createElement("div");
         const postVote = document.createElement("section");
         const voteField = document.createElement("div");
@@ -162,6 +163,9 @@ document.addEventListener("DOMContentLoaded", function () {
         postContent.classList.add("post-content");
         container.appendChild(postContent);
 
+        mediaContainer.classList.add("post-media-container");
+        postContent.appendChild(mediaContainer);
+
         medias.classList.add("post-medias");
         if (data.media_links != null) {
             postContent.classList.add("win95-border-bulge");
@@ -172,10 +176,75 @@ document.addEventListener("DOMContentLoaded", function () {
                 mediaElement.alt = `Media[${media}]`;
                 mediaElement.draggable = false;
                 mediaElement.classList.add("post-picture", "unselectable");
+                mediaElement.loading ="lazy";
+                mediaElement.style.display = "none";
                 medias.appendChild(mediaElement);
             }
+
+            mediaContainer.appendChild(medias);
+
+            if (data.media_links.length > 1){
+                const prev = document.createElement("button");
+                const prevImg = document.createElement("img");
+                prev.classList.add("prev-button", "win95-button");
+                prevImg.src = `/img/prev_arrow.png`;
+                prevImg.alt = "prev";
+                prevImg.draggable = false;
+                prevImg.classList.add("prev-img", "unselectable");
+                prev.appendChild(prevImg);
+                medias.appendChild(prev);
+
+                const next = document.createElement("button");
+                const nextImg = document.createElement("img");
+                next.classList.add("next-button", "win95-button");
+                nextImg.src = `/img/next_arrow.png`;
+                nextImg.alt = "next";
+                nextImg.draggable = false;
+                nextImg.classList.add("next-img", "unselectable");
+                next.appendChild(nextImg);
+                medias.appendChild(next);
+
+                const dots = document.createElement("div");
+                dots.classList.add("dots");
+                data.media_links.forEach((_, i) => {
+                    const dot = document.createElement("img");
+                    dot.src = `/img/dot_inactive.png`
+                    dot.classList.add("dot");
+                    dot.dataset.index = i;
+                    dots.appendChild(dot);
+                });
+                mediaContainer.appendChild(dots);
+
+                let currentSlide = 0;
+                const slides = Array.from(medias.querySelectorAll(".post-picture"));
+                const allDots = Array.from(dots.children);
+
+                function show(n) {
+                    if (n < 0) n = slides.length - 1;
+                    if (n >= slides.length) n = 0;
+                    currentSlide = n;
+                    slides.forEach((s, i) => s.style.display = i === n ? "block" : "none");
+                    allDots.forEach((d, i) => {
+                        d.src = i === n
+                            ? `/img/dot_active.png`
+                            : `/img/dot_inactive.png`;
+                    });
+                }
+
+                prev.addEventListener("click", () => show(currentSlide - 1));
+                next.addEventListener("click", () => show(currentSlide + 1));
+                dots.addEventListener("click", e => {
+                    if (e.target.matches(".dot")) {
+                        show(+e.target.dataset.index);
+                    }
+                });
+
+                show(0);
+            } else {
+                const onlySlide = medias.querySelector('.post-picture');
+                onlySlide.style.display = 'block';
+            }
         }
-        postContent.appendChild(medias);
 
         postVote.classList.add("post-vote");
         container.appendChild(postVote);
