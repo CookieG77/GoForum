@@ -64,6 +64,9 @@
                     <p>{{ .Lang.pages.thread.must_join_thread_message }}</p>
                 {{ end }}
             {{ end }}
+            <div id="datas" class="hidden">
+                <div id="isAuthenticated" class="hidden">{{ .IsAuthenticated }}</div>
+            </div>
             <div id="example-post-container" class="hidden">
                 <div class="post-box">
                     <section class="post-header post-section">
