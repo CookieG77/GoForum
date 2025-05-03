@@ -87,7 +87,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return {state, count};
     }
 
-
     /**
      * Create a new post element.
      * @description This function creates a new post element from the given data.
@@ -101,7 +100,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const postAuthor = document.createElement("div");
         const authorPfp = document.createElement("img");
         const author = document.createElement("span");
+        const option = document.createElement("div");
         const optionButton = document.createElement("button");
+        const optionMenu = document.createElement("div")
         const title = document.createElement("span");
         const tags = document.createElement("p");
         const postContent = document.createElement("section");
@@ -141,10 +142,37 @@ document.addEventListener("DOMContentLoaded", function () {
         author.innerText = `${data.user_name}`;
         postAuthor.appendChild(author);
 
+        option.classList.add();
+        postHeader.appendChild(option)
+
         optionButton.innerText = "...";
         optionButton.type = "button";
         optionButton.classList.add("win95-button");
-        postHeader.appendChild(optionButton);
+        option.appendChild(optionButton);
+
+        optionMenu.classList.add("option-menu", "win95-border");
+        option.appendChild(optionMenu);
+
+        function toggleOptionMenu() {
+            optionMenu.classList.add("active")
+        }
+
+        optionButton.addEventListener("click", (e) => {
+            if (!optionMenu.classList.contains("active")){
+                const options = document.querySelectorAll(".option-menu");
+                e.stopPropagation();
+                options.forEach((opt)=>{
+                    opt.classList.remove("active");
+                })
+                toggleOptionMenu();
+            }
+        })
+
+        window.addEventListener("click", (e) => {
+            if (!optionMenu.contains(e.target)){
+                optionMenu.classList.remove("active");
+            }
+        })
 
         title.innerText = `${data.message_title}`;
         title.classList.add("post-title");
