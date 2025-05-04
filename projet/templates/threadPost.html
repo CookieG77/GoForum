@@ -1,3 +1,52 @@
 {{ define "content" }}
 Welcome to the thread post page!
+<div class="message-viewer-box">
+    <div class="post-box win95-border">
+        <section class="post-header win95-header">
+            <div class="post-profile">
+                <img src="/upload/default_user_icon.png" alt="Author profile picture" class="post-profile-picture unselectable" draggable="false">
+                <span>fakeuser0</span>
+            </div>
+            <div class="">
+                <button type="button" class="win95-button">...</button>
+                <div class="option-menu win95-border">
+
+                </div>
+            </div>
+            <span class="post-title">Test message 0 title</span>
+            <p></p>
+        </section>
+        <section class="post-content win95-border-indent">
+            <div class="post-media-container">
+                <div class="post-medias">
+                    <img src="/upload/https://fakeimage0.com" alt="Media[https://fakeimage0.com]" draggable="false" class="post-picture unselectable" loading="lazy" style="display: block;">
+                    <img src="/upload/https://secondfakeimage0.com" alt="Media[https://secondfakeimage0.com]" draggable="false" class="post-picture unselectable" loading="lazy" style="display: none;">
+                    <button class="prev-button win95-button">
+                        <img src="/img/prev_arrow.png" alt="prev" draggable="false" class="prev-img unselectable">
+                    </button>
+                    <button class="next-button win95-button">
+                        <img src="/img/next_arrow.png" alt="next" draggable="false" class="next-img unselectable">
+                    </button></div><div class="dots">
+                <img src="/img/dot_active.png" class="dot" data-index="0">
+                <img src="/img/dot_inactive.png" class="dot" data-index="1">
+            </div>
+            </div>
+        </section>
+        <section class="post-vote">
+            <div class="post-vote-field">
+                <button type="button" class="win95-button post-vote-button" disabled="">
+                    <img src="/img/upvote_empty.png" alt="Upvote image" class="post-vote-image unselectable" draggable="false">
+                </button><span class="post-vote-value">1</span><button type="button" class="win95-button post-vote-button" disabled="">
+                <img src="/img/downvote_empty.png" alt="Downvote image" class="post-vote-image unselectable" draggable="false">
+            </button>
+            </div>
+        </section>
+        <p class="hidden messageId">Message ID : 1</p>
+        <p>Message content : This is a test 0 message </p>
+        <p>Was edited : false</p>
+        <p>Date : 2025-05-04T09:58:12Z</p>
+        <p>Vote state : 0</p>
+        <br>
+    </div>
+</div>
 {{ end }}

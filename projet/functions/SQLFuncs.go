@@ -110,18 +110,19 @@ type MediaLink struct {
 // FormattedThreadMessage is a struct used to represent a thread message with limited information
 // It is used to display the thread message in the thread page
 type FormattedThreadMessage struct {
-	MessageID      int       `json:"message_id"`
-	MessageTitle   string    `json:"message_title"`
-	MessageContent string    `json:"message_content"`
-	WasEdited      bool      `json:"was_edited"`
-	CreationDate   time.Time `json:"creation_date"`
-	UserName       string    `json:"user_name"`
-	UserPfpAddress string    `json:"user_pfp_address"`
-	Upvotes        int       `json:"up_votes"`
-	Downvotes      int       `json:"down_votes"`
-	MediaLinks     []string  `json:"media_links"`
-	MessageTags    []string  `json:"message_tags"`
-	VoteState      int       `json:"vote_state"`
+	MessageID        int       `json:"message_id"`
+	MessageTitle     string    `json:"message_title"`
+	MessageContent   string    `json:"message_content"`
+	WasEdited        bool      `json:"was_edited"`
+	CreationDate     time.Time `json:"creation_date"`
+	UserName         string    `json:"user_name"`
+	UserPfpAddress   string    `json:"user_pfp_address"`
+	Upvotes          int       `json:"up_votes"`
+	Downvotes        int       `json:"down_votes"`
+	NumberOfComments int       `json:"number_of_comments"`
+	MediaLinks       []string  `json:"media_links"`
+	MessageTags      []string  `json:"message_tags"`
+	VoteState        int       `json:"vote_state"`
 }
 
 // FormattedMessageComment is a struct used to represent a message comment with limited information
@@ -1764,7 +1765,7 @@ func IsUserAllowedToDeleteComment(thread ThreadGoForum, user User, commentID int
 // AddCommentToPost adds a comment to the post
 // Returns the comment id and an error if there is one
 func AddCommentToPost(user User, messageID int, content string) (int, error) {
-	insertComment := "INSERT INTO ThreadComments (message_id, user_id, comment_content) VALUES (?, ?, ?, ?)"
+	insertComment := "INSERT INTO ThreadComments (message_id, user_id, comment_content) VALUES (?, ?, ?)"
 	res, err := db.Exec(insertComment, messageID, user.UserID, content)
 	if err != nil {
 		ErrorPrintf("Error inserting the comment into the database: %v\n", err)
@@ -2080,7 +2081,8 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 				username,
 				pfp_media_address,
 				upvotes,
-				downvotes
+				downvotes,
+				comments_number
 			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY creation_date DESC LIMIT ? OFFSET ?`
 		break
 	case "popular": // popular order
@@ -2094,7 +2096,8 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 				username,
 				pfp_media_address,
 				upvotes,
-				downvotes
+				downvotes,
+				comments_number
 			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY (upvotes - downvotes) DESC LIMIT ? OFFSET ?`
 		break
 	case "unpopular": // unpopular order
@@ -2108,7 +2111,8 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 				username,
 				pfp_media_address,
 				upvotes,
-				downvotes
+				downvotes,
+				comments_number
 			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY (upvotes - downvotes) ASC LIMIT ? OFFSET ?`
 		break
 	default: // ascending order
@@ -2122,7 +2126,8 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 				username,
 				pfp_media_address,
 				upvotes,
-				downvotes
+				downvotes,
+				comments_number
 			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY creation_date ASC LIMIT ? OFFSET ?`
 		break
 	}
@@ -2149,7 +2154,8 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 			&message.UserName,
 			&message.UserPfpAddress,
 			&message.Upvotes,
-			&message.Downvotes)
+			&message.Downvotes,
+			&message.NumberOfComments)
 		if err != nil {
 			ErrorPrintf("Error scanning the rows in GetMessagesFromThread: %v\n", err)
 			return nil, err
@@ -3013,7 +3019,12 @@ func InitDatabase() {
 			u.username,
 			ml.media_address AS pfp_media_address,
 			COALESCE(v.upvotes, 0) AS upvotes,
-			COALESCE(v.downvotes, 0) AS downvotes
+			COALESCE(v.downvotes, 0) AS downvotes,
+			COALESCE((
+				SELECT COUNT(*)
+				FROM ThreadComments tc
+				WHERE tc.message_id = tm.message_id
+			), 0) AS comments_number
 		FROM ThreadMessages tm
 		JOIN ThreadGoForum tg ON tm.thread_id = tg.thread_id
 		JOIN Users u ON tm.user_id = u.user_id
@@ -3262,7 +3273,7 @@ func FillDatabase() {
 		time.Sleep(250 * time.Millisecond)
 	}
 
-	// Adding fake upvotes / downvotes to the messages
+	// Adding fake upvotes / downvotes to the messages and comments
 	for i := 0; i < 15; i++ { // loop for each user
 		for j := 0; j < 50; j++ { // loop for each message
 			// Randomly upvote or downvote the message
@@ -3271,6 +3282,13 @@ func FillDatabase() {
 				if err != nil {
 					ErrorPrintf("Error adding upvote %d for user %d: %v\n", j, i, err)
 					return
+				}
+				if mr.Intn(2) == 0 {
+					_, err := AddCommentToPost(User{UserID: i + 1}, j+1, fmt.Sprintf("This is a test comment %d for message %d", i, j))
+					if err != nil {
+						ErrorPrintf("Error adding comment %d for user %d: %v\n", j, i, err)
+						return
+					}
 				}
 			} else {
 				err := ThreadMessageDownVote(j+1, i+1)
