@@ -29,7 +29,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		PageInfo["ShowLoginPage"] = true
 	}
 
-	PageInfo["AllThreads"] = f.GetAllThreads()
+	PageInfo["AllThreads"] = f.GetAllFormattedThreads()
 
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/home.css")

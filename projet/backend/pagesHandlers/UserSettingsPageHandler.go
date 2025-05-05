@@ -76,7 +76,7 @@ func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
 	ConnectFromHeader(w, r, &PageInfo)
 
 	// Add additional styles to the content interface
-	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/userSettings.css")
-	f.AddAdditionalScriptsToContentInterface(&PageInfo, "js/userSettingsScript.js", "js/imgUploader.js")
+	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/userSettings.css")
+	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/userSettingsScript.js", "/js/imgUploaderScript.js")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/userSettings.html")
 }

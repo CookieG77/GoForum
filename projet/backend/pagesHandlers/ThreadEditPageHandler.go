@@ -38,6 +38,7 @@ func ThreadEditPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	thread := f.GetThreadFromName(threadName)
+	threadConfig := f.GetThreadConfigFromThread(thread)
 	user := f.GetUser(r)
 
 	// If not the thread owner, redirect to the thread page
@@ -48,6 +49,8 @@ func ThreadEditPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	PageInfo["ErrorEditingThread"] = false
+	PageInfo["ThreadIconPath"] = f.GetMediaLinkFromID(threadConfig.ThreadIconID).MediaAddress
+	PageInfo["ThreadBannerPath"] = f.GetMediaLinkFromID(threadConfig.ThreadBannerID).MediaAddress
 
 	// Handle the thread edit form
 	if r.Method == "POST" {
@@ -62,6 +65,6 @@ func ThreadEditPage(w http.ResponseWriter, r *http.Request) {
 
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/threadEdit.css")
-	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadEditScript.js", "/js/threadScript.js")
+	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadEditScript.js", "/js/threadScript.js", "/js/imgUploaderScript.js")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/threadEdit.html")
 }

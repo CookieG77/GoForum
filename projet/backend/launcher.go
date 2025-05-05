@@ -80,6 +80,7 @@ func LaunchWebApp() {
 	// Handle the routes
 	r.HandleFunc("/", pagesHandlers.HomePage).Methods("GET", "POST")
 	r.HandleFunc("/register", pagesHandlers.RegisterPage).Methods("GET", "POST")
+	r.HandleFunc("/auth/callback/{provider}", pagesHandlers.CallbackRedirection).Methods("GET", "POST")
 	r.HandleFunc("/profile", pagesHandlers.UserSelfProfilePage).Methods("GET", "POST")
 	r.HandleFunc("/profile/{user}", pagesHandlers.UserOtherProfilePage).Methods("GET", "POST")
 	r.HandleFunc("/settings", pagesHandlers.UserSettingsPage).Methods("GET", "POST")

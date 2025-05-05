@@ -84,6 +84,12 @@ type ThreadGoForumConfigs struct {
 	AllowTextFormatting       bool
 }
 
+type FormattedThread struct {
+	ThreadName       string
+	ThreadIconLink   string
+	ThreadBannerLink string
+}
+
 type MediaType string
 
 // Constants used to determine the type of the email
@@ -946,13 +952,21 @@ func GetThreadFromName(threadName string) ThreadGoForum {
 	return ThreadGoForum{}
 }
 
-// GetAllThreads returns a slice of all the threads in the database
-func GetAllThreads() []ThreadGoForum {
-	getAllThreads := "SELECT * FROM ThreadGoForum"
+// GetAllFormattedThreads returns a slice of all the threads in the database
+func GetAllFormattedThreads() []FormattedThread {
+	getAllThreads := `
+		SELECT 
+			t.thread_name AS ThreadName,
+			COALESCE(mi.media_address, 'default_thread_icon.png') AS ThreadIconLink,
+			COALESCE(mb.media_address, 'default_thread_banner.gif') AS ThreadBannerLink
+		FROM ThreadGoForum t
+		LEFT JOIN ThreadGoForumConfigs tc ON t.thread_id = tc.thread_id
+		LEFT JOIN MediaLink mi ON tc.thread_icon_id = mi.media_id
+		LEFT JOIN MediaLink mb ON tc.thread_banner_id = mb.media_id;`
 	rows, err := db.Query(getAllThreads)
 	if err != nil {
 		ErrorPrintf("Error getting all the threads: %v\n", err)
-		return []ThreadGoForum{}
+		return []FormattedThread{}
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
@@ -960,13 +974,13 @@ func GetAllThreads() []ThreadGoForum {
 			ErrorPrintf("Error closing the rows: %v\n", err)
 		}
 	}(rows)
-	var threads []ThreadGoForum
+	var threads []FormattedThread
 	for rows.Next() {
-		var thread ThreadGoForum
-		err := rows.Scan(&thread.ThreadID, &thread.ThreadName, &thread.OwnerID, &thread.CreationDate)
+		var thread FormattedThread
+		err := rows.Scan(&thread.ThreadName, &thread.ThreadIconLink, &thread.ThreadBannerLink)
 		if err != nil {
-			ErrorPrintf("Error scanning the rows in GetAllThreads: %v\n", err)
-			return []ThreadGoForum{}
+			ErrorPrintf("Error scanning the rows in GetAllFormattedThreads: %v\n", err)
+			return []FormattedThread{}
 		}
 		threads = append(threads, thread)
 	}

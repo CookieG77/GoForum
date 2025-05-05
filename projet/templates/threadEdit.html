@@ -15,5 +15,16 @@
     <div class="tag-manager-edit">
         <div id="editTagList"></div>
     </div>
+    <br>
+    <div>
+        <img id="thread-icon-preview" alt="Icon Preview" src="/upload/{{ .ThreadIconPath }}">
+        <br>
+        <input type="file" id="new-thread-icon" accept="image/png, image/jpeg, image/gif">
+    </div>
+    <div>
+        <img id="thread-banner-preview" alt="Icon Preview" src="/upload/{{ .ThreadBannerPath }}">
+        <br>
+        <input type="file" id="new-thread-banner" accept="image/png, image/jpeg, image/gif">
+    </div>
 </div>
 {{ end }}

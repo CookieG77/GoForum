@@ -11,6 +11,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const tags = {};
     const tagIds = {}; // map tagName -> tagId
 
+    const threadIconPreviewImg = document.getElementById('thread-icon-preview');
+    const threadIconInput = document.getElementById('new-thread-icon');
+    const htreadBannerPreviewImg = document.getElementById('thread-banner-preview');
+    const threadBannerInput = document.getElementById('new-thread-banner');
+
     function renderTags() {
         tagList.innerHTML = '';
         editTagList.innerHTML = '';
@@ -157,4 +162,39 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error('Failed to load tags:', err);
             errorDiv.textContent = err.message;
         });
+
+    threadIconInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            UploadThreadIcon(file);
+        }
+    });
+
+    function UploadThreadIcon(file) {
+        UploadImg(file, "thread_icon").then(r => {
+            if (r == null) return;
+            if (r.url) {
+                threadIconPreviewImg.src = "/upload/" + r.url;
+            } else {
+                alert("Server response error");
+            }
+        }).catch((error) => {
+            console.error("Error uploading image:", error);
+            alert("Error uploading image");
+        });
+    }
+
+    function UploadThreadBanner(file) {
+        UploadImg(file, "thread_banner").then(r => {
+            if (r == null) return;
+            if (r.url) {
+                htreadBannerPreviewImg.src = "/upload/" + r.url;
+            } else {
+                alert("Server response error");
+            }
+        }).catch((error) => {
+            console.error("Error uploading image:", error);
+            alert("Error uploading image");
+        });
+    }
 });

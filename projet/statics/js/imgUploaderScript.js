@@ -56,7 +56,14 @@ function UploadImg(file, imgType) {
     }
     const formData = new FormData();
     formData.append(`image` , file);
-    return fetch(`/api/upload/${imgType}`, {
+    let address = ""
+    if (imgType === 'thread_icon' || imgType === 'thread_banner') {
+        let threadName = getCurrentThreadName()
+        address = `/api/upload/${imgType}?thread=${threadName}`
+    } else {
+        address = `/api/upload/${imgType}`
+    }
+    return fetch(address, {
         method: "POST",
         body: formData
     }).then((response) => {

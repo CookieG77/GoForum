@@ -38,6 +38,6 @@ func UserOtherProfilePage(w http.ResponseWriter, r *http.Request) {
 	// TODO : Display the user profile of the 'user'
 
 	// Add additional styles to the content interface
-	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/userProfile.css", "generalElementStyling.css")
+	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/userProfile.css", "/css/generalElementStyling.css")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/userProfile.html")
 }

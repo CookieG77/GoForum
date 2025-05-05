@@ -23,6 +23,7 @@ func ImgUploader(w http.ResponseWriter, r *http.Request) {
 	// Get the query parameters
 	vars := mux.Vars(r)
 	rawImgType := vars["type"]
+	query := r.URL.Query()
 
 	// Check if the image type is valid
 	if !f.IsAMediaType(rawImgType) {
@@ -44,7 +45,7 @@ func ImgUploader(w http.ResponseWriter, r *http.Request) {
 	var threadConfigs f.ThreadGoForumConfigs
 	if imgType == f.ThreadIcon || imgType == f.ThreadBanner {
 		// Check if the thread is given
-		threadName := r.FormValue("thread")
+		threadName := query.Get("thread")
 		if threadName == "" {
 			f.DebugPrintf("Thread threadName is not given\n")
 			http.Error(w, "Thread threadName is not given", http.StatusBadRequest)

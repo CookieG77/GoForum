@@ -30,7 +30,7 @@ func ThreadSendMessagePage(w http.ResponseWriter, r *http.Request) {
 	PageInfo["UserThreads"] = f.GetUserThreads(f.GetUser(r))
 
 	// Add additional styles to the content interface
-	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/threadSendMessage.css", "css/generalElementStyling.css")
-	f.AddAdditionalScriptsToContentInterface(&PageInfo, "js/threadScript.js", "js/threadSendMessage.js", "js/imgUploader.js")
+	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/threadSendMessage.css", "/css/generalElementStyling.css")
+	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadScript.js", "/js/threadSendMessage.js", "/js/imgUploaderScript.js")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/threadSendMessage.html")
 }
