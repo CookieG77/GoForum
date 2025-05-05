@@ -68,7 +68,7 @@ type jsonUserDesignator struct {
 
 // jsonThreadTagDesignator is a custom type used to handle ajax calls that target a tag
 type jsonThreadTagDesignator struct {
-	TagID int `json:"tagId,string"`
+	TagID int `json:"tagId"`
 }
 
 // jsonThreadTag is a custom type used to handle ajax calls that create a thread tag
@@ -127,6 +127,7 @@ func ThreadContentHandler(w http.ResponseWriter, r *http.Request) {
 		action == "banUser" ||
 		action == "setReportToResolved" ||
 		action == "createThreadTag" ||
+		action == "editThreadTag" ||
 		action == "deleteThreadTag" ||
 		action == "getThreadTags") {
 
@@ -1349,6 +1350,7 @@ func setReportToResolved(w http.ResponseWriter, r *http.Request, thread f.Thread
 }
 
 func createThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	f.DebugPrintf("Creating thread tag\n")
 	if !(f.GetUserRankInThread(thread, user) >= f.ThreadRankOwner) {
 		f.DebugPrintf("User is not allowed to create a tag in this thread\n")
 		http.Error(w, "User is not allowed to create a tag in this thread", http.StatusForbidden)
@@ -1427,7 +1429,7 @@ func createThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoFo
 		return
 	}
 
-	f.DebugPrintf("Tag %s was created in thread %s by %s\n", tag.TagName, thread.ThreadID, user.Username)
+	f.DebugPrintf("Tag %s was created in thread %s by %s\n", tag.TagName, thread.ThreadName, user.Username)
 	// Return the response
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success"}`))
@@ -1439,6 +1441,7 @@ func createThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoFo
 }
 
 func deleteThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	f.DebugPrintf("Deleting thread tag\n")
 	if !(f.GetUserRankInThread(thread, user) >= f.ThreadRankOwner) {
 		f.DebugPrintf("User is not allowed to delete a tag in this thread\n")
 		http.Error(w, "User is not allowed to delete a tag in this thread", http.StatusForbidden)
@@ -1485,7 +1488,7 @@ func deleteThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoFo
 		return
 	}
 
-	f.DebugPrintf("Tag %d was deleted in thread %s by %s\n", tagFull.TagName, thread.ThreadID, user.Username)
+	f.DebugPrintf("Tag %s was deleted in thread %s by %s\n", tagFull.TagName, thread.ThreadName, user.Username)
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success"}`))
@@ -1497,6 +1500,7 @@ func deleteThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoFo
 }
 
 func editThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	f.DebugPrintf("Editing thread tag\n")
 	if !(f.GetUserRankInThread(thread, user) >= f.ThreadRankOwner) {
 		f.DebugPrintf("User is not allowed to edit a tag in this thread\n")
 		http.Error(w, "User is not allowed to edit a tag in this thread", http.StatusForbidden)
@@ -1533,7 +1537,7 @@ func editThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 		return
 	}
 
-	f.DebugPrintf("Tag %d was edited in thread %s by %s\n", tag.TagName, thread.ThreadID, user.Username)
+	f.DebugPrintf("Tag %s was edited in thread %s by %s\n", tag.TagName, thread.ThreadName, user.Username)
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success"}`))
@@ -1545,6 +1549,7 @@ func editThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 }
 
 func getThreadTags(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	f.DebugPrintf("Getting thread tags\n")
 	if r.Method != "POST" {
 		f.DebugPrintf("Method is not POST\n")
 		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)

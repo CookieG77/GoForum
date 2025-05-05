@@ -118,3 +118,64 @@
     width: 100%;
     gap: 8px;
 }
+
+/* Tags Display */
+
+.tag-container {
+    background-color: #f0f0f0;
+    border: 2px solid #000;
+    width: 300px;
+    padding: 10px;
+    margin: 20px auto;
+    border-radius: 5px;
+    box-shadow: 3px 3px 5px #888;
+}
+
+.tag-item {
+    background-color: #ffffff;
+    padding: 5px;
+    margin: 5px 0;
+    border: 1px solid #000;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tag-item.selected {
+    background-color: #5f9ea0;
+    color: white;
+}
+
+.tag-item:hover {
+    background-color: #d3d3d3;
+}
+
+/* Cache la checkbox visuelle mais elle reste fonctionnelle */
+.tag-item input[type="checkbox"] {
+    display: none;
+}
+
+/* Ajout des styles pour les boutons de contrôle */
+.tag-item button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.tag-item button:hover {
+    background-color: #cc0000;
+}
+
+/* Style pour un message d'absence de tags */
+.no-tags-message {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+}   
