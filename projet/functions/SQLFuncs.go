@@ -179,6 +179,12 @@ type ReportedContent struct {
 	ReportContent         string     `json:"report_content"`
 }
 
+const ThreadRankBanned = -1
+const ThreadRankUser = 0
+const ThreadRankModerator = 1
+const ThreadRankAdmin = 2
+const ThreadRankOwner = 3
+
 // InitDatabaseConnection initialises the database connection
 func InitDatabaseConnection() {
 	if !databaseInitialised {
@@ -2529,9 +2535,9 @@ func isValidHexColor(color string) bool {
 	return true
 }
 
-// IsTagAlreadyExists checks if the tag already exists in the thread
+// TagAlreadyExists checks if the tag already exists in the thread
 // Returns true if the tag already exists and false otherwise
-func IsTagAlreadyExists(thread ThreadGoForum, tagName string) (bool, error) {
+func TagAlreadyExists(thread ThreadGoForum, tagName string) (bool, error) {
 	getTag := "SELECT tag_name FROM ThreadGoForumTags WHERE thread_id = ? AND tag_name = ?"
 	rows, err := db.Query(getTag, thread.ThreadID, tagName)
 	if err != nil {
@@ -2571,6 +2577,39 @@ func IsTagIDAssociatedWithThread(thread ThreadGoForum, tagID int) (bool, error) 
 	return false, nil
 }
 
+// IsTagNameValid checks if the tag name is valid
+// Returns true if the tag name is valid and false otherwise
+func IsTagNameValid(tagName string) bool {
+	// Check if the tag name is at least 3 characters long
+	if len(tagName) < 3 {
+		return false
+	}
+	// Check if the tag name is at most 30 characters long
+	if len(tagName) > 30 {
+		return false
+	}
+	return true
+}
+
+// IsStringHexColor checks if the string is a valid hexadecimal color code
+// Returns true if the string is a valid hexadecimal color code and false otherwise
+func IsStringHexColor(color string) bool {
+	// Check if the color is a valid hexadecimal color code
+	// The color must start with # and be followed by 6 or 3 hexadecimal digits
+	if len(color) != 7 && len(color) != 4 {
+		return false
+	}
+	if color[0] != '#' {
+		return false
+	}
+	for i := 1; i < len(color); i++ {
+		if !((color[i] >= '0' && color[i] <= '9') || (color[i] >= 'a' && color[i] <= 'f') || (color[i] >= 'A' && color[i] <= 'F')) {
+			return false
+		}
+	}
+	return true
+}
+
 // AddThreadTag adds a tag to the thread
 // Returns an error if there is one
 // The tag name must be unique in the thread
@@ -2584,7 +2623,7 @@ func AddThreadTag(thread ThreadGoForum, tagName string, tagColor string) error {
 	if !isValidHexColor(tagColor) {
 		return fmt.Errorf("tag color must be a valid hexadecimal color code")
 	}
-	exists, err := IsTagAlreadyExists(thread, tagName)
+	exists, err := TagAlreadyExists(thread, tagName)
 	if err != nil {
 		ErrorPrintf("Error checking if the tag already exists: %v\n", err)
 		return err
@@ -2611,6 +2650,46 @@ func RemoveThreadTag(thread ThreadGoForum, tagName string) error {
 		return err
 	}
 	return nil
+}
+
+// UpdateThreadTag updates the tag of the thread
+// Returns an error if there is one
+// Does not check if the tag name already exists or if the tag color is valid
+func UpdateThreadTag(thread ThreadGoForum, tagID int, tagName string, tagColor string) error {
+	updateTag := "UPDATE ThreadGoForumTags SET tag_name = ?, tag_color = ? WHERE thread_id = ? AND tag_id = ?"
+	_, err := db.Exec(updateTag, tagName, tagColor, thread.ThreadID, tagID)
+	if err != nil {
+		ErrorPrintf("Error updating the tag of the thread: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// GetTagByID returns the tag by id
+// Returns the tag and an error if there is one
+func GetTagByID(tagID int) (ThreadTag, error) {
+	getTag := "SELECT * FROM ThreadGoForumTags WHERE tag_id = ?"
+	rows, err := db.Query(getTag, tagID)
+	if err != nil {
+		ErrorPrintf("Error getting the tag by id: %v\n", err)
+		return ThreadTag{}, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var tag ThreadTag
+		err := rows.Scan(&tag.TagID, &tag.ThreadID, &tag.TagName, &tag.TagColor)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetTagByID: %v\n", err)
+			return ThreadTag{}, err
+		}
+		return tag, nil
+	}
+	return ThreadTag{}, nil
 }
 
 // GetThreadTags returns the tags of the thread

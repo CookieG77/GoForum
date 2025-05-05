@@ -66,6 +66,23 @@ type jsonUserDesignator struct {
 	Username string `json:"username"`
 }
 
+// jsonThreadTagDesignator is a custom type used to handle ajax calls that target a tag
+type jsonThreadTagDesignator struct {
+	TagID int `json:"tagId,string"`
+}
+
+// jsonThreadTag is a custom type used to handle ajax calls that create a thread tag
+type jsonThreadTag struct {
+	TagName  string `json:"tagName"`
+	TagColor string `json:"tagColor"`
+}
+
+type jsonThreadTagUpdate struct {
+	TagID    int    `json:"tagId,string"`
+	TagName  string `json:"tagName"`
+	TagColor string `json:"tagColor"`
+}
+
 // ThreadContentHandler handles the thread message requests from ajax calls
 // Its path is /api/thread/{thread}/{action}?id={id}
 // The "thread" is the name of the thread
@@ -108,7 +125,10 @@ func ThreadContentHandler(w http.ResponseWriter, r *http.Request) {
 		action == "upvoteComment" ||
 		action == "downvoteComment" ||
 		action == "banUser" ||
-		action == "setReportToResolved") {
+		action == "setReportToResolved" ||
+		action == "createThreadTag" ||
+		action == "deleteThreadTag" ||
+		action == "getThreadTags") {
 
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
 		http.Error(w, "Action is empty or does not exist !", http.StatusNotFound)
@@ -192,6 +212,18 @@ func ThreadContentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	case "setReportToResolved":
 		setReportToResolved(w, r, thread, user)
+		return
+	case "createThreadTag":
+		createThreadTag(w, r, thread, user)
+		return
+	case "deleteThreadTag":
+		deleteThreadTag(w, r, thread, user)
+		return
+	case "editThreadTag":
+		editThreadTag(w, r, thread, user)
+		return
+	case "getThreadTags":
+		getThreadTags(w, r, thread, user)
 		return
 	default:
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
@@ -1312,6 +1344,234 @@ func setReportToResolved(w http.ResponseWriter, r *http.Request, thread f.Thread
 	if err != nil {
 		f.ErrorPrintf("Error while writing the response: %v\n", err)
 		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func createThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	if !(f.GetUserRankInThread(thread, user) >= f.ThreadRankOwner) {
+		f.DebugPrintf("User is not allowed to create a tag in this thread\n")
+		http.Error(w, "User is not allowed to create a tag in this thread", http.StatusForbidden)
+		return
+	}
+
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	// Getting the form values
+	var tag jsonThreadTag
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&tag); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the tag name is empty
+	if tag.TagName == "" {
+		f.DebugPrintf("Tag name is empty\n")
+		http.Error(w, "Tag name is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the tag name is valid
+	if !f.IsTagNameValid(tag.TagName) {
+		f.DebugPrintf("Tag name is not valid\n")
+		http.Error(w, "Tag name is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the tag color is empty
+	if tag.TagColor == "" {
+		f.DebugPrintf("Tag color is empty\n")
+		http.Error(w, "Tag color is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the tag color is valid
+	if !f.IsStringHexColor(tag.TagColor) {
+		f.DebugPrintf("Tag color is not valid\n")
+		http.Error(w, "Tag color is not valid", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the tag is already in the thread
+	res, err := f.TagAlreadyExists(thread, tag.TagName)
+	if err != nil {
+		f.ErrorPrintf("Error while checking if the tag already exists: %v\n", err)
+		http.Error(w, "Error while checking if the tag already exists", http.StatusInternalServerError)
+		return
+	}
+	if res {
+		f.DebugPrintf("Tag already exists in the thread\n")
+		http.Error(w, "Tag already exists in the thread", http.StatusBadRequest)
+		return
+	}
+
+	// Create the tag
+	err = f.AddThreadTag(thread, tag.TagName, tag.TagColor)
+	if err != nil {
+		f.ErrorPrintf("Error while creating the tag: %v\n", err)
+		http.Error(w, "Error while creating the tag", http.StatusInternalServerError)
+		return
+	}
+
+	f.DebugPrintf("Tag %s was created in thread %s by %s\n", tag.TagName, thread.ThreadID, user.Username)
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func deleteThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	if !(f.GetUserRankInThread(thread, user) >= f.ThreadRankOwner) {
+		f.DebugPrintf("User is not allowed to delete a tag in this thread\n")
+		http.Error(w, "User is not allowed to delete a tag in this thread", http.StatusForbidden)
+		return
+	}
+
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	// Getting the form values
+	var tag jsonThreadTagDesignator
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&tag); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the tag id is empty
+	if tag.TagID == 0 {
+		f.DebugPrintf("Tag id is empty\n")
+		http.Error(w, "Tag id is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Get the full tag
+	tagFull, err := f.GetTagByID(tag.TagID)
+
+	err = f.RemoveThreadTag(thread, tagFull.TagName)
+	if err != nil {
+		f.ErrorPrintf("Error while deleting the tag: %v\n", err)
+		http.Error(w, "Error while deleting the tag", http.StatusInternalServerError)
+		return
+	}
+
+	f.DebugPrintf("Tag %d was deleted in thread %s by %s\n", tagFull.TagName, thread.ThreadID, user.Username)
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func editThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	if !(f.GetUserRankInThread(thread, user) >= f.ThreadRankOwner) {
+		f.DebugPrintf("User is not allowed to edit a tag in this thread\n")
+		http.Error(w, "User is not allowed to edit a tag in this thread", http.StatusForbidden)
+		return
+	}
+
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	// Getting the form values
+	var tag jsonThreadTagUpdate
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&tag); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return
+	}
+
+	err = f.UpdateThreadTag(thread, tag.TagID, tag.TagName, tag.TagColor)
+	if err != nil {
+		f.ErrorPrintf("Error while editing the tag: %v\n", err)
+		http.Error(w, "Error while editing the tag", http.StatusInternalServerError)
+		return
+	}
+
+	f.DebugPrintf("Tag %d was edited in thread %s by %s\n", tag.TagName, thread.ThreadID, user.Username)
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func getThreadTags(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	tags, err := f.GetThreadTags(thread)
+	if err != nil {
+		f.ErrorPrintf("Error while getting the thread tags: %v\n", err)
+		http.Error(w, "Error while getting the thread tags", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(tags)
+	if err != nil {
+		f.ErrorPrintf("Error encoding comments to JSON: %s\n", err)
+		http.Error(w, "Error encoding comments to JSON", http.StatusInternalServerError)
 		return
 	}
 }

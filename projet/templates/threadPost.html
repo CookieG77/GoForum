@@ -1,5 +1,27 @@
 {{ define "content" }}
 Welcome to the thread post page!
+<div id="datas" class="hidden">
+    <div id="data_postID">{{ .Post.MessageID }}</div>
+    <div id="data_postTitle">{{ .Post.MessageTitle }}</div>
+    <div id="data_postContent">{{ .Post.MessageContent }}</div>
+    <div id="data_wasEdited">{{ .Post.WasEdited }}</div>
+    <div id="data_postDate">{{ .Post.CreationDate }}</div>
+    <div id="data_authorName">{{ .Post.UserName }}</div>
+    <div id="data_authorPfpAddress">{{ .Post.UserPfpAddress }}</div>
+    <div id="data_upvotes">{{ .Post.Upvotes }}</div>
+    <div id="data_downvotes">{{ .Post.Downvotes }}</div>
+    <div id="data_MediaLinks">
+        {{ range $i := .Post.MediaLinks }}
+            <div>{{ $i }}</div>
+        {{ end }}
+    </div>
+    <div id="data_PostTags">
+        {{ range $i := .Post.MessageTags }}
+            <div>{{ $i }}</div>
+        {{ end }}
+    </div>
+    <div id="data_postVoteState">{{ .Post.VoteState }}</div>
+</div>
 <div class="message-viewer-box">
     <div class="post-box win95-border">
         <section class="post-header win95-header">
@@ -19,9 +41,7 @@ Welcome to the thread post page!
         <section class="post-content win95-border-indent">
             <div class="post-media-container">
                 <div class="post-medias">
-                    {{ range $i := .Post.MediaLinks }}
-                        <img src="/upload/{{ $i }}" alt="Media[{{ $i }}]" draggable="false" class="post-picture unselectable" loading="lazy" style="display: block;">
-                    {{ end }}
+                        <img src="/upload/..." alt="Media[...]" draggable="false" class="post-picture unselectable" loading="lazy" style="display: block;">
                     <button class="prev-button win95-button">
                         <img src="/img/prev_arrow.png" alt="prev" draggable="false" class="prev-img unselectable">
                     </button>

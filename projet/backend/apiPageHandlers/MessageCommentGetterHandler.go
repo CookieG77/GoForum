@@ -73,15 +73,15 @@ func MessageCommentGetter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var Comments []f.FormattedMessageComment
+	var comments []f.FormattedMessageComment
 	if user != (f.User{}) {
-		Comments, err = f.GetCommentsFromMessageWithPOV(messageIdInt, offsetInt, user)
+		comments, err = f.GetCommentsFromMessageWithPOV(messageIdInt, offsetInt, user)
 	} else {
-		Comments, err = f.GetCommentsFromMessage(messageIdInt, offsetInt)
+		comments, err = f.GetCommentsFromMessage(messageIdInt, offsetInt)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(Comments)
+	err = json.NewEncoder(w).Encode(comments)
 	if err != nil {
 		f.ErrorPrintf("Error encoding comments to JSON: %s\n", err)
 		http.Error(w, "Error encoding comments to JSON", http.StatusInternalServerError)
