@@ -370,6 +370,14 @@ function banUser(threadName, username) {
     });
 }
 
+/**
+ * Set a report to resolved.
+ * @description This function sends a request to set a report to resolved. It does not handle the response.
+ * @description But a success response means that the report has been set to resolved.
+ * @param threadName
+ * @param reportId
+ * @returns {Promise<Response>}
+ */
 function setReportToResolved(threadName, reportId) {
     return fetch( `/api/thread/${threadName}/setReportToResolved`, {
         method: "POST",

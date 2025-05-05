@@ -367,7 +367,7 @@ document.addEventListener("DOMContentLoaded", function () {
         downvoteButton.appendChild(downvoteImg);
 
         messageID.classList.add("hidden", "messageId");
-        messageID.innerText = `Message ID : ${data.message_id}`;
+        messageID.innerText = `${data.message_id}`;
         container.appendChild(messageID);
 
         message.innerText = `Message content : ${data.message_content}`;
