@@ -3,7 +3,7 @@
  * @description This function extracts the thread name from the URL path. Only work if you are on the thread page. (e.g. /t/123)
  * @returns {string}
  */
-function getCurrentThreadNameOrPostID() {
+function getCurrentThreadName() {
     const path = window.location.pathname;
     const segments = path.split("/");
     return segments[2];

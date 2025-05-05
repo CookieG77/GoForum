@@ -48,14 +48,14 @@ function updateVoteState(currentVoteState, currentVoteCount, IsUpvoting, upvoteI
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    const leaveButton = document.getElementById("LeaveThreadButton")
-    const joinButton = document.getElementById("JoinThreadButton")
-    const editThreadButton = document.getElementById("EditThreadButton")
+    const leaveButton = document.getElementById("LeaveThreadButton");
+    const joinButton = document.getElementById("JoinThreadButton");
+    const editThreadButton = document.getElementById("EditThreadButton");
 
     // Debug button
     const loadMorePostsButton = document.getElementById("load-more-posts-button");
 
-    const threadName = getCurrentThreadNameOrPostID()
+    const threadName = getCurrentThreadName()
     let userIsAuthenticated = document.getElementById("isAuthenticated").textContent === "true";
     let offset= 0;
     let hasReachedEnd = false;

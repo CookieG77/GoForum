@@ -1,0 +1,59 @@
+#t-post{
+    width: 90%;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#t-post-container{
+    width: 100%;
+    background-color: silver;
+    position: absolute;
+}
+
+#t-post-header {
+    position: relative;
+    width: calc(100%);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
+}
+
+#t-option-menu{
+    right: 6px;
+}
+
+.option-menu{
+    position: relative;
+    right: 4px;
+    width: 200px;
+    height: 200px;
+    background-color: silver;
+    margin-top: 4px;
+    z-index: 1;
+    transform: scale(0);
+    transform-origin: top right;
+    transition: transform 0.2s steps(4, start), opacity 0.5s steps(4, start);
+}
+
+.option-menu.active{
+    transform: scale(1);
+}
+
+.prev-button,
+.next-button {
+    cursor: url('../img/pointer95.cur'), pointer;
+    width: auto;
+    top: 50%;
+}
+
+.prev-button { left: 24px !important;}
+.next-button { right: 24px !important;}
+
+.post-picture {
+    height: 700px;
+    width: auto;
+    overflow: hidden;
+    display: none;
+}
