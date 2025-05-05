@@ -62,6 +62,6 @@ func ThreadPostPage(w http.ResponseWriter, r *http.Request) {
 	PageInfo["ThreadName"] = threadName
 
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/threadPost.css", "/css/postStyle.css")
-	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadPostScript.js")
+	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadPostScript.js", "/js/threadScript.js", "/js/threadPageScript.js")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/threadPost.html")
 }

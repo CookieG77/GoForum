@@ -1,8 +1,56 @@
+function updateVoteVisual(currentVoteState, upvoteImg, downvoteImg) {
+    let state = parseInt(currentVoteState);
+    if (state === 1){
+        upvoteImg.src = `/img/upvote.png`
+        downvoteImg.src = `/img/downvote_empty.png`
+    } else if(state === 0){
+        upvoteImg.src = `/img/upvote_empty.png`
+        downvoteImg.src = `/img/downvote_empty.png`
+    } else if(state === -1){
+        upvoteImg.src = `/img/upvote_empty.png`
+        downvoteImg.src = `/img/downvote.png`
+    }
+}
+
+function updateVoteState(currentVoteState, currentVoteCount, IsUpvoting, upvoteImg, downvoteImg) {
+    let state = parseInt(currentVoteState);
+    let count = currentVoteCount;
+    if (state === 1){
+        if (IsUpvoting){ // upvoting when already upvoted so we remove the upvote
+            state = 0;
+            count -= 1;
+        } else { // downvoting when already upvoted so we remove the upvote and add a downvote
+            state = -1;
+            count -= 2;
+        }
+    } else if(state === 0){
+        if (IsUpvoting){ // upvoting when not voted so we add an upvote
+            state = 1;
+            count += 1;
+        } else { // downvoting when not voted so we add a downvote
+            state = -1;
+            count -= 1;
+        }
+    } else if(state === -1){
+        if (IsUpvoting){ // upvoting when already downvoted so we remove the downvote and add an upvote
+            state = 1;
+            count += 2;
+        } else { // downvoting when already downvoted so we remove the downvote
+            state = 0;
+            count += 1;
+        }
+    }
+    updateVoteVisual(state, upvoteImg, downvoteImg);
+    console.log("Current Vote State: ", state);
+    console.log("Current Vote Count: ", count);
+    return {state, count};
+}
+
 document.addEventListener("DOMContentLoaded", function () {
 
-    const leaveButton = document.getElementById("LeaveThreadButton")
-    const joinButton = document.getElementById("JoinThreadButton")
-    const editThreadButton = document.getElementById("EditThreadButton")
+    const leaveButton = document.getElementById("LeaveThreadButton");
+    const joinButton = document.getElementById("JoinThreadButton");
+    const editThreadButton = document.getElementById("EditThreadButton");
 
     // Debug button
     const loadMorePostsButton = document.getElementById("load-more-posts-button");
@@ -11,9 +59,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let userIsAuthenticated = document.getElementById("isAuthenticated").textContent === "true";
     let offset= 0;
     let hasReachedEnd = false;
-    let selectedTags = [];
     let orderSelect = document.getElementById("order")
     const postsContainer = document.getElementById("posts-container");
+    let selectedTags = [];
 
     const tagListContainer = document.getElementById('tagList');
     const noTagsMessage = document.getElementById('noTagsMessage');
@@ -166,11 +214,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const author = document.createElement("span");
         const option = document.createElement("div");
         const optionButton = document.createElement("button");
-        const optionMenu = document.createElement("div")
+        const optionMenu = document.createElement("div");
         const title = document.createElement("span");
         const tags = document.createElement("p");
         const postContent = document.createElement("section");
-        const mediaContainer = document.createElement("div")
+        const mediaContainer = document.createElement("div");
         const medias = document.createElement("div");
         const postVote = document.createElement("section");
         const voteField = document.createElement("div");

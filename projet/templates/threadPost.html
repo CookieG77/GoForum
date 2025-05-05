@@ -1,5 +1,4 @@
 {{ define "content" }}
-Welcome to the thread post page!
 <div id="datas" class="hidden">
     <div id="data_postID">{{ .Post.MessageID }}</div>
     <div id="data_postTitle">{{ .Post.MessageTitle }}</div>
@@ -10,6 +9,7 @@ Welcome to the thread post page!
     <div id="data_authorPfpAddress">{{ .Post.UserPfpAddress }}</div>
     <div id="data_upvotes">{{ .Post.Upvotes }}</div>
     <div id="data_downvotes">{{ .Post.Downvotes }}</div>
+    <div id="isAuthenticated" class="hidden">{{ .IsAuthenticated }}</div>
     <div id="data_MediaLinks">
         {{ range $i := .Post.MediaLinks }}
             <div>{{ $i }}</div>
@@ -22,7 +22,37 @@ Welcome to the thread post page!
     </div>
     <div id="data_postVoteState">{{ .Post.VoteState }}</div>
 </div>
-<div class="message-viewer-box">
+
+<div id="t-post">
+    <div id="t-post-container" class="win95-border">
+        <div id="t-post-header" class="win95-header">
+            <div class="post-profile">
+                <img src="/upload/{{ .Post.UserPfpAddress }}" alt="Author profile picture" class="post-profile-picture unselectable" draggable="false">
+                <span>{{ .Post.UserName }}</span>
+            </div>
+            <div class="t-post-menu-wrapper">
+                <button id="t-post-menu" type="button" class="win95-button">...</button>
+                <div id="t-option-menu" class="option-menu win95-border"></div>
+            </div>
+            <span class="post-title">{{ .Post.MessageTitle }}</span>
+        </div>
+        <div id="t-post-content">
+
+        </div>
+        <div id="t-post-comment-section" class="win95-border-indent">
+            <div id="comments-container">
+
+            </div>
+            <button id="load-more-comments-button" class="win95-button" type="button">
+                Load More Comments
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="message-viewer-box hidden">
     <div class="post-box win95-border">
         <section class="post-header win95-header">
             <div class="post-profile">
