@@ -381,3 +381,21 @@ function setReportToResolved(threadName, reportId) {
         })
     });
 }
+
+/**
+ * Get the comments from the message with the given id in the given thread.
+ * @description This function sends a request to get the comments from a message in the current thread. It does not handle the response.
+ * @description But a success response means that the comments have been retrieved.
+ * @param threadName {string} - The name of the thread to get the comments from.
+ * @param offset {number} - The offset to start getting the comments from.
+ * @param messageId {string} - The ID of the message to get the comments from.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function getComment(threadName, offset, messageId) {
+    return fetch( `/api/comments?thread=${threadName}&offset=${offset}&message=${messageId}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    });
+}

@@ -19,8 +19,9 @@ Welcome to the thread post page!
         <section class="post-content win95-border-indent">
             <div class="post-media-container">
                 <div class="post-medias">
-                    <img src="/upload/https://fakeimage0.com" alt="Media[https://fakeimage0.com]" draggable="false" class="post-picture unselectable" loading="lazy" style="display: block;">
-                    <img src="/upload/https://secondfakeimage0.com" alt="Media[https://secondfakeimage0.com]" draggable="false" class="post-picture unselectable" loading="lazy" style="display: none;">
+                    {{ range $i := .Post.MediaLinks }}
+                        <img src="/upload/{{ $i }}" alt="Media[{{ $i }}]" draggable="false" class="post-picture unselectable" loading="lazy" style="display: block;">
+                    {{ end }}
                     <button class="prev-button win95-button">
                         <img src="/img/prev_arrow.png" alt="prev" draggable="false" class="prev-img unselectable">
                     </button>
