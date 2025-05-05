@@ -418,7 +418,8 @@ function getComment(threadName, offset, messageId) {
  * @returns {Promise<Response>} - The response from the server.
  */
 function createThreadTag(threadName, tagName, tagColor) {
-    return fetch( `/api/thread/${threadName}/createTag`, {
+    console.log("Creating tag with name: " + tagName + " and color: " + tagColor);
+    return fetch( `/api/thread/${threadName}/createThreadTag`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -441,7 +442,7 @@ function createThreadTag(threadName, tagName, tagColor) {
  * @returns {Promise<Response>} - The response from the server.
  */
 function editThreadTag(threadName, tagId, tagName, tagColor) {
-    return fetch( `/api/thread/${threadName}/editTag`, {
+    return fetch( `/api/thread/${threadName}/editThreadTag`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -463,7 +464,7 @@ function editThreadTag(threadName, tagId, tagName, tagColor) {
  * @returns {Promise<Response>} - The response from the server.
  */
 function deleteThreadTag(threadName, tagId) {
-    return fetch( `/api/thread/${threadName}/deleteTag`, {
+    return fetch( `/api/thread/${threadName}/deleteThreadTag`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -482,8 +483,8 @@ function deleteThreadTag(threadName, tagId) {
  * @returns {Promise<Response>} - The response from the server.
  */
 function getThreadTags(threadName) {
-    return fetch( `/api/thread/${threadName}/getTags`, {
-        method: "GET",
+    return fetch( `/api/thread/${threadName}/getThreadTags`, {
+        method: "POST",
         headers: {
             "Content-Type": "application/json",
         }

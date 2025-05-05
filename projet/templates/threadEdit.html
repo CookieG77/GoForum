@@ -1,3 +1,19 @@
 {{ define "content" }}
+<div class="tag-manager">
+    <div class="tag-manager-form">
+        <label for="tagName">Tag Name:</label>
+        <input type="text" id="tagName" required>
 
+        <label for="tagColor">Tag Color:</label>
+        <input type="color" id="tagColor" value="#ff0000">
+
+        <button id="addTagBtn">Add Tag</button>
+        <div id="error" class="error"></div>
+        <div id="tagList"></div>
+    </div>
+
+    <div class="tag-manager-edit">
+        <div id="editTagList"></div>
+    </div>
+</div>
 {{ end }}

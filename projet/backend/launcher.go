@@ -60,6 +60,9 @@ func LaunchWebApp() {
 	}
 	finalPort := fmt.Sprintf(":%s", strconv.Itoa(getPort()))
 
+	// Setting up the rate limiter
+	// TODO : Add the rate limiter and his middleware
+
 	// Create the router
 	r := mux.NewRouter()
 

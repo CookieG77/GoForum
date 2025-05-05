@@ -141,10 +141,10 @@ type FormattedMessageComment struct {
 var OrderingList = []string{"asc", "desc", "popular", "unpopular"}
 
 type ThreadTag struct {
-	TagID    int
-	ThreadID int
-	TagName  string
-	TagColor string
+	TagID    int    `json:"tag_id"`
+	ThreadID int    `json:"thread_id"`
+	TagName  string `json:"tag_name"`
+	TagColor string `json:"tag_color"`
 }
 
 // PossibleMessageOrderingList is a list of possible message ordering
