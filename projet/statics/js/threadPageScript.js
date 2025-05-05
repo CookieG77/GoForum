@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let offset= 0;
     let hasReachedEnd = false;
     let orderSelect = document.getElementById("order")
-    const examplePostContainer = document.getElementById("example-post-container")
     const postsContainer = document.getElementById("posts-container");
 
     /**

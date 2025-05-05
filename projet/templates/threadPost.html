@@ -41,9 +41,7 @@ Welcome to the thread post page!
         <section class="post-content win95-border-indent">
             <div class="post-media-container">
                 <div class="post-medias">
-                    {{ range $i := .Post.MediaLinks }}
-                        <img src="/upload/{{ $i }}" alt="Media[{{ $i }}]" draggable="false" class="post-picture unselectable" loading="lazy" style="display: block;">
-                    {{ end }}
+                        <img src="/upload/..." alt="Media[...]" draggable="false" class="post-picture unselectable" loading="lazy" style="display: block;">
                     <button class="prev-button win95-button">
                         <img src="/img/prev_arrow.png" alt="prev" draggable="false" class="prev-img unselectable">
                     </button>

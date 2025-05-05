@@ -407,3 +407,85 @@ function getComment(threadName, offset, messageId) {
         }
     });
 }
+
+/**
+ * Create a tag in the given thread.
+ * @description This function sends a request to create a tag in the current thread. It does not handle the response.
+ * @description But a success response means that the tag has been created.
+ * @param threadName {string} - The name of the thread to create the tag in.
+ * @param tagName {string} - The name of the tag to create.
+ * @param tagColor {string} - The color of the tag to create.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function createThreadTag(threadName, tagName, tagColor) {
+    return fetch( `/api/thread/${threadName}/createTag`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            tagName: tagName,
+            tagColor: tagColor
+        })
+    });
+}
+
+/**
+ * Edit the tag with the given id in the given thread.
+ * @description This function sends a request to edit a tag in the current thread. It does not handle the response.
+ * @description But a success response means that the tag has been edited.
+ * @param threadName {string} - The name of the thread to edit the tag in.
+ * @param tagId {string} - The ID of the tag to edit.
+ * @param tagName {string} - The new name of the tag.
+ * @param tagColor {string} - The new color of the tag.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function editThreadTag(threadName, tagId, tagName, tagColor) {
+    return fetch( `/api/thread/${threadName}/editTag`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            tagId: tagId,
+            tagName: tagName,
+            tagColor: tagColor
+        })
+    });
+}
+
+/**
+ * Delete the tag with the given id in the given thread.
+ * @description This function sends a request to delete a tag in the current thread. It does not handle the response.
+ * @description But a success response means that the tag has been deleted.
+ * @param threadName {string} - The name of the thread to delete the tag from.
+ * @param tagId {string} - The ID of the tag to delete.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function deleteThreadTag(threadName, tagId) {
+    return fetch( `/api/thread/${threadName}/deleteTag`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            tagId: tagId
+        })
+    });
+}
+
+/**
+ * Get the tags from the given thread.
+ * @description This function sends a request to get the tags from the current thread. It does not handle the response.
+ * @description But a success response means that the tags have been retrieved.
+ * @param threadName {string} - The name of the thread to get the tags from.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function getThreadTags(threadName) {
+    return fetch( `/api/thread/${threadName}/getTags`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    });
+}
