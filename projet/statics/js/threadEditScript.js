@@ -141,16 +141,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // Chargement initial
     getThreadTags(threadName)
         .then(response => {
-            console.log(response)
             if (!response.ok) throw new Error('Failed to load tags.');
             return response.json();
         })
         .then(data => {
+            if (!data) return; // Handle empty data case
             data.forEach(tag => {
                 tags[tag.tag_name] = tag.tag_color;
                 tagIds[tag.tag_name] = tag.tag_id;
             });
             renderTags();
+
         })
         .catch(err => {
             console.error('Failed to load tags:', err);

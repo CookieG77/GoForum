@@ -128,8 +128,7 @@ func ThreadContentHandler(w http.ResponseWriter, r *http.Request) {
 		action == "setReportToResolved" ||
 		action == "createThreadTag" ||
 		action == "editThreadTag" ||
-		action == "deleteThreadTag" ||
-		action == "getThreadTags") {
+		action == "deleteThreadTag") {
 
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
 		http.Error(w, "Action is empty or does not exist !", http.StatusNotFound)
@@ -223,9 +222,6 @@ func ThreadContentHandler(w http.ResponseWriter, r *http.Request) {
 	case "editThreadTag":
 		editThreadTag(w, r, thread, user)
 		return
-	case "getThreadTags":
-		getThreadTags(w, r, thread, user)
-		return
 	default:
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
 		http.Error(w, "Action does not exist !", http.StatusNotFound)
@@ -309,7 +305,7 @@ func sendMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 	}
 
 	// Send the message
-	messageID, err := f.AddMessageInThread(thread, msg.Title, msg.Content, user, msg.Medias...)
+	messageID, err := f.AddMessageInThread(thread, msg.Title, msg.Content, user, msg.Medias, msg.Tags)
 	if err != nil {
 		f.ErrorPrintf("Error while sending the message: %v\n", err)
 		http.Error(w, "Error while sending the message", http.StatusInternalServerError)
@@ -1544,39 +1540,6 @@ func editThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 	if err != nil {
 		f.ErrorPrintf("Error while writing the response: %v\n", err)
 		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
-		return
-	}
-}
-
-func getThreadTags(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
-	f.DebugPrintf("Getting thread tags\n")
-	if r.Method != "POST" {
-		f.DebugPrintf("Method is not POST\n")
-		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Parse the form
-	err := r.ParseForm()
-	if err != nil {
-		f.ErrorPrintf("Error while parsing the form: %v\n", err)
-		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
-		return
-	}
-
-	tags, err := f.GetThreadTags(thread)
-	if err != nil {
-		f.ErrorPrintf("Error while getting the thread tags: %v\n", err)
-		http.Error(w, "Error while getting the thread tags", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(tags)
-	if err != nil {
-		f.ErrorPrintf("Error encoding comments to JSON: %s\n", err)
-		http.Error(w, "Error encoding comments to JSON", http.StatusInternalServerError)
 		return
 	}
 }

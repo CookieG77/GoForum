@@ -14,6 +14,7 @@ import (
 	"path"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -110,19 +111,19 @@ type MediaLink struct {
 // FormattedThreadMessage is a struct used to represent a thread message with limited information
 // It is used to display the thread message in the thread page
 type FormattedThreadMessage struct {
-	MessageID        int       `json:"message_id"`
-	MessageTitle     string    `json:"message_title"`
-	MessageContent   string    `json:"message_content"`
-	WasEdited        bool      `json:"was_edited"`
-	CreationDate     time.Time `json:"creation_date"`
-	UserName         string    `json:"user_name"`
-	UserPfpAddress   string    `json:"user_pfp_address"`
-	Upvotes          int       `json:"up_votes"`
-	Downvotes        int       `json:"down_votes"`
-	NumberOfComments int       `json:"number_of_comments"`
-	MediaLinks       []string  `json:"media_links"`
-	MessageTags      []string  `json:"message_tags"`
-	VoteState        int       `json:"vote_state"`
+	MessageID        int         `json:"message_id"`
+	MessageTitle     string      `json:"message_title"`
+	MessageContent   string      `json:"message_content"`
+	WasEdited        bool        `json:"was_edited"`
+	CreationDate     time.Time   `json:"creation_date"`
+	UserName         string      `json:"user_name"`
+	UserPfpAddress   string      `json:"user_pfp_address"`
+	Upvotes          int         `json:"up_votes"`
+	Downvotes        int         `json:"down_votes"`
+	NumberOfComments int         `json:"number_of_comments"`
+	MediaLinks       []string    `json:"media_links"`
+	MessageTags      []ThreadTag `json:"message_tags"`
+	VoteState        int         `json:"vote_state"`
 }
 
 // FormattedMessageComment is a struct used to represent a message comment with limited information
@@ -1572,7 +1573,7 @@ func IsUserAllowedToBanUserInThread(thread ThreadGoForum, user User) bool {
 
 // AddMessageInThread adds a message to the thread
 // Returns an error if there is one
-func AddMessageInThread(thread ThreadGoForum, title string, content string, user User, mediaLinksID ...int) (int, error) {
+func AddMessageInThread(thread ThreadGoForum, title string, content string, user User, mediaLinksID []int, TagIDs []int) (int, error) {
 	insertMessage := "INSERT INTO ThreadMessages (thread_id, user_id, message_title, message_content) VALUES (?, ?, ?, ?)"
 	res, err := db.Exec(insertMessage, thread.ThreadID, user.UserID, title, content)
 	if err != nil {
@@ -1593,6 +1594,17 @@ func AddMessageInThread(thread ThreadGoForum, title string, content string, user
 			return -1, err
 		}
 		DebugPrintf("Media link %d added to message %d\n", mediaLinkID, messageID)
+	}
+
+	// Add the tags to the message
+	for _, tagID := range TagIDs {
+		insertTag := "INSERT INTO ThreadMessageTags (message_id, tag_id) VALUES (?, ?)"
+		_, err = db.Exec(insertTag, messageID, tagID)
+		if err != nil {
+			ErrorPrintf("Error inserting the tag into the message: %v\n", err)
+			return -1, err
+		}
+		DebugPrintf("Tag %d added to message %d\n", tagID, messageID)
 	}
 	return int(messageID), nil
 }
@@ -2019,11 +2031,7 @@ func GetMessageByIDWithPOV(messageID int, user User) (FormattedThreadMessage, er
 			ErrorPrintf("Error getting the tags for the message: %v\n", err)
 			return FormattedThreadMessage{}, err
 		}
-		stringTags := make([]string, len(tags))
-		for i, tag := range tags {
-			stringTags[i] = tag.TagName
-		}
-		message.MessageTags = stringTags
+		message.MessageTags = tags
 
 		// Add the message pov (point of view) to the message
 		// Sets FormattedThreadMessage.VoteState to -1 if the user disliked the message
@@ -2039,21 +2047,12 @@ func GetMessageByIDWithPOV(messageID int, user User) (FormattedThreadMessage, er
 	return FormattedThreadMessage{}, nil
 }
 
-// GetMessagesFromThread returns the messages from the thread
-// Returns a slice of messages and an error if there is one
-// The messages are ordered by the given order (from the OrderingList)
-// The offset is used to paginate the messages
-// By default the function returns a maximum of 10 messages or is equal to the environment variable 'MAX_MESSAGES_PER_PAGE_LOAD'
-func GetMessagesFromThread(thread ThreadGoForum, offset int, order string) ([]FormattedThreadMessage, error) {
-	return GetMessagesFromThreadWithPOV(thread, offset, order, User{})
-}
-
 // GetMessagesFromThreadWithPOV returns the messages from the thread viewed from the point of view of the user
 // Returns a slice of messages and an error if there is one
 // The messages are ordered by the given order (from the OrderingList)
 // The offset is used to paginate the messages
 // By default the function returns a maximum of 10 messages or is equal to the environment variable 'MAX_MESSAGES_PER_PAGE_LOAD'
-func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string, user User) ([]FormattedThreadMessage, error) {
+func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string, user User, tags []ThreadTag) ([]FormattedThreadMessage, error) {
 	// Check if there is still Messages to load
 	numberOfMessages, err := GetNumberOfMessagesInThread(thread)
 	if err != nil {
@@ -2074,55 +2073,47 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 			maxMessagesPerPageLoad = 10
 		}
 	}
-	var getMessages string
+
+	// Make the tags filter
+	tagFilter := ""
+	if len(tags) > 0 {
+		tagIDs := make([]int, len(tags))
+		for i, tag := range tags {
+			tagIDs[i] = tag.TagID
+		}
+		// Conversion du slice d'entiers en chaîne de caractères
+		strSlice := make([]string, len(tagIDs))
+		for i, val := range tagIDs {
+			strSlice[i] = strconv.Itoa(val)
+		}
+		tagFilter = fmt.Sprintf(`
+			AND message_id IN (
+				SELECT message_id
+				FROM ThreadMessageTags
+				WHERE tag_id IN (%s)
+				GROUP BY message_id
+				HAVING COUNT(DISTINCT tag_id) = %d
+			)
+		`, strings.Join(strSlice, ","), len(tagIDs))
+	}
+
+	// Get the ordering of the messages
+	var orderFilter string
 	switch order {
 	case "desc": // descending order
-		getMessages = `
-			SELECT
-				message_id,
-				message_title,
-				message_content,
-				was_edited,
-				creation_date,
-				username,
-				pfp_media_address,
-				upvotes,
-				downvotes,
-				comments_number
-			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY creation_date DESC LIMIT ? OFFSET ?`
+		orderFilter = `creation_date DESC`
 		break
 	case "popular": // popular order
-		getMessages = `
-			SELECT
-				message_id,
-				message_title,
-				message_content,
-				was_edited,
-				creation_date,
-				username,
-				pfp_media_address,
-				upvotes,
-				downvotes,
-				comments_number
-			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY (upvotes - downvotes) DESC LIMIT ? OFFSET ?`
+		orderFilter = `(upvotes - downvotes) DESC`
 		break
 	case "unpopular": // unpopular order
-		getMessages = `
-			SELECT
-				message_id,
-				message_title,
-				message_content,
-				was_edited,
-				creation_date,
-				username,
-				pfp_media_address,
-				upvotes,
-				downvotes,
-				comments_number
-			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY (upvotes - downvotes) ASC LIMIT ? OFFSET ?`
+		orderFilter = `(upvotes - downvotes) ASC`
 		break
 	default: // ascending order
-		getMessages = `
+		orderFilter = `creation_date ASC`
+		break
+	}
+	getMessages := fmt.Sprintf(`
 			SELECT
 				message_id,
 				message_title,
@@ -2134,9 +2125,9 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 				upvotes,
 				downvotes,
 				comments_number
-			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? ORDER BY creation_date ASC LIMIT ? OFFSET ?`
-		break
-	}
+			FROM ViewThreadMessagesWithVotes WHERE thread_name = ? %s ORDER BY %s LIMIT ? OFFSET ?`,
+		tagFilter,
+		orderFilter)
 	rows, err := db.Query(getMessages, thread.ThreadName, maxMessagesPerPageLoad, offset)
 	if err != nil {
 		ErrorPrintf("Error getting all the incompleteMessages from the thread: %v\n", err)
@@ -2200,17 +2191,13 @@ func GetMessagesFromThreadWithPOV(thread ThreadGoForum, offset int, order string
 			ErrorPrintf("Error getting the tags for the message: %v\n", err)
 			return nil, err
 		}
-		stringTags := make([]string, len(tags))
-		for i, tag := range tags {
-			stringTags[i] = tag.TagName
-		}
-		message.MessageTags = stringTags
+		message.MessageTags = tags
 
 		// Adding the message pov (point of view) to the message
 		// Sets FormattedThreadMessage.VoteState to -1 if the user disliked the message
 		// Sets FormattedThreadMessage.VoteState to 1 if the user liked the message
 		// Sets FormattedThreadMessage.VoteState to 0 if the user has not voted
-		if user.UserID != 0 {
+		if (user != User{}) {
 			message.VoteState = HasUserAlreadyVotedOnMessage(user, message.MessageID)
 		} else {
 			message.VoteState = 0
@@ -2637,6 +2624,7 @@ func AddThreadTag(thread ThreadGoForum, tagName string, tagColor string) error {
 		ErrorPrintf("Error adding the tag to the thread: %v\n", err)
 		return err
 	}
+	DebugPrintf("Added the tag '%s' to the thread '%s'\n", tagName, thread.ThreadName)
 	return nil
 }
 
@@ -3276,6 +3264,21 @@ func FillDatabase() {
 		ErrorPrintf("Error adding thread TestThread: %v\n", err)
 		return
 	}
+	err = AddThreadTag(GetThreadFromName("TestThread"), "TestTag1", "#FF0000")
+	if err != nil {
+		ErrorPrintf("Error adding tag TestTag1 to thread TestThread: %v\n", err)
+		return
+	}
+	err = AddThreadTag(GetThreadFromName("TestThread"), "TestTag2", "#00FF00")
+	if err != nil {
+		ErrorPrintf("Error adding tag TestTag2 to thread TestThread: %v\n", err)
+		return
+	}
+	err = AddThreadTag(GetThreadFromName("TestThread"), "TestTag3", "#0000FF")
+	if err != nil {
+		ErrorPrintf("Error adding tag TestTag3 to thread TestThread: %v\n", err)
+		return
+	}
 
 	// A test thread with must be connected
 	err = AddThread(User{UserID: 1}, "TestThread2", "This is an other test thread where you must be connected ! (►__◄)")
@@ -3339,12 +3342,26 @@ func FillDatabase() {
 				mediaIDs = append(mediaIDs, mediaID)
 			}
 		}
+		var tagIDs []int
+		if mr.Intn(2) == 0 {
+			tags, err := GetThreadTags(GetThreadFromName("TestThread"))
+			if err != nil {
+				ErrorPrintf("Error getting tags from thread TestThread: %v\n", err)
+				return
+			}
+			for _, tag := range tags {
+				if mr.Intn(2) == 0 {
+					tagIDs = append(tagIDs, tag.TagID)
+				}
+			}
+		}
 		_, err := AddMessageInThread(
 			GetThreadFromName("TestThread"),
 			fmt.Sprintf("Test message %d title", i),
 			fmt.Sprintf("This is a test %d message ", i),
 			User{UserID: (i % 15) + 1},
-			mediaIDs...)
+			mediaIDs,
+			tagIDs)
 		if err != nil {
 			ErrorPrintf("Error adding fake message %d: %v\n", i, err)
 			return

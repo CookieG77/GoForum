@@ -206,9 +206,18 @@ function leaveThread(threadName) {
  * @param threadName {string} - The name of the thread to get the messages from.
  * @param offset {number} - The offset to start getting the messages from.
  * @param order {string} - The order to get the messages in.
+ * @param tags {string[]} - The tags to filter the messages by.
  * @returns {Promise<Response>} - The response from the server.
  */
-function getMessage(threadName, offset, order) {
+function getMessage(threadName, offset, order, tags = []) {
+    if (tags.length > 0) {
+        return fetch( `/api/messages?thread=${threadName}&offset=${offset}&order=${order}&tags=${encodeURIComponent(JSON.stringify(tags))}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        });
+    }
     return fetch( `/api/messages?thread=${threadName}&offset=${offset}&order=${order}`, {
         method: "GET",
         headers: {
@@ -483,8 +492,8 @@ function deleteThreadTag(threadName, tagId) {
  * @returns {Promise<Response>} - The response from the server.
  */
 function getThreadTags(threadName) {
-    return fetch( `/api/thread/${threadName}/getThreadTags`, {
-        method: "POST",
+    return fetch( `/api/threadTags?thread=${threadName}`, {
+        method: "GET",
         headers: {
             "Content-Type": "application/json",
         }

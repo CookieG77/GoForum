@@ -11,8 +11,12 @@ document.addEventListener("DOMContentLoaded", function () {
     let userIsAuthenticated = document.getElementById("isAuthenticated").textContent === "true";
     let offset= 0;
     let hasReachedEnd = false;
+    let selectedTags = [];
     let orderSelect = document.getElementById("order")
     const postsContainer = document.getElementById("posts-container");
+
+    const tagListContainer = document.getElementById('tagList');
+    const noTagsMessage = document.getElementById('noTagsMessage');
 
     /**
      * Load more posts from the server.
@@ -23,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (hasReachedEnd) {
             return;
         }
-        let res = getMessage(threadName, offset, orderSelect.value);
+        let res = getMessage(threadName, offset, orderSelect.value, selectedTags);
         res.then(async (response) => {
             if (response.ok) {
                 const data = await response.json();
@@ -43,6 +47,58 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 console.error(response);
             }
+        });
+    }
+
+    /**
+     * Render the tags in the tag list container.
+     * @description This function takes an array of tags and creates a visual representation of them.
+     * @param tags {Array} - The array of tags to render.
+     * @param tagContainer {HTMLElement} - The container to render the tags in.
+     * @param selectable {boolean} - Whether the tags should be selectable or not. Used for the tag selection (default is false)
+     * @returns {void}
+     */
+    function renderTags(tags, tagContainer, selectable = false) {
+        tags.forEach(tag => {
+            const tagItem = document.createElement('div');
+            tagItem.classList.add('tag-item');
+            tagItem.style.backgroundColor = tag.tag_color;
+
+            if (selectable) {
+                if (tags.length === 0) {
+                    noTagsMessage.style.display = 'block';
+                    return;
+                }
+                noTagsMessage.style.display = 'none';
+
+                tagItem.classList.add('clickable-tag-item');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `tag-${tag.tag_id}`;
+                checkbox.value = tag.tag_name;
+                checkbox.dataset.tagId = tag.tag_id;
+                tagItem.appendChild(checkbox);
+                tagItem.addEventListener('click', () => {
+                    checkbox.checked = !checkbox.checked;
+                    tagItem.classList.toggle('selected');
+                    if (checkbox.checked) { // If the tag is selected we add it to the list
+                        selectedTags.push(tag.tag_name);
+                    } else { // If the tag is deselected we remove it from the list
+                        selectedTags.splice(selectedTags.indexOf(tag.tag_name), 1);
+                    }
+                    postsContainer.innerHTML = "";
+                    offset = 0;
+                    // Reload more messages
+                    loadMorePosts();
+                });
+            }
+
+            const tagText = document.createElement('span');
+            tagText.textContent = tag.tag_name;
+            tagText.classList.add('unselectable');
+            tagItem.appendChild(tagText);
+
+            tagContainer.appendChild(tagItem);
         });
     }
 
@@ -185,16 +241,6 @@ document.addEventListener("DOMContentLoaded", function () {
         title.innerText = `${data.message_title}`;
         title.classList.add("post-title");
         postHeader.appendChild(title);
-
-        if (data.message_tags != null) {
-            for (let i = 0; i < data.message_tags; i++) {
-                const tag = data.message_tags[i];
-                var tagElement = document.createElement("span");
-                tagElement.innerText = `Tag : ${tag}`;
-                tags.appendChild(tagElement);
-            }
-        }
-        postHeader.appendChild(tags);
 
         postContent.classList.add("post-content");
         container.appendChild(postContent);
@@ -356,14 +402,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         voteField.appendChild(downvoteButton);
 
-        // Make sure to update the vote visual when the post is created so that if the user is already upvoting or downvoting the post, the visual is correct
-        updateVoteVisual(currentVoteState, upvoteImg, downvoteImg);
-
         downvoteImg.src = `/img/downvote_empty.png`;
         downvoteImg.alt = "Downvote image";
         downvoteImg.classList.add("post-vote-image", "unselectable");
         downvoteImg.draggable = false;
         downvoteButton.appendChild(downvoteImg);
+
+        // Make sure to update the vote visual when the post is created so that if the user is already upvoting or downvoting the post, the visual is correct
+        updateVoteVisual(currentVoteState, upvoteImg, downvoteImg);
+        if (data.message_tags != null) {
+            renderTags(data.message_tags, tags, false);
+        }
+        container.appendChild(tags);
 
         messageID.classList.add("hidden", "messageId");
         messageID.innerText = `${data.message_id}`;
@@ -432,75 +482,32 @@ document.addEventListener("DOMContentLoaded", function () {
         loadMorePosts();
     });
 
-
-    // Fonction pour obtenir les tags du thread actuel
-
-    // Élément pour afficher la liste des tags
-    const tagListContainer = document.getElementById('tagList');
-    const noTagsMessage = document.getElementById('noTagsMessage');
-
-    // Fonction pour afficher les tags
-    function renderTags(tags) {
-        tagListContainer.innerHTML = ''; // Clear existing list
-
-        if (tags.length === 0) {
-            noTagsMessage.style.display = 'block'; // Affiche le message "Aucun tag"
-            return;
-        }
-
-        noTagsMessage.style.display = 'none'; // Cache le message si des tags existent
-
-        tags.forEach(tag => {
-            // Crée un élément pour chaque tag
-            const tagItem = document.createElement('div');
-            tagItem.classList.add('tag-item');
-            tagItem.style.backgroundColor = tag.tag_color;
-
-            // Ajoute une checkbox invisible et une interaction sur le tag
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.id = `tag-${tag.tag_id}`;
-            checkbox.value = tag.tag_name;
-            checkbox.dataset.tagId = tag.tag_id;
-
-            tagItem.appendChild(checkbox);
-
-            const tagText = document.createElement('span');
-            tagText.textContent = tag.tag_name;
-            tagItem.appendChild(tagText);
-
-            // Event de sélection/désélection du tag
-            tagItem.addEventListener('click', () => {
-                checkbox.checked = !checkbox.checked;
-                tagItem.classList.toggle('selected');
-            });
-
-            // Ajout du tag à la liste
-            tagListContainer.appendChild(tagItem);
-        });
-    }
-
-    // Fonction pour charger les tags depuis le backend
-    function loadTags() {
+    /**
+     * Load tags from the server.
+     * @description This function sends a request to get the tags for the current thread.
+     * @param threadName {string} - The name of the thread to get tags for.
+     * @returns {void}
+     */
+    function loadTags(threadName) {
         getThreadTags(threadName)
             .then(response => {
                 if (!response.ok) throw new Error('Failed to load tags.');
                 return response.json();
             })
             .then(data => {
-                // Si la réponse est null ou un tableau vide, gérer le cas
                 if (!data || data.length === 0) {
-                    renderTags([]); // Passer une liste vide pour afficher "No tags available"
+                    renderTags([]);
                 } else {
-                    renderTags(data); // Afficher les tags reçus
+                    renderTags(data, tagListContainer, true);
                 }
             })
             .catch(err => {
                 console.error('Failed to load tags:', err);
-                noTagsMessage.style.display = 'block'; // Afficher le message d'erreur ou d'absence de tags
+                noTagsMessage.style.display = 'block';
             });
     }
 
-    // Charger les tags au démarrage
-    loadTags();
+    // Load the tags when the page is loaded
+    loadTags(threadName);
+    loadMorePosts();
 });

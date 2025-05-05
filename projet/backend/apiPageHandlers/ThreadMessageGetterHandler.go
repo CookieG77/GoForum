@@ -13,6 +13,7 @@ func ThreadMessageGetter(w http.ResponseWriter, r *http.Request) {
 	threadName := query.Get("thread")
 	offset := query.Get("offset")
 	order := query.Get("order")
+	tags := query.Get("tags")
 
 	// Check if the thread name is empty or does not exist
 	if threadName == "" || !f.CheckIfThreadNameExists(threadName) {
@@ -52,6 +53,19 @@ func ThreadMessageGetter(w http.ResponseWriter, r *http.Request) {
 	threadConfig := f.GetThreadConfigFromThread(thread)
 	user := f.GetUser(r)
 
+	realTags := []f.ThreadTag{}
+	// Check if the tags are empty or not a valid tag
+	if tags != "" {
+		var tagsList []string
+		err := json.Unmarshal([]byte(tags), &tagsList)
+		if err != nil {
+			f.ErrorPrintf("Error parsing tags: %s\n", err)
+			http.Error(w, "Tags are not a valid JSON array", http.StatusBadRequest)
+			return
+		}
+		realTags, err = stringTagsToThreadTags(tagsList, thread)
+	}
+
 	// Check if the user is banned from the thread
 	userRank := f.GetUserRankInThread(thread, user)
 	if userRank < 0 { // If the user is banned from the thread we show him the YOU ARE BANNED page
@@ -67,23 +81,17 @@ func ThreadMessageGetter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var Messages []f.FormattedThreadMessage
-	if (user != f.User{}) {
-		Messages, err = f.GetMessagesFromThreadWithPOV(
-			f.GetThreadFromName(threadName),
-			offsetInt,
-			order,
-			user)
-	} else {
-		Messages, err = f.GetMessagesFromThread(
-			f.GetThreadFromName(threadName),
-			offsetInt,
-			order)
-		if err != nil {
-			f.ErrorPrintf("Error getting messages from thread: %s\n", err)
-			http.Error(w, "Error getting messages from thread", http.StatusInternalServerError)
-			return
-		}
+	Messages, err := f.GetMessagesFromThreadWithPOV(
+		f.GetThreadFromName(threadName),
+		offsetInt,
+		order,
+		user,
+		realTags,
+	)
+	if err != nil {
+		f.ErrorPrintf("Error getting messages from thread: %s\n", err)
+		http.Error(w, "Error getting messages from thread", http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -93,4 +101,21 @@ func ThreadMessageGetter(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error encoding messages to JSON", http.StatusInternalServerError)
 		return
 	}
+}
+
+func stringTagsToThreadTags(tags []string, thread f.ThreadGoForum) ([]f.ThreadTag, error) {
+	threadTags, err := f.GetThreadTags(thread)
+	if err != nil {
+		f.ErrorPrintf("Error getting thread tags: %s\n", err)
+		return nil, err
+	}
+	var limitedTags []f.ThreadTag
+	for _, tag := range tags {
+		for _, threadTag := range threadTags {
+			if tag == threadTag.TagName {
+				limitedTags = append(limitedTags, threadTag)
+			}
+		}
+	}
+	return limitedTags, nil
 }

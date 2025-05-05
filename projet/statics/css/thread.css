@@ -137,10 +137,13 @@
     margin: 5px 0;
     border: 1px solid #000;
     border-radius: 3px;
-    cursor: pointer;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.clickable-tag-item {
+    cursor: pointer;
 }
 
 .tag-item.selected {

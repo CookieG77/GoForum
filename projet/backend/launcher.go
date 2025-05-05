@@ -92,6 +92,7 @@ func LaunchWebApp() {
 	r.HandleFunc("/tnm", pagesHandlers.ThreadSendMessagePage).Methods("GET", "POST")
 	r.HandleFunc("/api/messages", apiPageHandlers.ThreadMessageGetter).Methods("GET")
 	r.HandleFunc("/api/comments", apiPageHandlers.MessageCommentGetter).Methods("GET")
+	r.HandleFunc("/api/threadTags", apiPageHandlers.ThreadTagsGetterHandler).Methods("GET")
 	r.HandleFunc("/api/thread/{threadName}/{action}", apiPageHandlers.ThreadContentHandler).Methods("POST")
 	r.HandleFunc("/api/upload/{type}", apiPageHandlers.ImgUploader).Methods("POST")
 
