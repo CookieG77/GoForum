@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", function (){
         commentContent.classList.add("comment-content");
         container.appendChild(commentContent);
 
-        commentMedia.classList.add("comment-media");
+        commentMedia.classList.add("comment-media","win95-border-indent");
         commentMedia.innerText = data.comment_content;
         commentContent.appendChild(commentMedia);
 

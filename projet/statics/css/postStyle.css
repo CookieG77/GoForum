@@ -36,14 +36,14 @@
     gap: 16px;
 }
 
-.post-profile {
+.post-profile, .comment-profile {
     position: relative;
     display: flex;
     align-items: center;
     height: 100%;
 }
 
-.post-profile-picture {
+.post-profile-picture, .comment-profile-picture {
     position: relative;
     height: 64px;
     width: 64px;

@@ -57,3 +57,7 @@
     overflow: hidden;
     display: none;
 }
+
+.comment-content{
+    padding: 4px;
+}
