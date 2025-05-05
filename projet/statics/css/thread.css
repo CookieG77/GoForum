@@ -155,12 +155,10 @@
     background-color: #d3d3d3;
 }
 
-/* Cache la checkbox visuelle mais elle reste fonctionnelle */
 .tag-item input[type="checkbox"] {
     display: none;
 }
 
-/* Ajout des styles pour les boutons de contrôle */
 .tag-item button {
     background-color: #ff4d4d;
     color: white;
@@ -176,9 +174,63 @@
     background-color: #cc0000;
 }
 
-/* Style pour un message d'absence de tags */
 .no-tags-message {
     text-align: center;
     font-style: italic;
     color: #888;
-}   
+}
+
+
+/* Style for the new post elements */
+.new-post-content {
+    margin: 4px;
+    left: 0;
+    right: -8px;
+}
+
+#new-post-content-container {
+    display: grid;
+    grid-template-columns: 1fr 9fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    position: relative;
+    margin: 0 auto;
+    padding: 8px;
+
+}
+
+#new-post-content-container label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#new-post-content-container textarea {
+    right: 0;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    padding: 8px;
+    resize: vertical;
+    max-height: 20vh;
+}
+
+#new-post-medias {
+    grid-column: span 2;
+    width:  100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+#new-post-medias-container img {
+    width: 40%;
+}
+
+#new-post-send-button {
+    margin: 12px;
+}

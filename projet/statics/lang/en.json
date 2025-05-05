@@ -98,7 +98,12 @@
       "must_connect_message" : "You must be connected to see this page.",
       "must_join_thread_message" : "You must join this thread to see it's content.",
       "must_login_to_join_message" : "To join the thread, you must register/login",
-      "order_label" : "Message order : "
+      "order_label" : "Message order : ",
+      "new_post_title_label" : "Title : ",
+      "new_post_title_placeholder" : "Post title",
+      "new_post_content_label" : "Content : ",
+      "new_post_content_placeholder" : "Post description goes here",
+      "new_post_send_button" : "Send"
     },
     "thread_creation" : {
       "thread_name" : "Thread name",

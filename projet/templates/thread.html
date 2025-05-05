@@ -67,6 +67,32 @@
             <div id="datas" class="hidden">
                 <div id="isAuthenticated" class="hidden">{{ .IsAuthenticated }}</div>
             </div>
+            <div id="new-post-box" class="post-box, win95-border">
+                <section class="post-header win95-header">
+                    <div class="post-title">
+                        <label for="new-post-title">{{ .Lang.pages.thread.new_post_title_label }}</label>
+                        <input type="text" id="new-post-title" class="win95-input" placeholder="{{ .Lang.pages.thread.new_post_title_placeholder }}" required minlength="5" maxlength="50">
+                    </div>
+                </section>
+                <section class="new-post-content">
+                    <div id="new-post-content-container" class="win95-border-indent">
+                        <label for="new-post-content">{{ .Lang.pages.thread.new_post_content_label }}</label>
+                        <textarea id="new-post-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.new_post_content_placeholder }}" required maxlength="500" minlength="20"></textarea>
+                        <div id="new-post-medias">
+                            <input type="file" id="new-post-media" accept="image/png image/jpeg image/gif" class="win95-input" />
+                            <div id="new-post-medias-container" class="grid-align-right">
+
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <button id="new-post-send-button" class="hidden, win95-button" type="button">
+                        {{ .Lang.pages.thread.new_post_send_button }}
+                    </button>
+                </section>
+
+            </div>
             <div id="posts-container">
 
             </div>
