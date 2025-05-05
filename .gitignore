@@ -39,3 +39,9 @@ logs*.zip
 
 # IntelliJ files
 /.idea
+
+# Docker utility files
+docker\bin
+docker\logs
+docker/go.mod
+docker/go.sum

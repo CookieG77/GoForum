@@ -1,0 +1,21 @@
+# DO NOT USE ME FOR RUN I'M JUST AN EXAMPLE
+
+## Database configuration
+DB_URL=sqlite3
+DB_NAME=goForumDataBase.db
+
+CGO_ENABLED=1
+
+## Server configuration
+CERT_FILE=cert.pem
+CERT_KEY_FILE=key.pem
+SESSION_SECRET=super-secret-password
+
+
+## SMTP configuration
+SMTP_HOST=EMAIL_SMTP_HOST
+SMTP_PORT=SMTP_PORT
+SMTP_USER=SMTP_USER
+SMTP_PASSWORD=SMTP_PASSWORD
+
+# DO NOT USE ME FOR RUN I'M JUST AN EXAMPLE

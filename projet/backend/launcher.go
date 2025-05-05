@@ -4,10 +4,11 @@ import (
 	"GoForum/backend/pages"
 	f "GoForum/functions"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 // LaunchWebApp launches the web application and handles the routes.
