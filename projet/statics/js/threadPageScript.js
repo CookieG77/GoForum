@@ -219,11 +219,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const postHeader = document.createElement("section");
         const postAuthor = document.createElement("div");
         const authorPfp = document.createElement("img");
+        const authorAndTime = document.createElement("div");
         const author = document.createElement("span");
+        const time = document.createElement("span");
         const option = document.createElement("div");
         const optionButton = document.createElement("button");
         const optionMenu = document.createElement("div");
         const title = document.createElement("span");
+        const editStatus = document.createElement("span")
+        const postDescription = document.createElement("p")
         const tags = document.createElement("section");
         const postContent = document.createElement("section");
         const mediaContainer = document.createElement("div");
@@ -236,10 +240,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const downvoteButton = document.createElement("button");
         const downvoteImg = document.createElement("img");
         const messageID = document.createElement("p");
-        const message = document.createElement("p");
-        const wasEdited = document.createElement("p");
-        const date = document.createElement("p");
-        const voteState = document.createElement("p");
         const br = document.createElement("br");
 
         let currentVoteState = data.vote_state;
@@ -260,8 +260,16 @@ document.addEventListener("DOMContentLoaded", function () {
         authorPfp.draggable = false;
         postAuthor.appendChild(authorPfp);
 
+        authorAndTime.classList.add("anthor-and-time")
+        postAuthor.appendChild(authorAndTime);
+
+        author.classList.add("author-pseudo")
         author.innerText = `${data.user_name}`;
-        postAuthor.appendChild(author);
+        authorAndTime.appendChild(author);
+
+        time.classList.add("time-ago");
+        time.innerText = ` - ${timeAgo(data.creation_date)}`;
+        authorAndTime.appendChild(time);
 
         option.classList.add();
         postHeader.appendChild(option)
@@ -278,25 +286,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let optionMenuReportButtonHTML = `
             <li class="win95-menu-button message-report menu-button" id="post-report-button-p${data.message_id}">
-                <img src="/img/report.png" alt="" class="win95-minor-logo">
+                <img src="/img/report.png" alt="" class="win95-minor-logo unselectable" draggable="false">
                 <span>${getI18nText("option-menu-report-button-text")}</span>
             </li>`
 
         let optionMenuEditButtonHTML = `
             <li class="win95-menu-button message-edit menu-button" id="post-edit-button-p${data.message_id}">
-                <img src="/img/edit.png" alt="" class="win95-minor-logo">
+                <img src="/img/edit.png" alt="" class="win95-minor-logo  unselectable" draggable="false">
                 <span>${getI18nText("option-menu-edit-button-text")}</span>
             </li>`
 
         let optionMenuDeleteButtonHTML = `
             <li class="win95-menu-button message-delete menu-button" id="post-delete-button-p${data.message_id}">
-                <img src="/img/delete.png" alt="" class="win95-minor-logo">
+                <img src="/img/delete.png" alt="" class="win95-minor-logo  unselectable" draggable="false">
                 <span>${getI18nText("option-menu-delete-button-text")}</span>
             </li>`
 
         let optionMenuBanButtonHTML = `
             <li class="win95-menu-button message-ban menu-button" id="post-ban-button-p${data.message_id}">
-                <img src="/img/ban.png" alt="" class="win95-minor-logo">
+                <img src="/img/ban.png" alt="" class="win95-minor-logo unselectable" draggable="false">
                 <span>${getI18nText("option-menu-ban-button-text")}</span>
             </li>`
         let additionalButtonsHTML = "";
@@ -413,6 +421,16 @@ document.addEventListener("DOMContentLoaded", function () {
         title.innerText = `${data.message_title}`;
         title.classList.add("post-title");
         postHeader.appendChild(title);
+
+        editStatus.classList.add("edit-status");
+        if (data.was_edited){
+            editStatus.innerText = "[Edited]"
+        }
+        postHeader.appendChild(editStatus);
+
+        postDescription.classList.add("post-description");
+        postDescription.innerText = data.message_content;
+        container.appendChild(postDescription);
 
         tags.classList.add("tag-container");
         container.appendChild(tags);
@@ -593,16 +611,6 @@ document.addEventListener("DOMContentLoaded", function () {
         messageID.classList.add("hidden", "messageId");
         messageID.innerText = `${data.message_id}`;
         container.appendChild(messageID);
-
-        message.innerText = `Message content : ${data.message_content}`;
-        container.appendChild(message);
-        wasEdited.innerText = data.was_edited ? getI18nText('was-edited') : "";
-        container.appendChild(wasEdited);
-        //date.innerText = `${timeAgo(data.creation_date)}`;
-        container.appendChild(date);
-
-        voteState.innerText = `Vote state : ${data.vote_state}`;
-        container.appendChild(voteState);
         container.appendChild(br);
 
         return container;
