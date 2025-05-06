@@ -108,7 +108,7 @@
         "moderation_team" : "Equipe de modération du thread",
         "tags" : "Tags"
       },
-      "was_modified" : "(modifié)"
+      "was_modified" : "[modifié]"
     },
     "thread_creation" : {
       "thread_name" : "Nom du thread",

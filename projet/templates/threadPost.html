@@ -1,5 +1,6 @@
 {{ define "content" }}
 <div id="i18n" class="hidden">
+    <span id="username">{{ .Username }}</span>
     <span id="data_postID">{{ .Post.MessageID }}</span>
     <span id="data_postTitle">{{ .Post.MessageTitle }}</span>
     <span id="data_wasEdited">{{ .Post.WasEdited }}</span>
@@ -10,9 +11,7 @@
     <span data-key="data_downvotes">{{ .Post.Downvotes }}</span>
     <span id="isAuthenticated">{{ .IsAuthenticated }}</span>
     <span id="isAMember">{{ .IsAMember }}</span>
-    <span id="isAModerator">{{ .IsModerator }}</span>
-    <span id="isAnAdmin">{{ .IsAdmin }}</span>
-    <span id="isThreadOwner">{{ .IsOwner }}</span>
+    <span id="userRank">{{ .UserRank }}</span>
     <div id="data_MediaLinks">
         {{ range $i := .Post.MediaLinks }}
             <div>{{ $i }}</div>
@@ -177,8 +176,8 @@
             </div>
         </div>
         <div class="win95-border-indent">
-            <label for="edit-post-content">{{ .Lang.pages.threadPost.edit.new_content_label }}</label>
-            <textarea id="edit-comment-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.edit.content_placeholder }}" required maxlength="500" minlength="20"></textarea>
+            <label for="edit-comment-content">{{ .Lang.pages.threadPost.edit.new_content_label }}</label>
+            <textarea id="edit-comment-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.edit.content_placeholder }}" required maxlength="500" minlength="5"></textarea>
             <div id="edit-comment-content-char-count">
                 <span id="edit-comment-content-char-count-value">0</span> / 500
             </div>

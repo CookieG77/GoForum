@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const threadName = getCurrentThreadName()
     let userIsAuthenticated = document.getElementById("isAuthenticated").textContent === "true";
-    let userIsMember = document.getElementById("isAMember").textContent === "true";
+    let userIsAMember = document.getElementById("isAMember").textContent === "true";
     let userRank = parseInt(document.getElementById("userRank").textContent,10);
     let userIsModerator = userRank >= 1;
     let userIsAdmin = userRank >= 2;
@@ -71,6 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reportMenu.classList.remove("hidden");
         scrollbar.classList.add("hidden");
         messageToReport = messageID;
+        reportMenuSendButton.disabled = true;
     }
 
     /**
@@ -84,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reportMenuErrorMessage.classList.add("hidden");
         reportContent.value = "";
         messageToReport = null;
-        reportMenuSendButton.disabled = false;
+        reportMenuSendButton.disabled = true;
     }
 
     function showEditMenu(messageID, title, content, medias) {
@@ -94,6 +95,8 @@ document.addEventListener("DOMContentLoaded", function () {
         editMenuNewContentField.value = content;
         editedPostID = messageID;
         editedPostMedias = medias;
+        editMenuSendButton.disabled = true;
+
     }
 
     function hideEditMenu() {
@@ -103,6 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
         editMenuNewContentField.value = "";
         editedPostID = null;
         editedPostMedias = [];
+        editMenuSendButton.disabled = true;
     }
 
     /**
@@ -341,8 +345,6 @@ document.addEventListener("DOMContentLoaded", function () {
         `
         option.appendChild(optionMenu);
 
-        console.log(optionMenu.children);
-
         // Add the event listener to the edit button
         if (showEditButton) {
             const editButton = optionMenu.querySelector(`#post-edit-button-p${data.message_id}`);
@@ -422,9 +424,13 @@ document.addEventListener("DOMContentLoaded", function () {
         title.classList.add("post-title");
         postHeader.appendChild(title);
 
+        title.addEventListener("click", function() {
+            window.location = `/t/${threadName}/p/${data.message_id}`;
+        });
+
         editStatus.classList.add("edit-status");
         if (data.was_edited){
-            editStatus.innerText = "[Edited]"
+            editStatus.innerText = getI18nText("edited-post-text");
         }
         postHeader.appendChild(editStatus);
 
@@ -755,7 +761,7 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("You must be logged in to create a post.");
             return;
         }
-        if (!userIsMember) {
+        if (!userIsAMember) {
             alert("You must be a member of the thread to create a post.");
             return;
         }
@@ -872,7 +878,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadTags(threadName);
     loadMorePosts();
     updateNewPostButton();
-    if (!userIsAuthenticated || !userIsMember) {
+    if (!userIsAuthenticated || !userIsAMember) {
         newPostContainer.classList.add("hidden");
     }
 });

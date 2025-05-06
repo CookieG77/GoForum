@@ -1740,8 +1740,9 @@ func IsUserAllowedToEditComment(thread ThreadGoForum, user User, commentID int) 
 		if IsUserBannedFromThread(thread, user) {
 			return false
 		}
+		InfoPrintln("Checking if the user is allowed to edit the comment")
 		checkIfOwner := "SELECT comment_id FROM ThreadComments WHERE comment_id = ? AND user_id = ?"
-		rows, err := db.Query(checkIfOwner, thread.ThreadID, commentID, user.UserID)
+		rows, err := db.Query(checkIfOwner, commentID, user.UserID)
 		if err != nil {
 			ErrorPrintf("Error checking if the user is the owner of the comment: %v\n", err)
 			return false

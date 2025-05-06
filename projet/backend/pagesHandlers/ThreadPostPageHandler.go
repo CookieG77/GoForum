@@ -37,6 +37,20 @@ func ThreadPostPage(w http.ResponseWriter, r *http.Request) {
 
 	thread := f.GetThreadFromName(threadName)
 
+	// Get User and user rights
+	PageInfo["Username"] = ""
+	PageInfo["UserRank"] = 0
+	user := f.GetUser(r)
+	if (user != f.User{}) {
+		userRank := f.GetUserRankInThread(thread, user)
+		if userRank < 0 { // If the user is banned from the thread we show him the YOU ARE BANNED page
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/youAreBanned.html")
+			return
+		}
+		PageInfo["Username"] = user.Username
+		PageInfo["UserRank"] = userRank
+	}
+
 	// Check if the post MessageID is empty or does not exist
 	if postID == "" {
 		ErrorPage404(w, r)
@@ -49,9 +63,15 @@ func ThreadPostPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if the post exists
+	if !f.MessageExistsInThread(thread, postIDInt) {
+		f.ErrorPrintf("Post \"%s\" does not exist in thread \"%s\"\n", postID, threadName)
+		ErrorPage404(w, r)
+		return
+	}
+
 	var post f.FormattedThreadMessage
 	if PageInfo["IsAddressVerified"].(bool) {
-		user := f.GetUser(r)
 		post, err = f.GetMessageByIDWithPOV(postIDInt, user)
 		PageInfo["IsAMember"] = f.IsUserInThread(thread, user)
 	} else {
@@ -65,8 +85,9 @@ func ThreadPostPage(w http.ResponseWriter, r *http.Request) {
 	}
 	PageInfo["Post"] = post
 	PageInfo["ThreadName"] = threadName
+	PageInfo["ReportReasons"] = f.GetReportTypesAsStrings()
 
-	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/threadPost.css", "/css/postStyle.css")
+	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/threadPost.css", "/css/postStyle.css", "/css/thread.css")
 	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadPostScript.js", "/js/threadScript.js")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/threadPost.html")
 }

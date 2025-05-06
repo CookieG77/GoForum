@@ -22,7 +22,11 @@ document.addEventListener("DOMContentLoaded", function (){
     const threadName = getCurrentThreadName();
     const messageId = document.getElementById("data_postID").textContent;
     let userIsAuthenticated = document.getElementById("isAuthenticated").textContent === "true";
-    let userIsThreadMember = document.getElementById("isAMember").textContent === "true";
+    let userIsAMember = document.getElementById("isAMember").textContent === "true";
+    let userRank = parseInt(document.getElementById("userRank").textContent,10);
+    let userIsModerator = userRank >= 1;
+    let userIsAdmin = userRank >= 2;
+    let userIsThreadOwner = userRank >= 3;
     let offset= 0;
     let hasReachedEnd = false;
     const commentsContainer = document.getElementById("comments-container");
@@ -43,27 +47,14 @@ document.addEventListener("DOMContentLoaded", function (){
     const reportContentCharCountValue = document.getElementById("report-content-char-count-value");
     const reportMenuSuccessMessage = document.getElementById("report-success-message");
     const reportMenuErrorMessage = document.getElementById("report-error-message");
-    let messageToReport = null;
-    let messageIsPost = null;
-
-    // Edit post menu elements
-    const editMenu = document.getElementById("edit-post-button-menu");
-    const editMenuBackground = editMenu.getElementsByClassName("full-screens-menu-background")[0];
-    const editMenuCloseButton = document.getElementById("close-edit-post-menu");
-    const editMenuNewTitleField = document.getElementById("edit-post-title");
-    const editMenuNewContentField = document.getElementById("edit-post-content");
-    const editMenuNewContentCharCountValue = document.getElementById("edit-post-content-char-count-value");
-    const editMenuSendButton = document.getElementById("edit-post-send-button");
-    let editedPostMedias = [];
-    let editedPostID = null;
-    const editMenuMediasPreview = document.getElementById("edit-post-medias-container");
+    let commentToReport = null;
 
     // Edit comment menu elements
     const editCommentMenu = document.getElementById("edit-comment-button-menu");
-    const editCommentMenuBackground = editMenu.getElementsByClassName("full-screens-menu-background")[0];
+    const editCommentMenuBackground = editCommentMenu.getElementsByClassName("full-screens-menu-background")[0];
     const editCommentMenuCloseButton = document.getElementById("close-comment-post-menu");
     const editCommentMenuNewContentField = document.getElementById("edit-comment-content");
-    const editCommentMenuNewContentCharCountValue = document.getElementById("edit-post-comment-char-count-value");
+    const editCommentMenuNewContentCharCountValue = document.getElementById("edit-comment-content-char-count-value");
     const editCommentMenuSendButton = document.getElementById("edit-comment-send-button");
     let editedCommentID = null;
 
@@ -73,11 +64,11 @@ document.addEventListener("DOMContentLoaded", function (){
      * @param messageID {number} - The ID of the message to report
      * @param isPost {boolean} - Whether the message is a post or a comment (true for post, false for comment)
      */
-    function showReportMenu(messageID, isPost) {
+    function showReportMenu(messageID) {
         reportMenu.classList.remove("hidden");
         scrollbar.classList.add("hidden");
-        messageToReport = messageID;
-        messageIsPost = isPost;
+        commentToReport = messageID;
+        reportMenuSendButton.disabled = true;
     }
 
     /**
@@ -90,44 +81,36 @@ document.addEventListener("DOMContentLoaded", function (){
         reportMenuSuccessMessage.classList.add("hidden");
         reportMenuErrorMessage.classList.add("hidden");
         reportContent.value = "";
-        messageToReport = null;
-        messageIsPost = null;
-        reportMenuSendButton.disabled = false;
+        commentToReport = null;
+        reportMenuSendButton.disabled = true;
     }
 
-    function showEditMenu(messageID, title, content, medias) {
-        editMenu.classList.remove("hidden");
-        scrollbar.classList.add("hidden");
-        editMenuNewTitleField.value = title;
-        editMenuNewContentField.value = content;
-        editedPostID = messageID;
-        editedPostMedias = medias;
-    }
-
-    function hideEditMenu() {
-        editMenu.classList.add("hidden");
-        scrollbar.classList.remove("hidden");
-        editMenuNewTitleField.value = "";
-        editMenuNewContentField.value = "";
-        editedPostID = null;
-        editedPostMedias = [];
-    }
-
-    function showEditCommentMenu(commentID, content) {
+    function showEditMenu(commentID, content) {
         editCommentMenu.classList.remove("hidden");
         scrollbar.classList.add("hidden");
         editCommentMenuNewContentField.value = content;
         editedCommentID = commentID;
+        editCommentMenuSendButton.disabled = true;
+
+        // Update the character count
+        const charCount = editCommentMenuNewContentField.value.length;
+        editCommentMenuNewContentCharCountValue.innerText = `${charCount}`;
+        if (charCount > 500) {
+            editCommentMenuNewContentField.value = editCommentMenuNewContentField.value.substring(0, 500);
+            editCommentMenuNewContentCharCountValue.innerText = `500`;
+        }
+        editCommentMenuSendButton.disabled = (charCount < 5 || charCount > 500);
     }
 
-    function hideEditCommentMenu() {
+    function hideEditMenu() {
         editCommentMenu.classList.add("hidden");
         scrollbar.classList.remove("hidden");
         editCommentMenuNewContentField.value = "";
         editedCommentID = null;
+        editCommentMenuSendButton.disabled = true;
     }
 
-    if (userIsAuthenticated && userIsThreadMember) {
+    if (userIsAuthenticated && userIsAMember) {
         newCommentButton = document.getElementById("new-comment-send-button");
         newCommentContent = document.getElementById("new-comment-content");
         newCommentContentCharCountValue = document.getElementById("new-comment-content-char-count-value");
@@ -296,11 +279,9 @@ document.addEventListener("DOMContentLoaded", function (){
         const authorPfp = document.createElement("img");
         const authorAndTime = document.createElement("div");
         const author = document.createElement("span");
-        const time = document.createElement("span");
         const option = document.createElement("div");
         const optionButton = document.createElement("button");
         const optionMenu = document.createElement("div");
-        const editStatus = document.createElement("span");
         const commentContent = document.createElement("section");
         const commentMedia = document.createElement("p");
         const commentVote = document.createElement("section");
@@ -310,12 +291,15 @@ document.addEventListener("DOMContentLoaded", function (){
         const vote = document.createElement("span");
         const downvoteButton = document.createElement("button");
         const downvoteImg = document.createElement("img");
-        const dateAndEditContainer = document.createElement("div");
+        const dateAndEditContainer = document.createElement("section");
         const dateSpan = document.createElement("span");
         const isEditedSpan = document.createElement("span");
 
         let currentVoteState = data.vote_state;
         let currentVoteCount = data.up_votes - data.down_votes;
+        let isCommentOwner = data.user_name === document.getElementById("username").textContent;
+        console.log(data.user_name);
+        console.log(document.getElementById("username").textContent);
 
         container.classList.add("comment-box", "win95-border");
 
@@ -338,10 +322,6 @@ document.addEventListener("DOMContentLoaded", function (){
         author.innerText = `${data.user_name}`;
         authorAndTime.appendChild(author);
 
-        time.classList.add("time-ago");
-        time.innerText = `${timeAgo(data.creation_date)}`;
-        authorAndTime.appendChild(time);
-
         option.classList.add();
         commentHeader.appendChild(option);
 
@@ -351,7 +331,117 @@ document.addEventListener("DOMContentLoaded", function (){
         option.appendChild(optionButton);
 
         optionMenu.classList.add("option-menu", "win95-border");
+
+        let optionMenuReportButtonHTML = `
+            <li class="win95-menu-button message-report menu-button" id="comment-report-button-p${data.comment_id}">
+                <img src="/img/report.png" alt="" class="win95-minor-logo unselectable" draggable="false">
+                <span>${getI18nText("option-menu-report-button-text")}</span>
+            </li>`
+
+        let optionMenuEditButtonHTML = `
+            <li class="win95-menu-button message-edit menu-button" id="comment-edit-button-p${data.comment_id}">
+                <img src="/img/edit.png" alt="" class="win95-minor-logo  unselectable" draggable="false">
+                <span>${getI18nText("option-menu-edit-button-text")}</span>
+            </li>`
+
+        let optionMenuDeleteButtonHTML = `
+            <li class="win95-menu-button message-delete menu-button" id="comment-delete-button-p${data.comment_id}">
+                <img src="/img/delete.png" alt="" class="win95-minor-logo  unselectable" draggable="false">
+                <span>${getI18nText("option-menu-delete-button-text")}</span>
+            </li>`
+
+        let optionMenuBanButtonHTML = `
+            <li class="win95-menu-button message-ban menu-button" id="comment-ban-button-p${data.comment_id}">
+                <img src="/img/ban.png" alt="" class="win95-minor-logo unselectable" draggable="false">
+                <span>${getI18nText("option-menu-ban-button-text")}</span>
+            </li>`
+        let additionalButtonsHTML = "";
+        let showReportButton = false;
+        let showEditButton = false;
+        let showDeleteButton = false;
+        let showBanButton = false;
+
+        if (userIsAuthenticated) { // If the user is authenticated he can see the option menu
+            if (!isCommentOwner) { // If the user is authenticated he can report a post (exept his posts)
+                additionalButtonsHTML += optionMenuReportButtonHTML;
+                showReportButton = true;
+            }
+            if (isCommentOwner) { // If the user is the owner of the post he can edit it
+                additionalButtonsHTML += optionMenuEditButtonHTML;
+                showEditButton = true;
+            }
+            if (isCommentOwner || userIsModerator || userIsAdmin || userIsAdmin) { // If the user is the owner of the post or his rank is moderator or higher he can delete it
+                additionalButtonsHTML += optionMenuDeleteButtonHTML;
+                showDeleteButton = true;
+            }
+            if ((userIsThreadOwner || userIsAdmin) && !isCommentOwner) { // If the user rank is admin or higher he can ban the user (exept himself)
+                additionalButtonsHTML += optionMenuBanButtonHTML;
+                showBanButton = true;
+            }
+        }
+
+        // All user can report a post
+        optionMenu.innerHTML =`
+        <ul>
+            ${additionalButtonsHTML}
+        </ul>
+        
+        `
         option.appendChild(optionMenu);
+
+        // Add the event listener to the edit button
+        if (showEditButton) {
+            const editButton = optionMenu.querySelector(`#comment-edit-button-p${data.comment_id}`);
+            editButton.addEventListener("click", function() {
+                console.log(`Edit button clicked for comment ${data.comment_id}`);
+                showEditMenu(data.comment_id, data.comment_content);
+            });
+        }
+
+        // Add the event listener to the delete button
+        if (showDeleteButton) {
+            const deleteButton = optionMenu.querySelector(`#comment-delete-button-p${data.comment_id}`);
+            deleteButton.addEventListener("click", function() {
+                console.log(`Delete button clicked for post ${data.comment_id}`);
+                const result = deleteComment(threadName, data.comment_id);
+                result.then(async (response) => {
+                    if (response.ok) {
+                        container.remove();
+                        console.log("Comment deleted successfully");
+                    } else {
+                        alert("Error while deleting comment : " + response.statusText);
+                        console.error(response);
+                    }
+                });
+            });
+        }
+
+        // Add the event listener to the report button
+        if (showReportButton) {
+            const reportButton = optionMenu.querySelector(`#comment-report-button-p${data.comment_id}`);
+            reportButton.addEventListener("click", function() {
+                console.log(`Report button clicked for post ${data.comment_id}`);
+                showReportMenu(data.comment_id);
+            });
+        }
+
+        // Add the event listener to the ban button
+        if (showBanButton) {
+            const banButton = optionMenu.querySelector(`#comment-ban-button-p${data.comment_id}`);
+            banButton.addEventListener("click", function() {
+                console.log(`Ban button clicked for post ${data.comment_id}`);
+                const result = banUser(threadName, data.user_name);
+                result.then(async (response) => {
+                    if (response.ok) {
+                        alert("User banned successfully");
+                        console.log("User banned successfully");
+                    } else {
+                        alert("Error while banning user : " + response.statusText);
+                        console.error(response);
+                    }
+                });
+            });
+        }
 
         function toggleOptionMenu() {
             optionMenu.classList.add("active")
@@ -374,12 +464,6 @@ document.addEventListener("DOMContentLoaded", function (){
             }
         })
 
-        editStatus.classList.add("edit-status");
-        if (data.was_edited){
-            editStatus.innerText= "[Edited]"
-        }
-        commentHeader.appendChild(editStatus);
-
         commentContent.classList.add("comment-content");
         container.appendChild(commentContent);
 
@@ -397,8 +481,7 @@ document.addEventListener("DOMContentLoaded", function (){
         upvoteButton.classList.add("win95-button", "comment-vote-button");
         if (userIsAuthenticated) {
             upvoteButton.addEventListener("click", function () {
-                const commentId = data.comment_id.toString();
-                upvoteComment(threadName, messageId, commentId)
+                upvoteComment(threadName, messageId, data.comment_id)
                     .then(r => {
                         if (r.ok) {
                             return r.json();
@@ -436,8 +519,7 @@ document.addEventListener("DOMContentLoaded", function (){
         downvoteButton.classList.add("win95-button", "comment-vote-button");
         if (userIsAuthenticated) {
             downvoteButton.addEventListener("click", function () {
-                const commentId = data.comment_id.toString();
-                downvoteComment(threadName, messageId, commentId)
+                downvoteComment(threadName, messageId, data.comment_id)
                     .then(r => {
                         if (r.ok) {
                             return r.json();
@@ -473,6 +555,7 @@ document.addEventListener("DOMContentLoaded", function (){
         container.appendChild(dateAndEditContainer);
         dateAndEditContainer.appendChild(dateSpan);
         dateAndEditContainer.appendChild(isEditedSpan);
+        console.log(dateAndEditContainer);
         dateAndEditContainer.classList.add("comment-date-edit-container");
         dateSpan.classList.add("comment-date");
         dateSpan.innerText = timeAgo(data.creation_date);
@@ -489,9 +572,9 @@ document.addEventListener("DOMContentLoaded", function (){
         loadMoreComments();
     })
 
-    if (userIsAuthenticated && userIsThreadMember) {
+    if (userIsAuthenticated && userIsAMember) {
         postVoteUpButton.addEventListener('click', function() {
-            const postId = messageId.toString();
+            postId = parseInt(messageId, 10);
             upvoteMessage(threadName, postId)
                 .then(r => {
                     if (r.ok) {
@@ -513,7 +596,7 @@ document.addEventListener("DOMContentLoaded", function (){
         });
 
         postVoteDownButton.addEventListener('click', function() {
-            const postId = messageId.toString();
+            postId = parseInt(messageId, 10);
             downvoteMessage(threadName, postId)
                 .then(r => {
                     if (r.ok) {
@@ -585,35 +668,63 @@ document.addEventListener("DOMContentLoaded", function (){
         if (reportMenuSendButton.disabled) {
             return;
         }
-        if (messageIsPost) {
-            reportMessage(threadName, messageToReport, reportReason.value, reportContent.value)
-                .then(r => {
-                    if (r.ok) {
-                        reportMenuSuccessMessage.classList.remove("hidden");
-                        reportMenuSendButton.disabled = true;
-                        reportReason.disabled = true;
-                        reportContent.disabled = true;
+        reportComment(threadName, messageId, commentToReport, reportReason.value, reportContent.value)
+            .then(r => {
+                if (r.ok) {
+                    reportMenuSuccessMessage.classList.remove("hidden");
+                    reportMenuSendButton.disabled = true;
+                    reportReason.disabled = true;
+                    reportContent.disabled = true;
 
-                    } else {
-                        reportMenuErrorMessage.classList.remove("hidden");
-                        console.error(r);
-                    }
-                });
-        } else {
-            reportComment(threadName, messageToReport, reportReason.value, reportContent.value)
-                .then(r => {
-                    if (r.ok) {
-                        reportMenuSuccessMessage.classList.remove("hidden");
-                        reportMenuSendButton.disabled = true;
-                        reportReason.disabled = true;
-                        reportContent.disabled = true;
-
-                    } else {
-                        reportMenuErrorMessage.classList.remove("hidden");
-                        console.error(r);
-                    }
-                });
+                } else {
+                    reportMenuErrorMessage.classList.remove("hidden");
+                    console.error(r);
+                }
+            });
+    });
+    // Update the report content character count
+    reportContent.addEventListener("input", function() {
+        const charCount = reportContent.value.length;
+        reportContentCharCountValue.innerText = `${charCount}`;
+        if (charCount > 500) {
+            reportContent.value = reportContent.value.substring(0, 500);
+            reportContentCharCountValue.innerText = `500`;
         }
+        reportMenuSendButton.disabled = (charCount < 20 || charCount > 500);
+    });
+
+    // Close the edit menu when the close button is clicked
+    editCommentMenuBackground.addEventListener('click', hideEditMenu);
+    // Close the edit menu when the close button is clicked
+    editCommentMenuCloseButton.addEventListener('click', hideEditMenu);
+    // Send the edit when the send button is clicked
+    editCommentMenuSendButton.addEventListener("click", function() {
+        if (editCommentMenuSendButton.disabled) {
+            return;
+        }
+        editComment(threadName, messageId, editedCommentID, editCommentMenuNewContentField.value)
+            .then(r => {
+                if (r.ok) {
+                    hideEditMenu();
+                    commentsContainer.innerHTML = "";
+                    hasReachedEnd = false;
+                    offset = 0;
+                    // Reload the comments
+                    loadMoreComments();
+                } else {
+                    console.error(r);
+                }
+            });
+    });
+    // Update the edit content character count
+    editCommentMenuNewContentField.addEventListener("input", function() {
+        const charCount = editCommentMenuNewContentField.value.length;
+        editCommentMenuNewContentCharCountValue.innerText = `${charCount}`;
+        if (charCount > 500) {
+            editCommentMenuNewContentField.value = editCommentMenuNewContentField.value.substring(0, 500);
+            editCommentMenuNewContentCharCountValue.innerText = `500`;
+        }
+        editCommentMenuSendButton.disabled = (charCount < 5 || charCount > 500);
     });
 
     loadMoreComments()

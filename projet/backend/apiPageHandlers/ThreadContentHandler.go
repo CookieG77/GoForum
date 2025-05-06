@@ -71,6 +71,13 @@ type jsonThreadTagDesignator struct {
 	TagID int `json:"tagId"`
 }
 
+type jsonCommentReport struct {
+	ID         int    `json:"contentToReportID"`
+	MessageID  int    `json:"messageId,string"`
+	ReportType string `json:"reportType"`
+	Content    string `json:"content"`
+}
+
 // jsonThreadTag is a custom type used to handle ajax calls that create a thread tag
 type jsonThreadTag struct {
 	TagName  string `json:"tagName"`
@@ -1007,7 +1014,7 @@ func reportComment(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 	}
 
 	// Getting the form values
-	var comment jsonReport
+	var comment jsonCommentReport
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&comment); err != nil {
 		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
@@ -1023,7 +1030,7 @@ func reportComment(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 	}
 
 	// Check if the message MessageID is valid
-	if !f.MessageExistsInThread(thread, comment.ID) {
+	if !f.CommentExistsOnMessage(comment.MessageID, comment.ID) {
 		f.DebugPrintf("comment CommentID is not valid\n")
 		http.Error(w, "comment CommentID is not valid", http.StatusBadRequest)
 		return

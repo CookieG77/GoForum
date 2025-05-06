@@ -108,7 +108,7 @@
         "moderation_team" : "Thread moderation team",
         "tags" : "Tags"
       },
-      "was_modified" : "(edited)",
+      "was_modified" : "[edited]",
       "option_menu" : {
         "edit_button" : "Edit",
         "delete_button" : "Delete",

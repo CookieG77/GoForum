@@ -309,6 +309,7 @@ function reportComment(threadName, messageId, commentId, reportReason, reportDes
         },
         body: JSON.stringify({
             contentToReportID: commentId,
+            messageId: messageId,
             reportType: reportReason,
             content: reportDescription
         })
