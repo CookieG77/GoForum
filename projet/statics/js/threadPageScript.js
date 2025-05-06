@@ -57,6 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const threadName = getCurrentThreadName()
     let userIsAuthenticated = document.getElementById("isAuthenticated").textContent === "true";
+    let userIsMember = document.getElementById("isMember").textContent === "true";
     let offset= 0;
     let hasReachedEnd = false;
     let orderSelect = document.getElementById("order")
@@ -65,6 +66,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const tagListContainer = document.getElementById('tagList');
     const noTagsMessage = document.getElementById('noTagsMessage');
+
+    const newPostContainer = document.getElementById("new-post-box");
+    const newPostTitle = document.getElementById("new-post-title");
+    const newPostContent = document.getElementById("new-post-content");
+    const newPostButton = document.getElementById("new-post-send-button");
+    const newPostContentCharCountValue = document.getElementById("new-post-content-char-count-value");
+    const newPostfileInput = document.getElementById("new-post-file-input")
+    const newPostImagesPreview = document.getElementById("new-post-medias-container")
+    let MediaIDs = [];
+    let titleValid = false;
+    let contentValid = false;
 
     /**
      * Load more posts from the server.
@@ -106,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function () {
      * @param selectable {boolean} - Whether the tags should be selectable or not. Used for the tag selection (default is false)
      * @returns {void}
      */
-    function renderTags(tags, tagContainer, selectable = false) {
+    function renderTags(tags, tagContainer, selectable = false, isNewPostTagDisplat = false) {
         tags.forEach(tag => {
             const tagItem = document.createElement('div');
             tagItem.classList.add('tag-item');
@@ -495,6 +507,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (response.ok) {
                     joinButton.classList.remove("hidden");
                     leaveButton.classList.add("hidden");
+                    newPostContainer.classList.add("hidden");
                     console.log("You have left the thread");
                 } else {
                     console.error(response);
@@ -509,6 +522,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (response.ok) {
                     joinButton.classList.add("hidden");
                     leaveButton.classList.remove("hidden");
+                    newPostContainer.classList.remove("hidden");
                     console.log("You have joined the thread");
                 } else {
                     console.error(response);
@@ -561,7 +575,105 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    // Load the tags when the page is loaded
+    // New post buttons functions
+
+    function updateNewPostButton() {
+        newPostButton.disabled = !(titleValid && contentValid);
+    }
+
+    // Display the maximum number of characters for the content
+    // And add the validity check
+    newPostContent.addEventListener("input", function() {
+        const charCount = newPostContent.value.length;
+        newPostContentCharCountValue.innerText = `${charCount}`;
+        if (charCount > 500) {
+            newPostContent.value = newPostContent.value.substring(0, 500);
+            newPostContentCharCountValue.innerText = `500`;
+        }
+        contentValid = !(charCount <= 20 || charCount > 500);
+        updateNewPostButton();
+    });
+
+    newPostTitle.addEventListener("input" , function() {
+        const charCount = newPostTitle.value.length;
+        if (charCount > 50) {
+            newPostTitle.value = newPostTitle.value.substring(0, 50);
+        }
+        titleValid = !(charCount <= 5 || charCount > 50);
+        updateNewPostButton();
+    });
+
+    function removeSelfAndChildren(element) {
+        element.remove();
+    }
+
+    newPostfileInput.addEventListener("change", async (e) => {
+        e.preventDefault();
+
+        const res = await UploadImages(newPostfileInput, "message_picture")
+
+        for (const [url, id] of res.results) {
+            if (url !== null) {
+                const wrapper = document.createElement('div');
+                wrapper.classList.add("image-preview");
+                wrapper.addEventListener('click', () => { // Add click event to remove image
+                    removeSelfAndChildren(wrapper);
+                    MediaIDs.splice(MediaIDs.indexOf(id), 1);
+                });
+                const img = document.createElement('img');
+                img.src = "/upload/" + url;
+                img.alt = "Image preview";
+                img.draggable = false;
+                img.classList.add("unselectable");
+                MediaIDs.push(id);
+                wrapper.appendChild(img);
+                const imgContainer = newPostImagesPreview.appendChild(wrapper);
+            }
+        }
+    });
+
+    newPostButton.addEventListener("click", function() {
+        if (!userIsAuthenticated) {
+            alert("You must be logged in to create a post.");
+            return;
+        }
+        if (!userIsMember) {
+            alert("You must be a member of the thread to create a post.");
+            return;
+        }
+        sendMessage(threadName, newPostTitle.value, newPostContent.value, MediaIDs, null)
+            .then(r => {
+                if (r.ok) {
+                    return r.json();
+                } else {
+                    throw new Error("Error while sending message");
+                }
+            })
+            .then(
+                () => {
+                    newPostTitle.value = "";
+                    newPostContent.value = "";
+                    MediaIDs = [];
+                    while (newPostImagesPreview.firstChild) {
+                        newPostImagesPreview.removeChild(newPostImagesPreview.firstChild);
+                    }
+                    newPostImagesPreview.innerHTML = "";
+                    postsContainer.innerHTML = "";
+                    offset = 0;
+                    // Reload more messages
+                    loadMorePosts();
+                }
+            ).catch(error => {
+                alert("An error occurred while sending message");
+                console.error("Error:", error);
+        });
+    });
+
+    // Init the page
     loadTags(threadName);
     loadMorePosts();
+    updateNewPostButton();
+    if (!userIsAuthenticated || !userIsMember) {
+        newPostContainer.classList.add("hidden");
+    }
 });

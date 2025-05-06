@@ -97,6 +97,6 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/thread.css", "/css/postStyle.css")
-	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadScript.js", "/js/threadPageScript.js")
+	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadScript.js", "/js/threadPageScript.js", "/js/imgUploaderScript.js")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/thread.html")
 }

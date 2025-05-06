@@ -1633,11 +1633,12 @@ func IsMessageTitleValid(messageTitle string) bool {
 }
 
 // IsMessageContentOrCommentContentValid checks if the message content is valid
-// Message content must be at least 5 characters long
-// Message content must be at most 500 characters long
-// Message content must only contain letters, numbers, underscores, hyphens, spaces, punctuation, most special characters, accents and emojis
+// Message content must be at least 5 characters long.
+// Message content must be at most 500 characters long.
+// Message content must only contain letters, numbers, underscores, hyphens, spaces, punctuation, most special characters, accents and emojis.
+// Message can also be multiline.
 func IsMessageContentOrCommentContentValid(messageContent string) bool {
-	messageContentRegex := regexp.MustCompile(`^[a-zA-Z0-9 _\-.,;:!?(){}\[\]<>@#$%^&*+=~|\\"'/éèêëôçàâäïîùûü]{5,500}$`)
+	messageContentRegex := regexp.MustCompile(`^[a-zA-Z0-9 _\-.,;:!?(){}\[\]<>@#$%^&*+=~|\\"'/éèêëôçàâäïîùûü\n\r]{5,500}$`)
 	return messageContentRegex.MatchString(messageContent)
 }
 
