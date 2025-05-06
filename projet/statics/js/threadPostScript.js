@@ -162,10 +162,13 @@ document.addEventListener("DOMContentLoaded", function (){
         const commentHeader = document.createElement("section");
         const commentAuthor = document.createElement("div");
         const authorPfp = document.createElement("img");
+        const authorAndTime = document.createElement("div");
         const author = document.createElement("span");
+        const time = document.createElement("span");
         const option = document.createElement("div");
         const optionButton = document.createElement("button");
         const optionMenu = document.createElement("div");
+        const editStatus = document.createElement("span");
         const commentContent = document.createElement("section");
         const commentMedia = document.createElement("p");
         const commentVote = document.createElement("section");
@@ -193,8 +196,16 @@ document.addEventListener("DOMContentLoaded", function (){
         authorPfp.draggable = false;
         commentAuthor.appendChild(authorPfp);
 
+        authorAndTime.classList.add("author-and-time");
+        commentAuthor.appendChild(authorAndTime);
+
+        author.classList.add("author-pseudo");
         author.innerText = `${data.user_name}`;
-        commentAuthor.appendChild(author);
+        authorAndTime.appendChild(author);
+
+        time.classList.add("time-ago");
+        time.innerText = `${timeAgo(data.creation_date)}`;
+        authorAndTime.appendChild(time);
 
         option.classList.add();
         commentHeader.appendChild(option);
@@ -227,6 +238,12 @@ document.addEventListener("DOMContentLoaded", function (){
                 optionMenu.classList.remove("active");
             }
         })
+
+        editStatus.classList.add("edit-status");
+        if (data.was_edited){
+            editStatus.innerText= "[Edited]"
+        }
+        commentHeader.appendChild(editStatus);
 
         commentContent.classList.add("comment-content");
         container.appendChild(commentContent);
