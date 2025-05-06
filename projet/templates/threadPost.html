@@ -10,6 +10,9 @@
     <span data-key="data_downvotes">{{ .Post.Downvotes }}</span>
     <span id="isAuthenticated">{{ .IsAuthenticated }}</span>
     <span id="isAMember">{{ .IsAMember }}</span>
+    <span id="isAModerator">{{ .IsModerator }}</span>
+    <span id="isAnAdmin">{{ .IsAdmin }}</span>
+    <span id="isThreadOwner">{{ .IsOwner }}</span>
     <div id="data_MediaLinks">
         {{ range $i := .Post.MediaLinks }}
             <div>{{ $i }}</div>
@@ -29,6 +32,10 @@
     <span data-key="ago-day">{{ .Lang.time.ago_day }}</span>
     <span data-key="ago-days">{{ .Lang.time.ago_days }}</span>
     <span data-key="was-edited">{{ .Lang.pages.thread.was_modified }}</span>
+    <span data-key="option-menu-edit-button-text">{{ .Lang.pages.thread.option_menu.edit_button }}</span>
+    <span data-key="option-menu-delete-button-text">{{ .Lang.pages.thread.option_menu.delete_button }}</span>
+    <span data-key="option-menu-ban-button-text">{{ .Lang.pages.thread.option_menu.ban_button }}</span>
+    <span data-key="option-menu-report-button-text">{{ .Lang.pages.thread.option_menu.report_button }}</span>
 </div>
 
 <div id="t-post">

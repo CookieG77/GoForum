@@ -17,7 +17,7 @@ type jsonMessage struct {
 }
 
 type jsonUpdateMessage struct {
-	ID      int    `json:"messageId,string"`
+	ID      int    `json:"messageId"`
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
@@ -27,7 +27,7 @@ type jsonUpdateMessageMedia struct {
 	MediaID int `json:"mediaId,string"`
 }
 type jsonMessageDesignator struct {
-	MessageID int `json:"messageId,string"`
+	MessageID int `json:"messageId"`
 }
 
 type jsonComment struct {
@@ -36,13 +36,13 @@ type jsonComment struct {
 }
 
 type jsonUpdateComment struct {
-	CommentID int    `json:"commentId,string"`
+	CommentID int    `json:"commentId"`
 	MessageID int    `json:"messageId,string"`
 	Content   string `json:"content"`
 }
 
 type jsonCommentDesignator struct {
-	CommentID int `json:"commentId,string"`
+	CommentID int `json:"commentId"`
 	MessageID int `json:"messageId,string"`
 }
 
@@ -51,7 +51,7 @@ type IntSlice []int
 
 // jsonReport is a custom type used to handle ajax calls that create a report
 type jsonReport struct {
-	ID         int    `json:"contentToReportID,string"`
+	ID         int    `json:"contentToReportID"`
 	ReportType string `json:"reportType"`
 	Content    string `json:"content"`
 }

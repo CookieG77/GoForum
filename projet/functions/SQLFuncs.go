@@ -154,9 +154,6 @@ type ThreadTag struct {
 	TagColor string `json:"tag_color"`
 }
 
-// PossibleMessageOrderingList is a list of possible message ordering
-var PossibleMessageOrderingList = []string{"asc", "desc", "popular", "unpopular"}
-
 // ReportType is a type used to determine the type of the report
 type ReportType string
 
@@ -1308,6 +1305,15 @@ func IsAReportType(reportType string) bool {
 	return false
 }
 
+// GetReportTypesAsStrings returns the report types as a string
+func GetReportTypesAsStrings() []string {
+	var reportTypes []string
+	for _, v := range ReportTypes {
+		reportTypes = append(reportTypes, string(v))
+	}
+	return reportTypes
+}
+
 // GetReportTypeFromString returns the report type from the string
 // Returns an error if the report type is not valid
 func GetReportTypeFromString(reportType string) (ReportType, error) {
@@ -1542,10 +1548,7 @@ func IsUserAllowedToDeleteMessage(thread ThreadGoForum, user User, messageID int
 	if thread.OwnerID == user.UserID {
 		return true
 	}
-	if IsThreadOwner(thread, user) {
-		return true
-	}
-	if IsThreadAdmin(thread, user) {
+	if GetUserRankInThread(thread, user) >= 1 {
 		return true
 	}
 	// Check if the user is the owner of the message
@@ -1579,7 +1582,7 @@ func IsUserAllowedToDeleteMessage(thread ThreadGoForum, user User, messageID int
 // Returns true if the user is allowed to ban a user and false otherwise
 // A user is allowed to ban a user if he is the owner or an admin of the thread
 func IsUserAllowedToBanUserInThread(thread ThreadGoForum, user User) bool {
-	if GetThreadMemberRightsLevel(thread, user) > 1 {
+	if GetUserRankInThread(thread, user) >= 2 {
 		return true
 	}
 	return false

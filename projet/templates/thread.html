@@ -65,8 +65,10 @@
                 {{ end }}
             {{ end }}
             <div id="i18n" class="hidden">
-                <div id="isAuthenticated" class="hidden">{{ .IsAuthenticated }}</div>
-                <div id="isMember" class="hidden">{{ .IsAMember }}</div>
+                <span id="username">{{ .Username }}</span>
+                <span id="isAuthenticated">{{ .IsAuthenticated }}</span>
+                <span id="isAMember">{{ .IsAMember }}</span>
+                <span id="userRank">{{ .UserRank }}</span>
                 <span data-key="ago-seconds">{{ .Lang.time.ago_seconds }}</span>
                 <span data-key="ago-minute">{{ .Lang.time.ago_minute }}</span>
                 <span data-key="ago-minutes">{{ .Lang.time.ago_minutes }}</span>
@@ -75,6 +77,10 @@
                 <span data-key="ago-day">{{ .Lang.time.ago_day }}</span>
                 <span data-key="ago-days">{{ .Lang.time.ago_days }}</span>
                 <span data-key="was-edited">{{ .Lang.pages.thread.was_modified }}</span>
+                <span data-key="option-menu-edit-button-text">{{ .Lang.pages.thread.option_menu.edit_button }}</span>
+                <span data-key="option-menu-delete-button-text">{{ .Lang.pages.thread.option_menu.delete_button }}</span>
+                <span data-key="option-menu-report-button-text">{{ .Lang.pages.thread.option_menu.report_button }}</span>
+                <span data-key="option-menu-ban-button-text">{{ .Lang.pages.thread.option_menu.ban_button }}</span>
             </div>
             <div id="new-post-box" class="post-box, win95-border">
                 <section class="post-header win95-header">
@@ -146,6 +152,65 @@
             <div id="tagList"></div>
             <div id="noTagsMessage" class="no-tags-message" style="display: none;">No tags available.</div>
         </section>
+    </div>
+</div>
+<div id="report-button-menu" class="full-screen-menu hidden">
+    <div class="full-screens-menu-background"></div>
+    <div class="full-screen-menu-content win95-border">
+        <div class="win95-header">
+            <h3>{{ .Lang.pages.thread.report.title }}</h3>
+            <div>
+                <button class="win95-close-button" type="button" id="close-report-menu">
+                    <img src="/img/close.svg" alt="Close">
+                </button>
+            </div>
+        </div>
+        <div class="win95-border-indent">
+            <p>{{ .Lang.pages.thread.report.description }}</p>
+            <label for="report-reason">{{ .Lang.pages.thread.report.reason_label }}</label>
+            <select id="report-reason" class="win95-input">
+                {{ range $reason := .ReportReasons }}
+                    <option value="{{ $reason }}">{{ $reason }}</option>
+                {{ end }}
+            </select>
+            <label for="report-content">{{ .Lang.pages.thread.report.comment_label}}</label>
+            <textarea id="report-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.report.comment_placeholder }}" maxlength="500" minlength="5"></textarea>
+            <div id="report-content-char-count">
+                <span id="report-content-char-count-value">0</span> / 500
+            </div>
+            <button id="send-report-button" class="win95-button" type="button">{{ .Lang.pages.thread.report.report_button }}</button>
+            <div id="report-success-message" class="hidden">
+                <p>{{ .Lang.pages.thread.report.report_success }}</p>
+            </div>
+            <div id="report-error-message" class="hidden">
+                <p>{{ .Lang.pages.thread.report.report_error }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="edit-post-button-menu" class="full-screen-menu hidden">
+    <div class="full-screens-menu-background"></div>
+    <div class="full-screen-menu-content win95-border">
+        <div class="win95-header">
+            <h3>{{ .Lang.pages.thread.edit.title }}</h3>
+            <div>
+                <button class="win95-close-button" type="button" id="close-edit-post-menu">
+                    <img src="/img/close.svg" alt="Close">
+                </button>
+            </div>
+        </div>
+        <div class="win95-border-indent">
+            <label for="edit-post-title">{{ .Lang.pages.thread.edit.new_title_label }}</label>
+            <input type="text" id="edit-post-title" class="win95-input" placeholder="{{ .Lang.pages.thread.edit.title_placeholder }}" required minlength="5" maxlength="50">
+            <label for="edit-post-content">{{ .Lang.pages.thread.edit.new_content_label }}</label>
+            <textarea id="edit-post-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.edit.content_placeholder }}" required maxlength="500" minlength="20"></textarea>
+            <div id="edit-post-content-char-count">
+                <span id="edit-post-content-char-count-value">0</span> / 500
+            </div>
+            <button id="edit-post-send-button" class="win95-button" type="button">{{ .Lang.pages.thread.edit.send }}</button>
+            <div id="edit-post-medias-container">
+            <div>
+        </div>
     </div>
 </div>
 
