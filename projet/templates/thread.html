@@ -64,9 +64,17 @@
                     <p>{{ .Lang.pages.thread.must_join_thread_message }}</p>
                 {{ end }}
             {{ end }}
-            <div id="datas" class="hidden">
+            <div id="i18n" class="hidden">
                 <div id="isAuthenticated" class="hidden">{{ .IsAuthenticated }}</div>
                 <div id="isMember" class="hidden">{{ .IsAMember }}</div>
+                <span data-key="ago-seconds">{{ .Lang.time.ago_seconds }}</span>
+                <span data-key="ago-minute">{{ .Lang.time.ago_minute }}</span>
+                <span data-key="ago-minutes">{{ .Lang.time.ago_minutes }}</span>
+                <span data-key="ago-hour">{{ .Lang.time.ago_hour }}</span>
+                <span data-key="ago-hours">{{ .Lang.time.ago_hours }}</span>
+                <span data-key="ago-day">{{ .Lang.time.ago_day }}</span>
+                <span data-key="ago-days">{{ .Lang.time.ago_days }}</span>
+                <span data-key="was-edited">{{ .Lang.pages.thread.was_modified }}</span>
             </div>
             <div id="new-post-box" class="post-box, win95-border">
                 <section class="post-header win95-header">
@@ -84,7 +92,7 @@
                                 <span id="new-post-content-char-count-value">0</span> / 500
                             </div>
                         </div>
-                        <div id="new-post-tag-container">
+                        <div id="new-post-tags-container">
 
                         </div>
                         <div id="new-post-medias">

@@ -14,9 +14,9 @@
     "resetPassword" : "Reset your password",
     "error": "Error",
     "thread": "thread",
+    "threadNewMessage" : "threadNewMessage",
     "profile" : "Profile",
     "settings" : "Settings"
-
   },
   "pages" : {
     "base" : {
@@ -107,7 +107,8 @@
       "sidebar" : {
         "moderation_team" : "Thread moderation team",
         "tags" : "Tags"
-      }
+      },
+      "was_modified" : "(edited)"
     },
     "thread_creation" : {
       "thread_name" : "Thread name",
@@ -118,5 +119,14 @@
       "thread_creation_error" : "An error occurred while trying to create the thread. Please try again later.",
       "thread_creation_submit" : "Create thread"
     }
+  },
+  "time" : {
+    "ago_seconds" : "A few seconds ago",
+    "ago_minute" : "{n} minute ago",
+    "ago_minutes" : "{n} minutes ago",
+    "ago_hour" : "{n} hour ago",
+    "ago_hours" : "{n} hours ago",
+    "ago_day" : "{n} day ago",
+    "ago_days" : "{n} days ago"
   }
 }

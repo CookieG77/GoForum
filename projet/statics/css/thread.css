@@ -280,3 +280,10 @@
 #new-post-send-button {
     margin: 12px;
 }
+
+#new-post-tags-container {
+    display: inline;
+    width: 100%;
+    height: fit-content;
+    padding: 8px;
+}

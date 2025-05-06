@@ -1612,6 +1612,7 @@ func AddMessageInThread(thread ThreadGoForum, title string, content string, user
 
 	// Add the tags to the message
 	for _, tagID := range TagIDs {
+		DebugPrintf("messageID: %d, tagID: %d\n", messageID, tagID)
 		insertTag := "INSERT INTO ThreadMessageTags (message_id, tag_id) VALUES (?, ?)"
 		_, err = db.Exec(insertTag, messageID, tagID)
 		if err != nil {

@@ -17,7 +17,7 @@ function getCurrentThreadName() {
  * @param messageTitle {string} - The title of the message.
  * @param messageContent {string} - The content of the message.
  * @param messageMedias {string[]} - The media files to attach to the message.
- * @param messageTags {string[]} - The tags of the message.
+ * @param messageTags {int[]} - The tags of the message.
  * @returns {Promise<Response>} - The response from the server.
  */
 function sendMessage(threadName, messageTitle, messageContent, messageMedias, messageTags) {
@@ -498,4 +498,47 @@ function getThreadTags(threadName) {
             "Content-Type": "application/json",
         }
     });
+}
+
+
+/**
+ * Get the i18n text for the given key.
+ * @param key {string} - The key to get the text for.
+ * @param value {string|null} - The value to replace in the text. If null, no replacement is done.
+ * @returns {string} - The i18n text for the given key.
+ */
+function getI18nText(key, value = null) {
+    const el = document.querySelector(`#i18n [data-key="${key}"]`);
+    if (!el) return '';
+    return value !== null ? el.textContent.replace('{n}', value) : el.textContent;
+}
+
+/**
+ * Get the time ago string for the given date.
+ * @param dateString {string} - The date string to convert to a time ago string.
+ * @returns {string} - The time ago string for the given date.
+ */
+function timeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+
+    const seconds = Math.floor(diffMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours   = Math.floor(minutes / 60);
+    const days    = Math.floor(hours / 24);
+    const months  = Math.floor(days / 30);
+
+    if (minutes < 1) {
+        return getI18nText('ago-seconds');
+    } else if (minutes < 60) {
+        return getI18nText(minutes === 1 ? 'ago-minute' : 'ago-minutes', minutes);
+    } else if (hours < 24) {
+        return getI18nText(hours === 1 ? 'ago-hour' : 'ago-hours', hours);
+    } else if (days < 30) {
+        return getI18nText(days === 1 ? 'ago-day' : 'ago-days', days);
+    } else {
+        const options = { month: 'long', year: 'numeric' };
+        return date.toLocaleDateString(undefined, options); // utilise la locale du navigateur
+    }
 }
