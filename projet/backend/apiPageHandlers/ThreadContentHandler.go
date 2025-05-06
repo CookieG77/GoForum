@@ -313,27 +313,6 @@ func sendMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum,
 	}
 	f.DebugPrintf("Message sent with MessageID: %d\n", messageID)
 
-	// Add the tags to the message
-	if len(msg.Tags) > 0 {
-		for _, tagID := range msg.Tags {
-			isCorrect, err := f.IsTagIDAssociatedWithThread(thread, tagID)
-			if !isCorrect {
-				f.DebugPrintf("Tag MessageID %d is not associated with thread %s\n", tagID, thread.ThreadID)
-				http.Error(w, "Tag MessageID is not associated with thread", http.StatusBadRequest)
-			} else {
-				err = f.AddTagToMessage(messageID, tagID)
-				if err != nil {
-					f.ErrorPrintf("Error while adding the tag to the message: %v\n", err)
-					http.Error(w, "Error while adding the tag to the message", http.StatusInternalServerError)
-					return
-				}
-			}
-		}
-		f.DebugPrintf("Tags added to message with MessageID: %d\n", messageID)
-	} else {
-		f.DebugPrintf("No tags to add to the message with MessageID: %d\n", messageID)
-	}
-
 	// Return the response with the message MessageID
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success", "messageId":` + strconv.Itoa(messageID) + `}`))

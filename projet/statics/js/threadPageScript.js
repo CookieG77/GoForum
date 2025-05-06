@@ -74,9 +74,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const newPostContentCharCountValue = document.getElementById("new-post-content-char-count-value");
     const newPostfileInput = document.getElementById("new-post-file-input")
     const newPostImagesPreview = document.getElementById("new-post-medias-container")
+    const newPostTagsContainer = document.getElementById("new-post-tags-container");
     let MediaIDs = [];
     let titleValid = false;
     let contentValid = false;
+    let newPostTags = [];
 
     /**
      * Load more posts from the server.
@@ -116,9 +118,10 @@ document.addEventListener("DOMContentLoaded", function () {
      * @param tags {Array} - The array of tags to render.
      * @param tagContainer {HTMLElement} - The container to render the tags in.
      * @param selectable {boolean} - Whether the tags should be selectable or not. Used for the tag selection (default is false)
+     * @param isNewPostTagSelect {boolean} - Whether the tags should be selectable for the new post or not (default is false)
      * @returns {void}
      */
-    function renderTags(tags, tagContainer, selectable = false, isNewPostTagDisplat = false) {
+    function renderTags(tags, tagContainer, selectable = false, isNewPostTagSelect = false) {
         tags.forEach(tag => {
             const tagItem = document.createElement('div');
             tagItem.classList.add('tag-item');
@@ -139,19 +142,32 @@ document.addEventListener("DOMContentLoaded", function () {
                 checkbox.value = tag.tag_name;
                 checkbox.dataset.tagId = tag.tag_id;
                 tagItem.appendChild(checkbox);
-                tagItem.addEventListener('click', () => {
-                    checkbox.checked = !checkbox.checked;
-                    tagItem.classList.toggle('selected');
-                    if (checkbox.checked) { // If the tag is selected we add it to the list
-                        selectedTags.push(tag.tag_name);
-                    } else { // If the tag is deselected we remove it from the list
-                        selectedTags.splice(selectedTags.indexOf(tag.tag_name), 1);
-                    }
-                    postsContainer.innerHTML = "";
-                    offset = 0;
-                    // Reload more messages
-                    loadMorePosts();
-                });
+                if (isNewPostTagSelect) {
+                    checkbox.classList.add("new-post-tag");
+                    tagItem.classList.add("new-post-tag-item");
+                    tagItem.addEventListener('click', () => {
+                        checkbox.checked = !checkbox.checked;tagItem.classList.toggle('selected');
+                        if (checkbox.checked) { // If the tag is selected we add it to the list
+                            newPostTags.push(`${tag.tag_id}`);
+                        } else { // If the tag is deselected we remove it from the list
+                            newPostTags.splice(newPostTags.indexOf(`${tag.tag_id}`), 1);
+                        }
+                    });
+                } else
+                    tagItem.addEventListener('click', () => {
+                        checkbox.checked = !checkbox.checked;
+                        tagItem.classList.toggle('selected');
+                        if (checkbox.checked) { // If the tag is selected we add it to the list
+                            selectedTags.push(tag.tag_name);
+                        } else { // If the tag is deselected we remove it from the list
+                            selectedTags.splice(selectedTags.indexOf(tag.tag_name), 1);
+                        }
+                        postsContainer.innerHTML = "";
+                        hasReachedEnd = false;
+                        offset = 0;
+                        // Reload more messages
+                        loadMorePosts();
+                    });
             } else {
                 tagItem.classList.add("unclickable-tag-item");
             }
@@ -163,54 +179,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             tagContainer.appendChild(tagItem);
         });
-    }
-
-    function updateVoteVisual(currentVoteState, upvoteImg, downvoteImg) {
-        let state = parseInt(currentVoteState);
-        if (state === 1){
-            upvoteImg.src = `/img/upvote.png`
-            downvoteImg.src = `/img/downvote_empty.png`
-        } else if(state === 0){
-            upvoteImg.src = `/img/upvote_empty.png`
-            downvoteImg.src = `/img/downvote_empty.png`
-        } else if(state === -1){
-            upvoteImg.src = `/img/upvote_empty.png`
-            downvoteImg.src = `/img/downvote.png`
-        }
-    }
-
-    function updateVoteState(currentVoteState, currentVoteCount, IsUpvoting, upvoteImg, downvoteImg) {
-        let state = parseInt(currentVoteState);
-        let count = currentVoteCount;
-        if (state === 1){
-            if (IsUpvoting){ // upvoting when already upvoted so we remove the upvote
-                state = 0;
-                count -= 1;
-            } else { // downvoting when already upvoted so we remove the upvote and add a downvote
-                state = -1;
-                count -= 2;
-            }
-        } else if(state === 0){
-            if (IsUpvoting){ // upvoting when not voted so we add an upvote
-                state = 1;
-                count += 1;
-            } else { // downvoting when not voted so we add a downvote
-                state = -1;
-                count -= 1;
-            }
-        } else if(state === -1){
-            if (IsUpvoting){ // upvoting when already downvoted so we remove the downvote and add an upvote
-                state = 1;
-                count += 2;
-            } else { // downvoting when already downvoted so we remove the downvote
-                state = 0;
-                count += 1;
-            }
-        }
-        updateVoteVisual(state, upvoteImg, downvoteImg);
-        console.log("Current Vote State: ", state);
-        console.log("Current Vote Count: ", count);
-        return {state, count};
     }
 
 
@@ -487,9 +455,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         message.innerText = `Message content : ${data.message_content}`;
         container.appendChild(message);
-        wasEdited.innerText = `Was edited : ${data.was_edited}`;
+        wasEdited.innerText = data.was_edited ? getI18nText('was-edited') : "";
         container.appendChild(wasEdited);
-        date.innerText = `Date : ${data.creation_date}`;
+        date.innerText = `${timeAgo(data.creation_date)}`;
         container.appendChild(date);
 
         voteState.innerText = `Vote state : ${data.vote_state}`;
@@ -545,6 +513,7 @@ document.addEventListener("DOMContentLoaded", function () {
     orderSelect.addEventListener('change' , function() {
        // Empty the posts container
         postsContainer.innerHTML = "";
+        hasReachedEnd = false;
         offset = 0;
         // Reload more messages
         loadMorePosts();
@@ -567,6 +536,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     renderTags([]);
                 } else {
                     renderTags(data, tagListContainer, true);
+                    renderTags(data, newPostTagsContainer, true, true)
+                    pageTags = data;
                 }
             })
             .catch(err => {
@@ -590,7 +561,7 @@ document.addEventListener("DOMContentLoaded", function () {
             newPostContent.value = newPostContent.value.substring(0, 500);
             newPostContentCharCountValue.innerText = `500`;
         }
-        contentValid = !(charCount <= 20 || charCount > 500);
+        contentValid = !(charCount < 20 || charCount > 500);
         updateNewPostButton();
     });
 
@@ -599,7 +570,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (charCount > 50) {
             newPostTitle.value = newPostTitle.value.substring(0, 50);
         }
-        titleValid = !(charCount <= 5 || charCount > 50);
+        titleValid = !(charCount < 5 || charCount > 50);
         updateNewPostButton();
     });
 
@@ -641,7 +612,7 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("You must be a member of the thread to create a post.");
             return;
         }
-        sendMessage(threadName, newPostTitle.value, newPostContent.value, MediaIDs, null)
+        sendMessage(threadName, newPostTitle.value, newPostContent.value, MediaIDs, newPostTags)
             .then(r => {
                 if (r.ok) {
                     return r.json();
@@ -651,14 +622,26 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(
                 () => {
+                    // Clear the new post fields
                     newPostTitle.value = "";
                     newPostContent.value = "";
+                    newPostTags = [];
+                    let tagCheckbox;
+                    for (const tag of document.getElementsByClassName("new-post-tag-item")) {
+                        tagCheckbox = tag.querySelector("input[type='checkbox']");
+                        if (tagCheckbox.checked) {
+                            tagCheckbox.checked = false;
+                            tag.classList.toggle('selected');
+                        }
+                    }
                     MediaIDs = [];
                     while (newPostImagesPreview.firstChild) {
                         newPostImagesPreview.removeChild(newPostImagesPreview.firstChild);
                     }
+                    // Clear the new displayed post to avoid duplicates
                     newPostImagesPreview.innerHTML = "";
                     postsContainer.innerHTML = "";
+                    hasReachedEnd = false;
                     offset = 0;
                     // Reload more messages
                     loadMorePosts();

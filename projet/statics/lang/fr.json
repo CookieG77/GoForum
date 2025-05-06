@@ -98,7 +98,35 @@
       "must_connect_message" : "Vous devez être connecté pour voir cette page.",
       "must_join_thread_message" : "Vous devez rejoindre ce thread pour voir son contenu.",
       "must_login_to_join_message" : "Pour rejoindre ce thread, vous devez être connecté.",
-      "order_label" : "Ordre des messages : "
+      "order_label" : "Ordre des messages : ",
+      "new_post_title_label" : "Titre : ",
+      "new_post_title_placeholder" : "Titre du post",
+      "new_post_content_label" : "Message : ",
+      "new_post_content_placeholder" : "Écrivez votre message ici",
+      "new_post_send_button" : "Publier",
+      "sidebar" : {
+        "moderation_team" : "Equipe de modération du thread",
+        "tags" : "Tags"
+      },
+      "was_modified" : "(modifié)",
+    },
+    "thread_creation" : {
+      "thread_name" : "Nom du thread",
+      "thread_description" : "Description",
+      "name_already_exist" : "Ce nom de thread existe déjà.",
+      "name_invalid" : "Nom de thread invalide : Doit contenir entre 3 et 20 caractères et ne doit être composé que de lettres, chiffres, tirets bas et tirets.",
+      "description_invalid" : "Description invalide : Doit contenir entre 3 et 100 caractères et ne doit être composé que de lettres, chiffres, tirets bas et tirets.",
+      "thread_creation_error" : "Une erreur est survenue lors de la création du thread. Veuillez réessayer plus tard.",
+      "thread_creation_submit" : "Créer le thread"
     }
+  },
+  "time" : {
+    "ago_seconds" : "Il y a quelques secondes",
+    "ago_minute" : "Il y a {n} minute",
+    "ago_minutes" : "Il y a {n} minutes",
+    "ago_hour" : "Il y a {n} heure",
+    "ago_hours" : "Il y a {n} heures",
+    "ago_day" : "Il y a {n} jour",
+    "ago_days" : "Il y a {n} jours"
   }
 }

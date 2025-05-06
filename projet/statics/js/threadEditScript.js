@@ -170,6 +170,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    threadBannerInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            UploadThreadBanner(file);
+        }
+    });
+
     function UploadThreadIcon(file) {
         UploadImg(file, "thread_icon").then(r => {
             if (r == null) return;
