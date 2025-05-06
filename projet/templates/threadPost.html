@@ -106,4 +106,84 @@
         </div>
     </div>
 </div>
+<div id="report-button-menu" class="full-screen-menu hidden">
+    <div class="full-screens-menu-background"></div>
+    <div class="full-screen-menu-content win95-border">
+        <div class="win95-header">
+            <h3>{{ .Lang.pages.thread.report.title }}</h3>
+            <div>
+                <button class="win95-close-button" type="button" id="close-report-menu">
+                    <img src="/img/close.svg" alt="Close">
+                </button>
+            </div>
+        </div>
+        <div class="win95-border-indent">
+            <p>{{ .Lang.pages.thread.report.description }}</p>
+            <label for="report-reason">{{ .Lang.pages.thread.report.reason_label }}</label>
+            <select id="report-reason" class="win95-input">
+                {{ range $reason := .ReportReasons }}
+                <option value="{{ $reason }}">{{ $reason }}</option>
+                {{ end }}
+            </select>
+            <label for="report-content">{{ .Lang.pages.thread.report.comment_label}}</label>
+            <textarea id="report-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.report.comment_placeholder }}" maxlength="500" minlength="5"></textarea>
+            <div id="report-content-char-count">
+                <span id="report-content-char-count-value">0</span> / 500
+            </div>
+            <button id="send-report-button" class="win95-button" type="button">{{ .Lang.pages.thread.report.report_button }}</button>
+            <div id="report-success-message" class="hidden">
+                <p>{{ .Lang.pages.thread.report.report_success }}</p>
+            </div>
+            <div id="report-error-message" class="hidden">
+                <p>{{ .Lang.pages.thread.report.report_error }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="edit-post-button-menu" class="full-screen-menu hidden">
+    <div class="full-screens-menu-background"></div>
+    <div class="full-screen-menu-content win95-border">
+        <div class="win95-header">
+            <h3>{{ .Lang.pages.thread.edit.title }}</h3>
+            <div>
+                <button class="win95-close-button" type="button" id="close-edit-post-menu">
+                    <img src="/img/close.svg" alt="Close">
+                </button>
+            </div>
+        </div>
+        <div class="win95-border-indent">
+            <label for="edit-post-title">{{ .Lang.pages.thread.edit.new_title_label }}</label>
+            <input type="text" id="edit-post-title" class="win95-input" placeholder="{{ .Lang.pages.thread.edit.title_placeholder }}" required minlength="5" maxlength="50">
+            <label for="edit-post-content">{{ .Lang.pages.thread.edit.new_content_label }}</label>
+            <textarea id="edit-post-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.edit.content_placeholder }}" required maxlength="500" minlength="20"></textarea>
+            <div id="edit-post-content-char-count">
+                <span id="edit-post-content-char-count-value">0</span> / 500
+            </div>
+            <button id="edit-post-send-button" class="win95-button" type="button">{{ .Lang.pages.thread.edit.send }}</button>
+            <div id="edit-post-medias-container">
+            </div>
+        </div>
+    </div>
+</div>
+<div id="edit-comment-button-menu" class="full-screen-menu hidden">
+    <div class="full-screens-menu-background"></div>
+    <div class="full-screen-menu-content win95-border">
+        <div class="win95-header">
+            <h3>{{ .Lang.pages.threadPost.edit.title }}</h3>
+            <div>
+                <button class="win95-close-button" type="button" id="close-comment-post-menu">
+                    <img src="/img/close.svg" alt="Close">
+                </button>
+            </div>
+        </div>
+        <div class="win95-border-indent">
+            <label for="edit-post-content">{{ .Lang.pages.threadPost.edit.new_content_label }}</label>
+            <textarea id="edit-comment-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.edit.content_placeholder }}" required maxlength="500" minlength="20"></textarea>
+            <div id="edit-comment-content-char-count">
+                <span id="edit-comment-content-char-count-value">0</span> / 500
+            </div>
+            <button id="edit-comment-send-button" class="win95-button" type="button">{{ .Lang.pages.thread.edit.send }}</button>
+        </div>
+    </div>
+</div>
 {{ end }}

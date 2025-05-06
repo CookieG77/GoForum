@@ -31,6 +31,102 @@ document.addEventListener("DOMContentLoaded", function (){
     let newCommentContent;
     let newCommentContentCharCountValue;
 
+    const scrollbar = document.getElementsByClassName("custom-scrollbar")[0];
+
+    // Report menu elements
+    const reportMenu = document.getElementById("report-button-menu");
+    const reportMenuBackground = reportMenu.getElementsByClassName("full-screens-menu-background")[0];
+    const reportMenuCloseButton = document.getElementById("close-report-menu");
+    const reportMenuSendButton = document.getElementById("send-report-button");
+    const reportReason = document.getElementById("report-reason");
+    const reportContent = document.getElementById("report-content");
+    const reportContentCharCountValue = document.getElementById("report-content-char-count-value");
+    const reportMenuSuccessMessage = document.getElementById("report-success-message");
+    const reportMenuErrorMessage = document.getElementById("report-error-message");
+    let messageToReport = null;
+    let messageIsPost = null;
+
+    // Edit post menu elements
+    const editMenu = document.getElementById("edit-post-button-menu");
+    const editMenuBackground = editMenu.getElementsByClassName("full-screens-menu-background")[0];
+    const editMenuCloseButton = document.getElementById("close-edit-post-menu");
+    const editMenuNewTitleField = document.getElementById("edit-post-title");
+    const editMenuNewContentField = document.getElementById("edit-post-content");
+    const editMenuNewContentCharCountValue = document.getElementById("edit-post-content-char-count-value");
+    const editMenuSendButton = document.getElementById("edit-post-send-button");
+    let editedPostMedias = [];
+    let editedPostID = null;
+    const editMenuMediasPreview = document.getElementById("edit-post-medias-container");
+
+    // Edit comment menu elements
+    const editCommentMenu = document.getElementById("edit-comment-button-menu");
+    const editCommentMenuBackground = editMenu.getElementsByClassName("full-screens-menu-background")[0];
+    const editCommentMenuCloseButton = document.getElementById("close-comment-post-menu");
+    const editCommentMenuNewContentField = document.getElementById("edit-comment-content");
+    const editCommentMenuNewContentCharCountValue = document.getElementById("edit-post-comment-char-count-value");
+    const editCommentMenuSendButton = document.getElementById("edit-comment-send-button");
+    let editedCommentID = null;
+
+    /**
+     * Show the report menu for a message.
+     * @description This function displays the report menu and sets the message ID to report.
+     * @param messageID {number} - The ID of the message to report
+     * @param isPost {boolean} - Whether the message is a post or a comment (true for post, false for comment)
+     */
+    function showReportMenu(messageID, isPost) {
+        reportMenu.classList.remove("hidden");
+        scrollbar.classList.add("hidden");
+        messageToReport = messageID;
+        messageIsPost = isPost;
+    }
+
+    /**
+     * Hide the report menu.
+     * @description This function hides the report menu and resets the fields.
+     */
+    function hideReportMenu() {
+        reportMenu.classList.add("hidden");
+        scrollbar.classList.remove("hidden");
+        reportMenuSuccessMessage.classList.add("hidden");
+        reportMenuErrorMessage.classList.add("hidden");
+        reportContent.value = "";
+        messageToReport = null;
+        messageIsPost = null;
+        reportMenuSendButton.disabled = false;
+    }
+
+    function showEditMenu(messageID, title, content, medias) {
+        editMenu.classList.remove("hidden");
+        scrollbar.classList.add("hidden");
+        editMenuNewTitleField.value = title;
+        editMenuNewContentField.value = content;
+        editedPostID = messageID;
+        editedPostMedias = medias;
+    }
+
+    function hideEditMenu() {
+        editMenu.classList.add("hidden");
+        scrollbar.classList.remove("hidden");
+        editMenuNewTitleField.value = "";
+        editMenuNewContentField.value = "";
+        editedPostID = null;
+        editedPostMedias = [];
+    }
+
+    function showEditCommentMenu(commentID, content) {
+        editCommentMenu.classList.remove("hidden");
+        scrollbar.classList.add("hidden");
+        editCommentMenuNewContentField.value = content;
+        editedCommentID = commentID;
+    }
+
+    function hideEditCommentMenu() {
+        editCommentMenu.classList.add("hidden");
+        scrollbar.classList.remove("hidden");
+        editCommentMenuNewContentField.value = "";
+        editedCommentID = null;
+    }
+
     if (userIsAuthenticated && userIsThreadMember) {
         newCommentButton = document.getElementById("new-comment-send-button");
         newCommentContent = document.getElementById("new-comment-content");
@@ -479,6 +575,46 @@ document.addEventListener("DOMContentLoaded", function (){
                 });
         });
     }
+
+    // Close the report menu when the close button is clicked
+    reportMenuBackground.addEventListener('click', hideReportMenu);
+    // Close the report menu when the close button is clicked
+    reportMenuCloseButton.addEventListener('click', hideReportMenu);
+    // Send the report when the send button is clicked
+    reportMenuSendButton.addEventListener("click", function() {
+        if (reportMenuSendButton.disabled) {
+            return;
+        }
+        if (messageIsPost) {
+            reportMessage(threadName, messageToReport, reportReason.value, reportContent.value)
+                .then(r => {
+                    if (r.ok) {
+                        reportMenuSuccessMessage.classList.remove("hidden");
+                        reportMenuSendButton.disabled = true;
+                        reportReason.disabled = true;
+                        reportContent.disabled = true;
+
+                    } else {
+                        reportMenuErrorMessage.classList.remove("hidden");
+                        console.error(r);
+                    }
+                });
+        } else {
+            reportComment(threadName, messageToReport, reportReason.value, reportContent.value)
+                .then(r => {
+                    if (r.ok) {
+                        reportMenuSuccessMessage.classList.remove("hidden");
+                        reportMenuSendButton.disabled = true;
+                        reportReason.disabled = true;
+                        reportContent.disabled = true;
+
+                    } else {
+                        reportMenuErrorMessage.classList.remove("hidden");
+                        console.error(r);
+                    }
+                });
+        }
+    });
 
     loadMoreComments()
     // Update the vote count

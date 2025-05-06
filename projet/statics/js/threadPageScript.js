@@ -531,8 +531,7 @@ document.addEventListener("DOMContentLoaded", function () {
         upvoteButton.classList.add("win95-button", "post-vote-button");
         if (userIsAuthenticated) {
             upvoteButton.addEventListener("click", function () {
-                const messageId = data.message_id.toString();
-                upvoteMessage(threadName, messageId)
+                upvoteMessage(threadName, data.message_id)
                     .then(r => {
                         if (r.ok) {
                             return r.json();
@@ -570,8 +569,7 @@ document.addEventListener("DOMContentLoaded", function () {
         downvoteButton.classList.add("win95-button", "post-vote-button");
         if (userIsAuthenticated) {
             downvoteButton.addEventListener("click", function () {
-                const messageId = data.message_id.toString();
-                downvoteMessage(threadName, messageId)
+                downvoteMessage(threadName, data.message_id)
                     .then(r => {
                         if (r.ok) {
                             return r.json();
