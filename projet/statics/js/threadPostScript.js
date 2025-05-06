@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", function (){
         commentAuthor.classList.add("comment-profile");
         commentHeader.appendChild(commentAuthor);
 
-        authorPfp.src = `upload/${data.user_pfp_address}`;
+        authorPfp.src = `/upload/${data.user_pfp_address}`;
         authorPfp.alt = "Author profile picture";
         authorPfp.classList.add("comment-profile-picture", "unselectable");
         authorPfp.draggable = false;

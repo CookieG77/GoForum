@@ -78,7 +78,7 @@ type jsonThreadTag struct {
 }
 
 type jsonThreadTagUpdate struct {
-	TagID    int    `json:"tagId,string"`
+	TagID    int    `json:"tagId"`
 	TagName  string `json:"tagName"`
 	TagColor string `json:"tagColor"`
 }

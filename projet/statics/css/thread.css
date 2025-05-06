@@ -182,6 +182,10 @@
 
 
 /* Style for the new post elements */
+#new-post-box {
+    margin-bottom: 8px;
+}
+
 .new-post-content {
     margin: 4px;
     left: 0;
@@ -191,7 +195,7 @@
 #new-post-content-container {
     display: grid;
     grid-template-columns: 1fr 9fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: 20vh 1fr;
     gap: 8px;
     width: 100%;
     position: relative;
@@ -206,15 +210,26 @@
     justify-content: center;
 }
 
-#new-post-content-container textarea {
-    right: 0;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    padding: 8px;
-    resize: vertical;
-    max-height: 20vh;
+#new-post-content-holder {
+    display: flex;
+    flex-direction: column;
+    justify-content: right;
+    align-items: end;
+    width: 100%;
+    height: 100%;
+
 }
+
+#new-post-content-holder textarea {
+    position: relative;
+    left: 8px;
+    top: 0;
+    width: 100%;
+    padding: 8px;
+    height: 15vh;
+    resize: none;
+}
+
 
 #new-post-medias {
     grid-column: span 2;

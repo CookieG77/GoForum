@@ -66,6 +66,7 @@
             {{ end }}
             <div id="datas" class="hidden">
                 <div id="isAuthenticated" class="hidden">{{ .IsAuthenticated }}</div>
+                <div id="isMember" class="hidden">{{ .IsAMember }}</div>
             </div>
             <div id="new-post-box" class="post-box, win95-border">
                 <section class="post-header win95-header">
@@ -77,11 +78,18 @@
                 <section class="new-post-content">
                     <div id="new-post-content-container" class="win95-border-indent">
                         <label for="new-post-content">{{ .Lang.pages.thread.new_post_content_label }}</label>
-                        <textarea id="new-post-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.new_post_content_placeholder }}" required maxlength="500" minlength="20"></textarea>
-                        <div id="new-post-medias">
-                            <input type="file" id="new-post-media" accept="image/png image/jpeg image/gif" class="win95-input" />
-                            <div id="new-post-medias-container" class="grid-align-right">
+                        <div id="new-post-content-holder">
+                            <textarea id="new-post-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.new_post_content_placeholder }}" required maxlength="500" minlength="20"></textarea>
+                            <div id="new-post-content-char-count">
+                                <span id="new-post-content-char-count-value">0</span> / 500
+                            </div>
+                        </div>
+                        <div id="new-post-tag-container">
 
+                        </div>
+                        <div id="new-post-medias">
+                            <input type="file" id="new-post-file-input" accept="image/png image/jpeg image/gif" class="win95-input" multiple/>
+                            <div id="new-post-medias-container" class="grid-align-right">
                             </div>
                         </div>
                     </div>
@@ -102,6 +110,7 @@
         </div>
     </div>
     <div id="thread-sidebar" class=win95-border>
+        <h3>{{ .Lang.pages.thread.sidebar.moderation_team }}</h3>
         <section class="thread-sidebar-section win95-border-indent">
             {{ range $modTeamMember := .ThreadModerationTeam }}
                 <div class="thread-moderation-team-member win95-border-bulge" onclick="window.location='/profile/{{ $modTeamMember.Username }}'">
@@ -123,8 +132,9 @@
                 </div>
             {{ end }}
         </section>
+        <br>
+        <h3>{{ .Lang.pages.thread.sidebar.tags }}</h3>
         <section class="thread-sidebar-section win95-border-indent">
-            Tags
             <div id="tagList"></div>
             <div id="noTagsMessage" class="no-tags-message" style="display: none;">No tags available.</div>
         </section>
