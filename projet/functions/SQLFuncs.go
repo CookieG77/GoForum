@@ -2267,7 +2267,7 @@ func GetCommentsFromMessageWithPOV(messageID int, offset int, user User) ([]Form
 			upvotes,
 			downvotes
 		FROM ViewMessageCommentsWithVotes
-		WHERE message_id = ? ORDER BY creation_date ASC LIMIT ? OFFSET ?`
+		WHERE message_id = ? ORDER BY (upvotes - downvotes) DESC LIMIT ? OFFSET ?` // ordered by the number of votes by default so the most popular comments are first
 	rows, err := db.Query(getComments, messageID, maxCommentsPerPageLoad, offset)
 	if err != nil {
 		ErrorPrintf("Error getting all the incompleteMessages from the thread: %v\n", err)
@@ -2297,7 +2297,7 @@ func GetCommentsFromMessageWithPOV(messageID int, offset int, user User) ([]Form
 			return nil, err
 		}
 		if (user != User{}) {
-			comment.VoteState = HasUserAlreadyVotedOnMessage(user, comment.CommentID)
+			comment.VoteState = HasUserAlreadyVotedOnComment(user, comment.CommentID)
 		} else {
 			comment.VoteState = 0
 		}

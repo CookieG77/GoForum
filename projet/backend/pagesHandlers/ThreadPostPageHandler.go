@@ -35,6 +35,8 @@ func ThreadPostPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	thread := f.GetThreadFromName(threadName)
+
 	// Check if the post MessageID is empty or does not exist
 	if postID == "" {
 		ErrorPage404(w, r)
@@ -49,9 +51,12 @@ func ThreadPostPage(w http.ResponseWriter, r *http.Request) {
 
 	var post f.FormattedThreadMessage
 	if PageInfo["IsAddressVerified"].(bool) {
-		post, err = f.GetMessageByIDWithPOV(postIDInt, f.GetUser(r))
+		user := f.GetUser(r)
+		post, err = f.GetMessageByIDWithPOV(postIDInt, user)
+		PageInfo["IsAMember"] = f.IsUserInThread(thread, user)
 	} else {
 		post, err = f.GetMessageByID(postIDInt)
+		PageInfo["IsAMember"] = false
 	}
 	if err != nil {
 		f.ErrorPrintf("Error getting post \"%s\" : %s\n", postID, err)
@@ -62,6 +67,6 @@ func ThreadPostPage(w http.ResponseWriter, r *http.Request) {
 	PageInfo["ThreadName"] = threadName
 
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/threadPost.css", "/css/postStyle.css")
-	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadPostScript.js", "/js/threadScript.js", "/js/threadPageScript.js")
+	f.AddAdditionalScriptsToContentInterface(&PageInfo, "/js/threadPostScript.js", "/js/threadScript.js")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/threadPost.html")
 }

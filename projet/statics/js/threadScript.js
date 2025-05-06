@@ -542,3 +542,71 @@ function timeAgo(dateString) {
         return date.toLocaleDateString(undefined, options); // utilise la locale du navigateur
     }
 }
+
+/**
+ * Update the vote visual based on the current vote state.
+ * @description This function updates the vote visual based on the current vote state.
+ * @description It changes the image source of the upvote and downvote images based on the current vote state.
+ * @param currentVoteState {string} - The current vote state. 1 for upvote, 0 for no vote, -1 for downvote.
+ * @param upvoteImg {HTMLImageElement} - The image element for the upvote button.
+ * @param downvoteImg {HTMLImageElement} - The image element for the downvote button.
+ * @returns {void} - This function does not return anything.
+ */
+function updateVoteVisual(currentVoteState, upvoteImg, downvoteImg) {
+    let state = parseInt(currentVoteState);
+    if (state === 1){
+        upvoteImg.src = `/img/upvote.png`
+        downvoteImg.src = `/img/downvote_empty.png`
+    } else if(state === 0){
+        upvoteImg.src = `/img/upvote_empty.png`
+        downvoteImg.src = `/img/downvote_empty.png`
+    } else if(state === -1){
+        upvoteImg.src = `/img/upvote_empty.png`
+        downvoteImg.src = `/img/downvote.png`
+    }
+}
+
+/**
+ * Update the vote state based on the current vote state and the action taken.
+ * @description This function updates the vote state based on the current vote state and the action taken.
+ * @description It changes the vote state and the vote count based on the action taken.
+ * @param currentVoteState {string} - The current vote state. 1 for upvote, 0 for no vote, -1 for downvote.
+ * @param currentVoteCount {number} - The current vote count.
+ * @param IsUpvoting {boolean} - Whether the user is upvoting or downvoting.
+ * @param upvoteImg {HTMLImageElement} - The image element for the upvote button.
+ * @param downvoteImg {HTMLImageElement} - The image element for the downvote button.
+ * @returns {{state: number, count}} - The updated vote state and vote count.
+ */
+function updateVoteState(currentVoteState, currentVoteCount, IsUpvoting, upvoteImg, downvoteImg) {
+    let state = parseInt(currentVoteState);
+    let count = currentVoteCount;
+    if (state === 1){
+        if (IsUpvoting){ // upvoting when already upvoted so we remove the upvote
+            state = 0;
+            count -= 1;
+        } else { // downvoting when already upvoted so we remove the upvote and add a downvote
+            state = -1;
+            count -= 2;
+        }
+    } else if(state === 0){
+        if (IsUpvoting){ // upvoting when not voted so we add an upvote
+            state = 1;
+            count += 1;
+        } else { // downvoting when not voted so we add a downvote
+            state = -1;
+            count -= 1;
+        }
+    } else if(state === -1){
+        if (IsUpvoting){ // upvoting when already downvoted so we remove the downvote and add an upvote
+            state = 1;
+            count += 2;
+        } else { // downvoting when already downvoted so we remove the downvote
+            state = 0;
+            count += 1;
+        }
+    }
+    updateVoteVisual(state, upvoteImg, downvoteImg);
+    console.log("Current Vote State: ", state);
+    console.log("Current Vote Count: ", count);
+    return {state, count};
+}

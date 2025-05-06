@@ -219,7 +219,7 @@
 #new-post-content-container {
     display: grid;
     grid-template-columns: 1fr 9fr;
-    grid-template-rows: 20vh 1fr;
+    grid-template-rows: 15vh 1fr;
     gap: 8px;
     width: 100%;
     position: relative;
@@ -250,7 +250,7 @@
     top: 0;
     width: 100%;
     padding: 8px;
-    height: 15vh;
+    height: 10vh;
     resize: none;
 }
 

@@ -6,6 +6,15 @@ document.addEventListener("DOMContentLoaded", function (){
     const mediaContainer = document.createElement("div");
     const medias = document.createElement("div");
     const mediaLinks = [];
+    const postVoteCountSpan = document.getElementById("t-vote-count");
+    let postVoteCount = parseInt(getI18nText("data_upvotes"), 10) - parseInt(getI18nText("data_downvotes"), 10);
+    const postVoteUpImage = document.getElementById("t-post-vote-up-image");
+    const postVoteUpButton = document.getElementById("t-post-vote-up-button");
+    const postVoteDownImage = document.getElementById("t-post-vote-down-image");
+    const postVoteDownButton = document.getElementById("t-post-vote-down-button");
+    let voteState = parseInt(getI18nText("data_postVoteState"), 10);
+    const postDateContainer = document.getElementById("t-post-date");
+    let postDate = getI18nText("data_postDate");
     for (const medialink of document.getElementById("data_MediaLinks").children){
         mediaLinks.push(medialink.textContent);
     }
@@ -13,9 +22,37 @@ document.addEventListener("DOMContentLoaded", function (){
     const threadName = getCurrentThreadName();
     const messageId = document.getElementById("data_postID").textContent;
     let userIsAuthenticated = document.getElementById("isAuthenticated").textContent === "true";
+    let userIsThreadMember = document.getElementById("isAMember").textContent === "true";
     let offset= 0;
     let hasReachedEnd = false;
     const commentsContainer = document.getElementById("comments-container");
+
+    let newCommentButton;
+    let newCommentContent;
+    let newCommentContentCharCountValue;
+
+    if (userIsAuthenticated && userIsThreadMember) {
+        newCommentButton = document.getElementById("new-comment-send-button");
+        newCommentContent = document.getElementById("new-comment-content");
+        newCommentContentCharCountValue = document.getElementById("new-comment-content-char-count-value");
+    }
+
+    if (voteState === 1) {
+        postVoteUpImage.src = `/img/upvote.png`;
+        postVoteDownImage.src = `/img/downvote_empty.png`;
+    }
+    else if (voteState === -1) {
+        postVoteUpImage.src = `/img/upvote_empty.png`;
+        postVoteDownImage.src = `/img/downvote.png`;
+    } else {
+        postVoteUpImage.src = `/img/upvote_empty.png`;
+        postVoteDownImage.src = `/img/downvote_empty.png`;
+    }
+
+    if (!userIsAuthenticated) {
+        postVoteUpButton.disabled = true;
+        postVoteDownButton.disabled = true;
+    }
 
     if (postMenu && optionMenu) {
         postMenu.addEventListener("click", function(e) {
@@ -40,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function (){
     postContent.appendChild(mediaContainer);
 
     medias.classList.add("post-medias");
-    if (mediaLinks.length != 0) {
+    if (mediaLinks.length !== 0) {
         mediaContainer.classList.add("win95-border-indent");
         for (let i = 0; i < mediaLinks.length; i++) {
             const media = mediaLinks[i];
@@ -132,7 +169,6 @@ document.addEventListener("DOMContentLoaded", function (){
         res.then(async (response) => {
             if (response.ok) {
                 const data = await response.json();
-                console.log(data);
                 if (data == null) {
                     hasReachedEnd = true;
                     loadMoreCommentsButton.disabled = true;
@@ -175,6 +211,9 @@ document.addEventListener("DOMContentLoaded", function (){
         const vote = document.createElement("span");
         const downvoteButton = document.createElement("button");
         const downvoteImg = document.createElement("img");
+        const dateAndEditContainer = document.createElement("div");
+        const dateSpan = document.createElement("span");
+        const isEditedSpan = document.createElement("span");
 
         let currentVoteState = data.vote_state;
         let currentVoteCount = data.up_votes - data.down_votes;
@@ -309,20 +348,125 @@ document.addEventListener("DOMContentLoaded", function (){
         }
         voteField.appendChild(downvoteButton);
 
-        // Make sure to update the vote visual when the comment is created so that if the user is already upvoting or downvoting the post, the visual is correct
-        updateVoteVisual(currentVoteState, upvoteImg, downvoteImg);
-
         downvoteImg.src = `/img/downvote_empty.png`;
         downvoteImg.alt = "Downvote image";
         downvoteImg.classList.add("comment-vote-image", "unselectable");
         downvoteImg.draggable = false;
         downvoteButton.appendChild(downvoteImg);
+        // Make sure to update the vote visual when the comment is created so that if the user is already upvoting or downvoting the post, the visual is correct
+        updateVoteVisual(currentVoteState, upvoteImg, downvoteImg);
 
+
+        container.appendChild(dateAndEditContainer);
+        dateAndEditContainer.appendChild(dateSpan);
+        dateAndEditContainer.appendChild(isEditedSpan);
+        dateAndEditContainer.classList.add("comment-date-edit-container");
+        dateSpan.classList.add("comment-date");
+        dateSpan.innerText = timeAgo(data.creation_date);
+        isEditedSpan.classList.add("comment-edited");
+        if (data.was_edited) {
+            isEditedSpan.innerText = getI18nText("was-edited");
+        } else {
+            isEditedSpan.innerText = "";
+        }
         return container;
     }
 
     loadMoreCommentsButton.addEventListener('click', function() {
         loadMoreComments();
     })
-})
+
+    if (userIsAuthenticated && userIsThreadMember) {
+        postVoteUpButton.addEventListener('click', function() {
+            const postId = messageId.toString();
+            upvoteMessage(threadName, postId)
+                .then(r => {
+                    if (r.ok) {
+                        return r.json();
+                    } else {
+                        throw new Error("Error while upvoting post");
+                    }
+                })
+                .then(data => {
+                    console.log("Post upvoted successfully", data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            const {state, count} = updateVoteState(voteState, postVoteCount, true, postVoteUpImage, postVoteDownImage);
+            voteState = state;
+            postVoteCount = count;
+            postVoteCountSpan.innerText = `${postVoteCount}`;
+        });
+
+        postVoteDownButton.addEventListener('click', function() {
+            const postId = messageId.toString();
+            downvoteMessage(threadName, postId)
+                .then(r => {
+                    if (r.ok) {
+                        return r.json();
+                    } else {
+                        throw new Error("Error while downvoting post");
+                    }
+                })
+                .then(data => {
+                    console.log("Post downvoted successfully", data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            const {state, count} = updateVoteState(voteState, postVoteCount, false, postVoteUpImage, postVoteDownImage);
+            voteState = state;
+            postVoteCount = count;
+            postVoteCountSpan.innerText = `${postVoteCount}`;
+        });
+
+        newCommentContent.addEventListener('input' , function() {
+            const charCount = newCommentContent.value.length;
+            newCommentContentCharCountValue.innerText = `${charCount}`;
+            if (charCount > 500) {
+                newCommentContent.value = newCommentContent.value.substring(0, 500);
+            }
+            newCommentButton.disabled = (charCount < 5 || charCount > 500);
+        });
+
+        newCommentButton.addEventListener("click", function() {
+            const commentContent = newCommentContent.value;
+            const postId = messageId.toString();
+            const threadName = getCurrentThreadName();
+            sendComment(threadName, postId, commentContent)
+                .then(r => {
+                    if (r.ok) {
+                        return r.json();
+                    } else {
+                        throw new Error("Error while creating comment");
+                    }
+                })
+                .then(data => {
+                    console.log("Comment created successfully", data);
+                    const postElement = createNewComment(data);
+                    commentsContainer.appendChild(postElement);
+                    newCommentContent.value = "";
+                    newCommentContentCharCountValue.innerText = "0";
+
+                    // reload the comments
+                    offset = 0;
+                    hasReachedEnd = false;
+                    loadMoreCommentsButton.disabled = false;
+                    loadMoreCommentsButton.innerText = "Load more comments";
+                    commentsContainer.innerHTML = "";
+                    loadMoreComments();
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+        });
+    }
+
+    loadMoreComments()
+    // Update the vote count
+    postVoteCountSpan.innerText = `${postVoteCount}`;
+    // Update the post date
+    postDateContainer.innerText = timeAgo(postDate);
+});
 

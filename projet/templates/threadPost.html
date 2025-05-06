@@ -1,15 +1,15 @@
 {{ define "content" }}
-<div id="datas" class="hidden">
-    <div id="data_postID">{{ .Post.MessageID }}</div>
-    <div id="data_postTitle">{{ .Post.MessageTitle }}</div>
-    <div id="data_postContent">{{ .Post.MessageContent }}</div>
-    <div id="data_wasEdited">{{ .Post.WasEdited }}</div>
-    <div id="data_postDate">{{ .Post.CreationDate }}</div>
-    <div id="data_authorName">{{ .Post.UserName }}</div>
-    <div id="data_authorPfpAddress">{{ .Post.UserPfpAddress }}</div>
-    <div id="data_upvotes">{{ .Post.Upvotes }}</div>
-    <div id="data_downvotes">{{ .Post.Downvotes }}</div>
-    <div id="isAuthenticated" class="hidden">{{ .IsAuthenticated }}</div>
+<div id="i18n" class="hidden">
+    <span id="data_postID">{{ .Post.MessageID }}</span>
+    <span id="data_postTitle">{{ .Post.MessageTitle }}</span>
+    <span id="data_wasEdited">{{ .Post.WasEdited }}</span>
+    <span data-key="data_postDate">{{ .Post.CreationDate }}</span>
+    <span id="data_authorName">{{ .Post.UserName }}</span>
+    <span id="data_authorPfpAddress">{{ .Post.UserPfpAddress }}</span>
+    <span data-key="data_upvotes">{{ .Post.Upvotes }}</span>
+    <span data-key="data_downvotes">{{ .Post.Downvotes }}</span>
+    <span id="isAuthenticated">{{ .IsAuthenticated }}</span>
+    <span id="isAMember">{{ .IsAMember }}</span>
     <div id="data_MediaLinks">
         {{ range $i := .Post.MediaLinks }}
             <div>{{ $i }}</div>
@@ -20,7 +20,15 @@
             <div>{{ $i }}</div>
         {{ end }}
     </div>
-    <div id="data_postVoteState">{{ .Post.VoteState }}</div>
+    <span data-key="data_postVoteState">{{ .Post.VoteState }}</span>
+    <span data-key="ago-seconds">{{ .Lang.time.ago_seconds }}</span>
+    <span data-key="ago-minute">{{ .Lang.time.ago_minute }}</span>
+    <span data-key="ago-minutes">{{ .Lang.time.ago_minutes }}</span>
+    <span data-key="ago-hour">{{ .Lang.time.ago_hour }}</span>
+    <span data-key="ago-hours">{{ .Lang.time.ago_hours }}</span>
+    <span data-key="ago-day">{{ .Lang.time.ago_day }}</span>
+    <span data-key="ago-days">{{ .Lang.time.ago_days }}</span>
+    <span data-key="was-edited">{{ .Lang.pages.thread.was_modified }}</span>
 </div>
 
 <div id="t-post">
@@ -37,9 +45,51 @@
             <span class="post-title">{{ .Post.MessageTitle }}</span>
         </div>
         <div id="t-post-content">
-
+            <div id="t-post-content-text" class="win95-border-indent">
+                    {{ .Post.MessageContent }}
+            </div>
         </div>
+        <div id="t-post-vote-field">
+            <div id="t-vote-field-container" class="post-vote-field">
+                <button id="t-post-vote-up-button" type="button" class="win95-button post-vote-button">
+                    <img src="/img/upvote_empty.png" alt="Upvote icon" class="unselectable post-vote-image" draggable="false" id="t-post-vote-up-image">
+                </button>
+                <span id="t-vote-count" class="post-vote-value"></span>
+                <button id="t-post-vote-down-button" type="button" class="win95-button post-vote-button">
+                    <img src="/img/downvote_empty.png" alt="Downvote icon" class="unselectable post-vote-image" draggable="false" id="t-post-vote-down-image">
+                </button>
+            </div>
+        </div>
+        <br>
+        <div id="t-post-date-and-edited">
+            <span id="t-post-date"></span>
+            <span id="t-post-edited">{{ if .Post.WasEdited }}{{ .Lang.pages.thread.was_modified }}{{ end }}</span>
+        </div>
+        <br>
+        <h3 id="t-post-comment-title">{{.Lang.pages.threadPost.comments_title }}</h3>
         <div id="t-post-comment-section" class="win95-border-indent">
+            {{ if .IsAuthenticated }}
+                {{ if .IsAMember }}
+                    <div id="new-comment-box" class="post-box win95-border">
+                        <section class="new-post-content">
+                            <div id="new-comment-content-container">
+                                <label for="new-comment-content">{{ .Lang.pages.threadPost.comment_content_label }}</label>
+                                <div id="new-comment-content-holder">
+                                    <textarea id="new-comment-content" class="win95-border-indent" placeholder="{{ .Lang.pages.threadPost.comment_placeholder }}" required maxlength="500" minlength="20"></textarea>
+                                    <div id="new-comment-content-char-count">
+                                        <span id="new-comment-content-char-count-value">0</span> / 500
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section>
+                            <button id="new-comment-send-button" class="win95-button" type="button" disabled>
+                                {{ .Lang.pages.threadPost.comment_send_button }}
+                            </button>
+                        </section>
+                    </div>
+                {{ end }}
+            {{ end }}
             <div id="comments-container">
 
             </div>
