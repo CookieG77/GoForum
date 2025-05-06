@@ -287,3 +287,10 @@
     height: fit-content;
     padding: 8px;
 }
+
+.menu-img{
+    position: relative;
+    height: 32px;
+    width: 32px;
+}
+

@@ -246,6 +246,15 @@ document.addEventListener("DOMContentLoaded", function () {
         option.appendChild(optionButton);
 
         optionMenu.classList.add("option-menu", "win95-border");
+        optionMenu.innerHTML =`
+        <ul>
+            <li class="win95-menu-button message-edit menu-button"><img src="/img/edit.png" alt="edit img" class="win95-minor-logo"><span>Edit</span></li>
+            <li class="win95-menu-button message-delete menu-button"><img src="/img/delete.png" alt="delete img" class="win95-minor-logo"><span>Delete</span></li>
+            <li class="win95-menu-button message-report menu-button"><img src="/img/report.png" alt="report img" class="win95-minor-logo"><span>Report</span></li>
+            <li class="win95-menu-button message-ban menu-button"><img src="/img/ban.png" alt="ban img" class="win95-minor-logo"><span>Ban</span></li>
+        </ul>
+        
+        `
         option.appendChild(optionMenu);
 
         function toggleOptionMenu() {
@@ -457,7 +466,7 @@ document.addEventListener("DOMContentLoaded", function () {
         container.appendChild(message);
         wasEdited.innerText = data.was_edited ? getI18nText('was-edited') : "";
         container.appendChild(wasEdited);
-        date.innerText = `${timeAgo(data.creation_date)}`;
+        //date.innerText = `${timeAgo(data.creation_date)}`;
         container.appendChild(date);
 
         voteState.innerText = `Vote state : ${data.vote_state}`;
