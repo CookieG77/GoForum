@@ -24,18 +24,18 @@ document.addEventListener("DOMContentLoaded", function () {
             const tagId = tagIds[name];
 
             const tagEl = document.createElement('div');
-            tagEl.className = 'tag';
+            tagEl.classList.add("tag", "win95-input-indent");
             tagEl.style.backgroundColor = color;
-            tagEl.innerHTML = `${name} <button data-name="${name}">x</button>`;
+            tagEl.innerHTML = `${name} <button data-name="${name}" class="win95-button">x</button>`;
             tagList.appendChild(tagEl);
 
             const editEl = document.createElement('div');
             editEl.className = 'tag-editor';
             editEl.innerHTML = `
-          <input type="text" value="${name}" data-old-name="${name}" />
+          <input type="text" value="${name}" data-old-name="${name}" class="win95-input-indent"/>
           <input type="color" value="${color}" />
-          <button data-action="save">Save</button>
-          <button data-action="delete">Delete</button>
+          <button data-action="save" class="win95-button">Save</button>
+          <button data-action="delete" class="win95-button">Delete</button>
         `;
             editTagList.appendChild(editEl);
 
