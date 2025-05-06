@@ -92,8 +92,15 @@
 }
 
 #thread-description{
+    position: relative;
     display: grid;
     grid-template-columns: 5fr 2fr;
+}
+
+#thread-description p{
+    position: relative;
+    width: 100%;
+    word-break: break-word;
 }
 
 #thread-description-join{
@@ -280,3 +287,10 @@
     height: fit-content;
     padding: 8px;
 }
+
+.menu-img{
+    position: relative;
+    height: 32px;
+    width: 32px;
+}
+

@@ -15,7 +15,7 @@
                 <li class="win95-menu-box thread-list-element">
                     <!--TODO Connect the database to get the thread's icon -->
                     <img class="thread-menu-icon unselectable" draggable="false" src="/upload/{{ .ThreadIconLink }}" alt="Thread Icon">
-                    <a class="thread-link win95-menu-button" href="/t/{{ .ThreadName }}">{{ .ThreadName }}</a>
+                    <a class="thread-link win95-menu-button" href="/t/{{ .ThreadName }}"><span>{{ .ThreadName }}</span></a>
                 </li>
             {{ end }}
         </ul>

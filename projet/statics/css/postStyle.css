@@ -8,10 +8,6 @@
     padding: 8px;
 }
 
-.post-box * {
-    width: 100%;
-}
-
 .post-header {
     position: relative;
     width: calc(100% + 8px);
@@ -41,6 +37,10 @@
     display: flex;
     align-items: center;
     height: 100%;
+}
+
+.post-profile span, .comment-profile span{
+    max-width: max-content;
 }
 
 .post-profile-picture, .comment-profile-picture {
@@ -100,8 +100,10 @@
 
 .post-media-container{
     position: relative;
-    display: grid;
-    grid-template-rows: auto auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 }
 
 .post-medias{
@@ -153,16 +155,28 @@
 .option-menu{
     position: absolute;
     right: 4px;
-    width: 200px;
-    height: 200px;
+    display: flex;
+    max-width: max-content;
+    flex-direction: column;
+    align-content: center;
     background-color: silver;
     margin-top: 4px;
     z-index: 1;
     transform: scale(0);
     transform-origin: top right;
     transition: transform 0.2s steps(4, start), opacity 0.5s steps(4, start);
+    padding: 4px;
+    color: black;
+}
+
+.option-menu ul li{
+    padding: 4px 8px;
 }
 
 .option-menu.active{
     transform: scale(1);
+}
+
+#load-more-posts-button, #load-more-comments-button{
+    margin-top: 4px;
 }
