@@ -132,6 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 noTagsMessage.style.display = 'none';
 
                 tagItem.classList.add('clickable-tag-item');
+                tagItem.style.outlineColor = tag.tag_color;
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.id = `tag-${tag.tag_id}`;
@@ -151,6 +152,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     // Reload more messages
                     loadMorePosts();
                 });
+            } else {
+                tagItem.classList.add("unclickable-tag-item");
             }
 
             const tagText = document.createElement('span');
@@ -228,7 +231,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const optionButton = document.createElement("button");
         const optionMenu = document.createElement("div");
         const title = document.createElement("span");
-        const tags = document.createElement("p");
+        const tags = document.createElement("section");
         const postContent = document.createElement("section");
         const mediaContainer = document.createElement("div");
         const medias = document.createElement("div");
@@ -301,6 +304,9 @@ document.addEventListener("DOMContentLoaded", function () {
         title.innerText = `${data.message_title}`;
         title.classList.add("post-title");
         postHeader.appendChild(title);
+
+        tags.classList.add("tag-container");
+        container.appendChild(tags);
 
         postContent.classList.add("post-content");
         container.appendChild(postContent);
@@ -502,7 +508,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     joinButton.classList.remove("hidden");
                     leaveButton.classList.add("hidden");
                     newPostContainer.classList.add("hidden");
-                    console.log("You have joined the thread");
+                    console.log("You have left the thread");
                 } else {
                     console.error(response);
                 }
@@ -517,7 +523,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     joinButton.classList.add("hidden");
                     leaveButton.classList.remove("hidden");
                     newPostContainer.classList.remove("hidden");
-                    console.log("You have left the thread");
+                    console.log("You have joined the thread");
                 } else {
                     console.error(response);
                 }

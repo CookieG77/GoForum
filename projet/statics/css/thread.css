@@ -122,33 +122,51 @@
 /* Tags Display */
 
 .tag-container {
-    background-color: #f0f0f0;
-    border: 2px solid #000;
-    width: 300px;
-    padding: 10px;
-    margin: 20px auto;
-    border-radius: 5px;
-    box-shadow: 3px 3px 5px #888;
+    width: 100%;
+    margin: 0;
+    display: inline-block;
+    gap: 8px;
 }
 
 .tag-item {
     background-color: #ffffff;
     padding: 5px;
     margin: 5px 0;
-    border: 1px solid #000;
-    border-radius: 3px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 4px;
 }
 
 .clickable-tag-item {
-    cursor: pointer;
+    cursor: url('../img/pointer95.cur'), pointer;
+    border: #808080 2px solid;
+    border-left: #404040 2px solid;
+    border-top: #404040 2px solid;
+    box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.5);
+    outline: 2px solid #808080;
+    color: #ffffff;
+}
+
+.clickable-tag-item span::first-letter{
+    text-decoration: underline;
+}
+
+.unclickable-tag-item{
+    border: #404040 4px solid;
+    border-left: #808080 4px solid;
+    border-top: #808080 4px solid;
+    position: relative;
+    width: auto;
 }
 
 .tag-item.selected {
-    background-color: #5f9ea0;
-    color: white;
+    background-color: #000000;
+    color: black;
+    border: white 2px solid;
+    border-right: black 2px solid;
+    border-bottom: black 2px solid;
+    box-shadow: none;
 }
 
 .tag-item:hover {
@@ -164,9 +182,8 @@
     color: white;
     border: none;
     padding: 5px;
-    cursor: pointer;
+    cursor: url('../img/pointer95.cur'), pointer;
     font-size: 12px;
-    border-radius: 3px;
     font-weight: bold;
 }
 
