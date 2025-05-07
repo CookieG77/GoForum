@@ -173,6 +173,18 @@
         "send" : "Send"
       }
     },
+    "thread_edit" : {
+      "title" : "Thread Editor",
+      "tags_edit" : "Tags Edit",
+      "tag_name" : "Tag Name : ",
+      "tag_color" : "Tag Color : ",
+      "add_tag" : "Add Tag",
+      "pictures_edit" : "Pictures Edit",
+      "roles_edit" : "Roles Edit",
+      "user_pseudo" : "User Pseudo : ",
+      "promote" : "Promote",
+      "demote" : "Demote"
+    },
     "thread_reports" : {
       "report_title" : "Reports",
       "reported_by" : "Reported by : ",

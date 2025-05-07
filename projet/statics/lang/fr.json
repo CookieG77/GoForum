@@ -171,6 +171,18 @@
         "send" : "Envoyer"
       }
     },
+    "thread_edit" : {
+      "title" : "Edition de thread",
+      "tags_edit" : "Edition des Etiquettes",
+      "tag_name" : "Nom de l'Etiquette : ",
+      "tag_color" : "Couleur de l'Etiquette : ",
+      "add_tag" : "Ajouter l'Etiquette",
+      "pictures_edit" : "Edition des Images",
+      "roles_edit" : "Edition des Roles",
+      "user_pseudo" : "Pseudo de l'Utilisateur : ",
+      "promote" : "Promouvoir",
+      "demote" : "Destituer"
+    },
     "thread_reports" : {
       "report_title" : "Signalements",
       "reported_by" : "Signalé par : ",
