@@ -1,4 +1,4 @@
-package pages
+package pagesHandlers
 
 import (
 	f "GoForum/functions"
@@ -31,7 +31,14 @@ func ConnectFromHeader(w http.ResponseWriter, r *http.Request, PageInfo *map[str
 			if err != nil {
 				f.ErrorPrintf("Error emptying the session cookie: %v\n", err)
 			} else {
+				// We reset the PageInfo to the default values for a non-authenticated user
+				*PageInfo = f.NewContentInterface(((*PageInfo)["PageTitleKey"]).(string), r)
+				f.GiveUserHisRights(PageInfo, r)
 				(*PageInfo)["IsAuthenticated"] = false
+				(*PageInfo)["LoginError"] = ""
+				(*PageInfo)["LoginMissingField"] = map[string]bool{}
+				(*PageInfo)["ShowLoginPage"] = false
+				(*PageInfo)["Error"] = ""
 			}
 		case "login":
 			f.DebugPrintln("Login form submitted")
@@ -88,8 +95,12 @@ func ConnectFromHeader(w http.ResponseWriter, r *http.Request, PageInfo *map[str
 						(*PageInfo)["ShowLoginPage"] = true
 						return true
 					}
+					cookieMaxAge := 86400 // 1 day
+					if r.Form.Get("rememberMe") == "on" {
+						cookieMaxAge = 2592000 // 30 days
+					}
 					// Set the session cookie
-					err = f.SetSessionCookie(w, r, emailOrUsername)
+					err = f.SetSessionCookie(w, r, emailOrUsername, cookieMaxAge)
 					if err != nil {
 						f.ErrorPrintf("Error setting the session cookie: %v\n", err)
 						(*PageInfo)["LoginError"] = "serverError"
@@ -117,27 +128,36 @@ func ConnectFromHeader(w http.ResponseWriter, r *http.Request, PageInfo *map[str
 						(*PageInfo)["ShowLoginPage"] = true
 						return true
 					}
-					email := f.GetEmailFromUsername(emailOrUsername)
+					user, err := f.GetUserFromUsername(emailOrUsername)
+					if err != nil {
+						f.ErrorPrintf("Error getting the user from username: %v\n", err)
+						(*PageInfo)["LoginError"] = "serverError"
+						(*PageInfo)["ShowLoginPage"] = true
+						return true
+					}
+					cookieMaxAge := 86400 // 1 day
+					if r.Form.Get("rememberMe") == "on" {
+						cookieMaxAge = 2592000 // 30 days
+					}
 					// Set the session cookie
-					err = f.SetSessionCookie(w, r, email)
+					err = f.SetSessionCookie(w, r, user.Email, cookieMaxAge)
 					if err != nil {
 						f.ErrorPrintf("Error setting the session cookie: %v\n", err)
 						(*PageInfo)["LoginError"] = "serverError"
 						(*PageInfo)["ShowLoginPage"] = true
 						return true
 					}
+					// We reset the PageInfo to the default values for an authenticated user
+					*PageInfo = f.NewContentInterface(((*PageInfo)["PageTitleKey"]).(string), r)
+					f.GiveUserHisRights(PageInfo, r)
 					(*PageInfo)["IsAuthenticated"] = true
+					(*PageInfo)["LoginError"] = ""
+					(*PageInfo)["LoginMissingField"] = map[string]bool{}
+					(*PageInfo)["ShowLoginPage"] = false
+					(*PageInfo)["Error"] = ""
 					f.InfoPrintf("User %s logged in\n", emailOrUsername)
 					return false
 				}
-			default:
-				{
-					f.DebugPrintf("Unknown connection method: '%s\n'", connectionMethod)
-				}
-			}
-		default:
-			{
-				f.DebugPrintf("Unknown connection method: '%s\n'", r.Form.Get("headerForm"))
 			}
 		}
 	}

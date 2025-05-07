@@ -1,0 +1,65 @@
+{{ define "content" }}
+<div class="hidden" id="i18n">
+    <span data-key="promote_failed_message">{{ .Lang.pages.thread_edit.promote_failed_message }}</span>
+    <span data-key="promote_success_message">{{ .Lang.pages.thread_edit.promote_success_message }}</span>
+    <span data-key="promote_error_message">{{ .Lang.pages.thread_edit.promote_error_message }}</span>
+
+    <span data-key="demote_failed_message">{{ .Lang.pages.thread_edit.demote_failed_message }}.</span>
+    <span data-key="demote_success_message">{{ .Lang.pages.thread_edit.demote_success_message }}</span>
+    <span data-key="demote_error_message">{{ .Lang.pages.thread_edit.demote_error_message }}</span>
+
+    <span data-key="rank_0">{{ .Lang.pages.thread_edit.rank_0 }}</span>
+    <span data-key="rank_1">{{ .Lang.pages.thread_edit.rank_1 }}</span>
+    <span data-key="rank_2">{{ .Lang.pages.thread_edit.rank_2 }}</span>
+</div>
+<div id="thread-edit-box" class="win95-border">
+    <section class="win95-header">
+        <h1>{{ .Lang.pages.thread_edit.title }}</h1>
+    </section>
+    <h2 class="section-title">{{ .Lang.pages.thread_edit.tags_edit }}</h2>
+    <section class="editor-section tag-manager win95-border-indent">
+        <div id="tag-manager-form">
+            <div class="tag-manager-section">
+                <label for="tagName">{{ .Lang.pages.thread_edit.tag_name }}</label>
+                <input class="win95-input-indent" type="text" id="tagName" required>
+            </div>
+            <div class="tag-manager-section">
+                <label for="tagColor">{{ .Lang.pages.thread_edit.tag_color }}</label>
+                <input class="win95-input-indent" type="color" id="tagColor" value="#ff0000">
+            </div>
+            <button id="addTagBtn" class="win95-button">{{ .Lang.pages.thread_edit.add_tag }}</button>
+            <div id="error" class="error"></div>
+            <div id="tagList"></div>
+        </div>
+        <div class="tag-manager-edit">
+            <div id="editTagList"></div>
+        </div>
+        <br>
+    </section>
+    <h2 class="section-title">{{ .Lang.pages.thread_edit.pictures_edit }}</h2>
+    <section class="editor-section win95-border-indent">
+        <div class="picture-section">
+            <img id="thread-icon-preview" alt="Icon Preview" src="/upload/{{ .ThreadIconPath }}">
+            <br>
+            <input type="file" id="new-thread-icon" accept="image/png, image/jpeg, image/gif">
+        </div>
+        <div class="picture-section">
+            <img id="thread-banner-preview" alt="Icon Preview" src="/upload/{{ .ThreadBannerPath }}">
+            <br>
+            <input type="file" id="new-thread-banner" accept="image/png, image/jpeg, image/gif">
+        </div>
+    </section>
+    <h2 class="section-title">{{ .Lang.pages.thread_edit.roles_edit }}</h2>
+    <section class="editor-section win95-border-indent">
+        <div class="tag-manager-section">
+            <label for="tagName">{{ .Lang.pages.thread_edit.user_pseudo }}</label>
+            <input class="win95-input-indent" type="text" id="user-pseudo" required>
+        </div>
+        <div class="tag-manager-section">
+            <button class="win95-button" id="promote-button" disabled>{{ .Lang.pages.thread_edit.promote }}</button>
+            <button class="win95-button" id="demote-button" disabled>{{ .Lang.pages.thread_edit.demote }}</button>
+        </div>
+    </section>
+</div>
+
+{{ end }}

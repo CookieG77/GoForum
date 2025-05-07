@@ -1,0 +1,95 @@
+{{ define "content" }}
+    <div id="settings-container" class="win95-border">
+        <div class="win95-header">
+            <p>{{ .Lang.pages.user_settings.title }}</p>
+        </div>
+        <div id="pfp-settings">
+            <p>{{ .Lang.pages.user_settings.profile_picture_change }} :</p>
+            <div id="pfp-container">
+                <div>
+                    <img id="pfp" class="unselectable" draggable="false" src="/upload/{{ .UserPfpPath }}" alt="profile picture">
+                </div>
+            </div>
+        </div>
+        <div id="settings-content" class="win95-border-indent">
+            <div id="current-settings">
+                <div class="settings-field">
+                    <p> {{ .Lang.pages.user_settings.user_lang }} :
+                        <span>
+                            {{ range $key, $value := .Lang.langs }}
+                                {{ if eq (interfaceToString $key) $.UserLang }}
+                                    {{ $value }}
+                                {{ end }}
+                            {{ end }}
+                        </span>
+                    </p>
+                </div>
+                <div class="hidden">
+                    <p> User theme :
+                        <span>
+                            {{ range $key, $value := .Lang.themes }}
+                                {{ if eq (interfaceToString $key) $.UserTheme }}
+                                    {{ $value }}
+                                {{ end }}
+                            {{ end }}
+                        </span>
+                    </p>
+                </div>
+                <button id="change-settings-button" class="win95-button">{{ .Lang.pages.user_settings.change_settings }}</button>
+            </div>
+            <div id="change-settings" class="hidden">
+                <form action="/settings" method="post">
+                    <div class="settings-field">
+                        <label for="lang">{{ .Lang.pages.user_settings.choose_language }} :</label>
+                        <select name="lang" id="lang" class="win95-input-indent">
+                            <option value="{{ .UserLang }}">
+                                {{ range $key, $value := .Lang.langs }}
+                                    {{ if eq (interfaceToString $key) $.UserLang }}
+                                        {{ $value }}
+                                    {{ end }}
+                                {{ end }}
+                            </option>
+                            {{ range $lang := .LangList }}
+                                {{ if ne $lang $.UserLang }}
+                                <option value="{{ $lang }}">
+                                    {{ range $key, $value := $.Lang.langs }}
+                                        {{ if eq (interfaceToString $key) $lang }}
+                                            {{ $value }}
+                                        {{ end }}
+                                    {{ end }}
+                                </option>
+                                {{ end }}
+                            {{ end }}
+                        </select>
+                    </div>
+                   <div class="hidden">
+                       <label for="theme">Choose a theme:</label>
+                       <select name="theme" id="theme" class="win95-input-indent">
+                           <option value="light">Light</option><option value="dark">Dark</option>
+                       </select>
+                   </div>
+                   <input type="submit" value="Submit" class="win95-button">
+                </form>
+                <button id="close-change-settings-button" class="win95-button">{{ .Lang.pages.user_settings.close }}</button>
+            </div>
+        </div>
+    </div>
+    <div id="change-pfp-popup-bg" class="hidden">
+    </div>
+    <div id="change-pfp-popup" class="win95-border hidden">
+        <div class="win95-header">
+            <p>{{ .Lang.pages.user_settings.change_pfp }}</p>
+        </div>
+        <div id="change-pfp-popup-content">
+            <p>{{ .Lang.pages.user_settings.select_new_pfp }}</p>
+            <p>{{ .Lang.pages.user_settings.accepted_formats }} : .png .jpeg .gif</p>
+            <p>{{ .Lang.pages.user_settings.size_warning }}</p>
+            <div id="new-pfp-container">
+                <div id="new-pfp-dropzone">
+                    <span>+</span>
+                </div>
+                <input type="file" id="new-pfp-input" accept="image/png, image/jpeg, image/gif" class="hidden">
+            </div>
+        </div>
+    </div>
+{{ end }}

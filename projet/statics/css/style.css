@@ -2,23 +2,63 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'VT323', monospace;
+    letter-spacing: 2px;
+    font-weight: 500;
+    scrollbar-width: none;
+}
+
+.scroll-content::-webkit-scrollbar {
+    display: none;
+}
+
+#page-container {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    background-color: silver;
+    z-index: 101;
+}
+
+body {
+    image-rendering: pixelated;
+    -ms-interpolation-mode: nearest-neighbor;
+    cursor: url('../img/arrow95.cur'), auto;
+}
+
+@font-face {
+    font-family: 'Win95Font';
+    src: url('../fonts/w95fa.woff2') format('woff2'),
+    url('../fonts/w95fa.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+a {
+    cursor: url('../img/pointer95.cur'), pointer;
 }
 
 button {
-    cursor: pointer;
+    cursor: url('../img/pointer95.cur'), pointer;
     padding: 5px;
 }
 
+li{
+    text-decoration: none;
+}
+
 header{
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     right: 0;
     width: 100%;
-    height: 6rem;
     background-color: var(--headerBackground);
     display: grid;
-    grid-template-columns: 4fr 6fr 4fr;
+    grid-template-columns: repeat(3, auto);
+    grid-template-rows: repeat(2, auto);
     user-select: none;
     -moz-user-select: none;
     -khtml-user-select: none;
@@ -30,16 +70,19 @@ header{
 .header-sections {
     width: 100%;
     height: 100%;
-    border-radius: 30px;
     display: grid;
-    gap: 0.5rem;
+    gap: 8px;
     align-items: center;
-    padding: 0 0.25rem;
+    padding: 0 4px;
 }
 
 
 .logo {
+    height: 1.5em;
     grid-template-columns: 80px 1fr;
+    grid-column: 1 / -1;
+    background-color: #808080;
+    font-size: 48px;
 }
 
 .minimized-image {
@@ -47,10 +90,13 @@ header{
     height: 80px;
 }
 
-#logo-title {
-    font-size: 3rem;
+#logo-image {
+    height: 60px;
 }
 
+#logo-image:hover {
+    cursor: url('../img/pointer95.cur'), pointer;
+}
 
 .search-box {
     align-self: center;
@@ -58,76 +104,70 @@ header{
     padding-right: 50px;
 }
 
-#search-container {
+#search-container, .search-form {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: var(--searchBackground);
-    padding: 5px;
-    border-radius: 50px;;
+}
+
+#search-container {
+    margin-top: 5px;
 }
 
 .search-button, .search-input {
     height: 30px;
-    color: var(--almostWhite);
     padding: 2px 10px;
-    border-radius: 15px / 50%;
 }
 
 .search-input{
     width: 64ch;
-    background-color: transparent;
-    border: none;
 }
 
 .search-input::placeholder{
-    color: var(--veryLightBlue)
+    color: grey;
 }
 
 .search-button {
-    background-color: var(--searchButtonBackground);
-    border: 2px solid var(--veryLightBlue);
 }
 
 .options {
     flex: 1;
     display: flex;
+    justify-content: flex-start;
+}
+
+#right-nav {
+    display: flex;
+    align-items: center;
     justify-content: flex-end;
 }
 
 #user-profile-picture {
     border-radius: 50%;
     visibility: visible;
+    max-width: 32px;
+    max-height: 32px;
 }
 
 #user-dropdown {
-    width: 12rem;
-    height: 30rem;
     position: fixed;
-    right: 0;
-    top: 6rem;
+    right: 24px;
+    top: 136px;
     z-index: 90;
-    transition: transform 300ms ease-in-out, opacity 300ms ease-in-out;
-    transform: translate3d(0, -150%, 0) ;
-    background-color: var(--headerBackground);
-    border-radius: 0 0 1rem 1rem;
-    padding: 1rem;
-    opacity: 0;
+    background-color: silver;
+    padding: 8px;
+    transform: scale(0);
+    transform-origin: top right;
+    transition: transform 0.2s steps(4, start), opacity 0.5s steps(4, start);
 }
 
 #user-dropdown.active {
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
-    z-index: 90;
+    transform: scale(1);
 }
 
 #user-dropdown ul li {
     list-style-type: none;
-    margin-top: 0.5rem;
-    border-radius: 0.5rem;
-    background-color: var(--searchBackground);
-    padding: 1rem;
-    z-index: 90;
+    padding: 5px 10px;
 }
 
 .invisible {
@@ -135,183 +175,77 @@ header{
     border: none;
 }
 
-/* Elements in the login popup */
-
-#login-popup {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 200;
-    color: white; /* TODO: To remove once the color of the website is defined */
-    user-select: none;
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
-}
-
-#login-popup.hidden {
-    display: none;
-}
-
-#login-popup-background {
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    position: fixed;
-    top: 0;
-    left: 0;
-}
-
-#login-popup-box {
-    width: 30rem;
-    height: 40rem;
-    display: grid;
-    grid-template-rows: 2fr 0.1fr 6fr 16fr 2fr 2fr 16fr 4fr;
-    background-color: var(--headerBackground);
-    position: fixed;
-    border-radius: 1rem;
-    z-index: 210;
-}
-
-#login-popup-title, #login-popup-box p {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#login-popup-box hr {
-    width: 30rem;
-/*    border: 1px solid var(--searchBackground);*/
-    justify-self: center;
-}
-
-#login-popup-close-button-wrapper {
-    display: flex;
-    justify-content: flex-end;
-    margin: 0.5rem;
-}
-
-#login-popup-close-button {
-    width: 2rem;
-    height: 2rem;
-    background-color: var(--searchBackground);
-    border-radius: 50%;
-    padding: 0.2rem;
-}
-
-#login-popup-close-button img {
-    width: 100%;
-    height: 100%;
-}
-
-#login-popup-form {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-#login-popup-form * {
-    margin: 0.5rem;
-}
-
-#login-popup-or p {
-    padding: 0.5rem;
-}
-
-#login-popup-or::before, #login-popup-or::after {
-    content: "";
-    flex: 1;
-    border-bottom: 1px solid var(--searchBackground);
-}
-
-#login-popup-connect-with {
-    margin: 1rem;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 0.5rem;
-}
-
-#login-popup-connect-with div {
-    height: 3rem;
-    width: 100%;
-    background-color: var(--searchBackground);
-    border-radius: 0.5rem;
-    padding: 0.2rem;
-    display: grid;
-    grid-template-columns: 1fr 4fr 1fr;
-    justify-content: center;
-
-}
-
-#login-popup-connect-with div img {
-    width: 80%;
-    height: auto;
-    margin: auto;
-
-}
-
-#login-popup-connect-with div span {
-    text-align: center;
-    margin: auto;
-}
-
-#login-popup-or {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 1rem;
-}
-
-/* Error Popup */
-
-#error-popup {
-    position: fixed;
-    display: block;
-    top: 5%;
-    height: 15%;
-    left: 15%;
-    right: 15%;
-    background-color: red;
-    border-radius: 1rem;
-    padding: 1rem;
-    z-index: 1000;
-    font-size: x-large;
-    color: white; /* TODO: To remove once the color of the website is defined */
-    user-select: none;
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
-}
-
 /* Elements in the main */
 
 main {
     position: fixed;
-    top: 6rem;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    overflow: hidden;
+    background-color: white;
+    top: 120px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    z-index: 0;
+    display: flex;
+    justify-content: center;
+    padding: 5px;
+}
+
+.main-content {
+    position: relative;
+    padding: 5px;
+    overflow-y: auto;
+    height: 100%;
     z-index: 0;
 }
 
-#main-content {
-    padding: 1rem;
-    overflow-y: scroll;
-    z-index: 0;
+#main-container {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    width: 100%;
 }
-
 
 /* List of utils class for scripts */
 
 .hidden {
     display: none;
+}
+
+.unselectable {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    pointer-events: none;
+}
+
+.page-error-container {
+    width: 512px;
+    display: grid;
+    grid-template-columns: 256px auto;
+    padding: 8px;
+    position: absolute;
+}
+
+.page-error-img {
+    width: 256px;
+    height: 256px;
+}
+
+.page-error-status {
+    font-size: 96px;
+}
+
+.page-error-message {
+    font-size: 32px;
+}
+
+.page-error-info{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }

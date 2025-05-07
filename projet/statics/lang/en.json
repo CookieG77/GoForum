@@ -1,8 +1,239 @@
 {
-  "pageNames" : {
-    "home" : "Home"
+  "langs" : {
+    "en" : "English",
+    "fr" : "French"
   },
-  "home" : {
-    "test" : "This is a test"
+  "themes" : {
+    "light" : "Light",
+    "dark"  : "Dark"
+  },
+  "pageNames" : {
+    "home" : "Home",
+    "register" : "Register",
+    "confirmMail" : "Confirm your email",
+    "resetPassword" : "Reset your password",
+    "error": "Error",
+    "thread": "thread",
+    "threadNewMessage" : "threadNewMessage",
+    "profile" : "Profile",
+    "user_settings" : "Settings"
+  },
+  "pages" : {
+    "base" : {
+      "header" : {
+        "logo_alt"                     : "Logo icon",
+        "website_name"                 : "GoForum",
+        "post_button"                  : "Post",
+        "create_thread_button"         : "Create a Thread",
+        "register_account_button"      : "Register an account",
+        "login_button"                 : "Login",
+        "search_bar_placeholder"       : "Search...",
+        "search_button"                : "Search",
+        "profile_button"               : "Profile",
+        "settings_button"              : "Settings",
+        "logout_button"                : "Logout"
+      },
+      "connection_popup" : {
+        "title"                        : "Connection",
+        "login_server_error"           : "An error occurred while trying to login. Please try again later.",
+        "login_invalid_credentials"    : "Invalid credentials.",
+        "login_missing_fields"         : "Please fill in all the fields.",
+        "login_account_is_google"      : "This account is a Google account. Please login with Google.",
+        "login_account_is_github"      : "This account is a GitHub account. Please login with GitHub.",
+        "login_account_is_discord"     : "This account is a Discord account. Please login with Discord.",
+        "login_missing_field_email"    : "Please fill in the 'email' field.",
+        "login_missing_field_password" : "Please fill in the 'password' field.",
+        "email_field_label"            : "Email",
+        "password_field_label"         : "Password",
+        "forgot_password_button"       : "Forgot password ?",
+        "remember_me_checkbox"         : "Remember me",
+        "login_button"                 : "Login",
+        "separator_or"                 : "or",
+        "login_with"                   : "Login with",
+        "register_instead"             : "Not a member yet ?",
+        "register_instead_button"      : "Register an account!"
+      }
+    },
+    "home" : {
+      "thread_list_title" : "Thread list : "
+    },
+    "register" : {
+      "title"                          : "Register",
+      "error_message"                  : "An error occurred while trying to register. Please try again later. If the problem persists, please contact the support.",
+      "enter_information_message"      : "Please enter your information below.",
+      "missing_field_first_name"       : "Please fill in the 'first name' field.",
+      "missing_field_last_name"        : "Please fill in the 'last name' field.",
+      "missing_field_username"         : "Please fill in the 'username' field.",
+      "missing_field_email"            : "Please fill in the 'email' field.",
+      "missing_field_password"         : "Please fill in the 'password' field.",
+      "missing_field_password_confirm" : "Please fill in the 'confirm password' field.",
+      "missing_field_terms"            : "Please accept the terms of use.",
+      "field_first_name_label"         : "First name",
+      "field_last_name_label"          : "Last name",
+      "username_error_already_exists"  : "This username is already taken.",
+      "username_error_invalid"         : "Invalid username : Must be between 3 and 20 characters long and contain only letters, numbers, underscores, or hyphens.",
+      "field_username_label"           : "Username",
+      "email_error_is_google"          : "This email is already associated with a Google account.",
+      "email_error_is_github"          : "This email is already associated with a GitHub account.",
+      "email_error_is_discord"         : "This email is already associated with a Discord account.",
+      "email_error_already_exists"     : "This email is already taken.",
+      "email_error_invalid"            : "Invalid email.",
+      "field_email_label"              : "Email",
+      "password_error_mismatch"        : "Passwords do not match.",
+      "password_error_invalid"         : "Invalid Password : Must be at least 8 characters long, under 64 characters long, contain at least one uppercase letter, one lowercase letter, one number and one special character",
+      "password_field_label"           : "Password",
+      "password_confirm_field_label"   : "Confirm password",
+      "terms_checkbox_label"           : "I agree to the terms of use",
+      "register_button"                : "Register",
+      "register_with"                  : "Register with",
+      "login_instead"                  : "Already a member ?",
+      "login_instead_button"           : "Login",
+      "logout_button" : "Give-up registration"
+    },
+    "user_settings" : {
+      "title" : "User Settings",
+      "profile_picture_change" : "Change your profile picture",
+      "user_lang": "User language",
+      "change_settings" : "Change Settings",
+      "choose_language" : "Choose a language",
+      "close" : "Close",
+      "change_pfp" : "Change Personal Profile Picture",
+      "select_new_pfp" : "Click to select a file",
+      "accepted_formats" : "Accepted formats are",
+      "size_warning" : "Image size must be under 20MB !"
+
+    },
+    "thread" : {
+      "banned_message" : "You are banned from this thread. You are forbidden to access it.",
+      "rank" : {
+        "moderator" : "Moderator",
+        "administrator" : "Administrator",
+        "owner" : "Owner"
+      },
+      "must_connect_message" : "You must be connected to see this page.",
+      "must_join_thread_message" : "You must join this thread to see its content.",
+      "must_login_to_join_message" : "To join the thread, you must register/login",
+      "join_button" : "Join",
+      "leave_button" : "Leave",
+      "edit_button" : "Edit",
+      "moderate_button" : "Moderation",
+      "order_label" : "Message order : ",
+      "new_post_title_label" : "Title : ",
+      "new_post_title_placeholder" : "Post title",
+      "new_post_content_label" : "Content : ",
+      "new_post_content_placeholder" : "Post description goes here",
+      "new_post_send_button" : "Send",
+      "sidebar" : {
+        "moderation_team" : "Thread moderation team",
+        "tags" : "Tags"
+      },
+      "was_modified" : "[edited]",
+      "option_menu" : {
+        "edit_button" : "Edit",
+        "delete_button" : "Delete",
+        "report_button" : "Report",
+        "ban_button" : "Ban"
+      },
+      "report" : {
+        "title" : "Make a report",
+        "description" : "Please describe the reason for your report.",
+        "reason_label" : "Reason : ",
+        "reason_placeholder" : "Reason for the report",
+        "report_button" : "Report",
+        "comment_label" : "Comment : ",
+        "comment_placeholder" : "Comment for the moderation team",
+        "report_success" : "Your report has been sent. Thank you for your contribution.",
+        "report_error" : "An error occurred while trying to send your report. Please try again later."
+      },
+      "edit" : {
+        "title" : "Edit Post",
+        "new_title_label" : "New Title",
+        "new_content_label" : "New Description",
+        "send" : "Send"
+      },
+      "load_more_posts" : "Load More Posts"
+    },
+    "thread_creation" : {
+      "thread_name" : "Thread name",
+      "thread_description" : "Description",
+      "name_already_exist" : "This thread name already exists.",
+      "name_invalid" : "Invalid thread name : Must be at least between 3 and 20 characters long and must be made only of letters, numbers, underscores and hyphens",
+      "description_invalid" : "Invalid description : Must be at least between 20 and 500 characters long",
+      "thread_creation_error" : "An error occurred while trying to create the thread. Please try again later.",
+      "thread_creation_submit" : "Create thread"
+    },
+    "threadPost" : {
+      "comments_title" : "Comments : ",
+      "comment_content_label" : "Add comment : ",
+      "comment_placeholder" : "Write a comment...",
+      "comment_send_button" : "Send",
+      "edit" : {
+        "title" : "Edit Comment",
+        "new_content_label" : "New Comment",
+        "send" : "Send"
+      }
+    },
+    "thread_edit" : {
+      "title" : "Thread Editor",
+      "tags_edit" : "Tags Edit",
+      "tag_name" : "Tag Name : ",
+      "tag_color" : "Tag Color : ",
+      "add_tag" : "Add Tag",
+      "pictures_edit" : "Pictures Edit",
+      "roles_edit" : "Roles Edit",
+      "user_pseudo" : "User Pseudo : ",
+      "promote" : "Promote",
+      "demote" : "Demote",
+      "promote_failed_message": "Failed to promote user.",
+      "promote_success_message": "User {n} promoted successfully to : ",
+      "promote_error_message": "Error promoting user : ",
+
+      "demote_failed_message": "Failed to demote user.",
+      "demote_success_message": "User {n} demoted successfully to : ",
+      "demote_error_message": "Error demoting user:",
+
+      "rank_0": "User",
+      "rank_1": "Moderator",
+      "rank_2": "Administrator"
+    },
+    "thread_reports" : {
+      "report_title" : "Reports",
+      "reported_by" : "Reported by : ",
+      "report_id" : "Report Id : ",
+      "report_type" : "Report Type : ",
+      "report_content_type" : "Reported Content Type : ",
+      "post" : "Post",
+      "comment" : "Comment",
+      "reported_content" : "Reported Content Link : ",
+      "link" : "Link",
+      "report_description" : "Report description : ",
+      "resolve_report" : "Resolve Report"
+    },
+    "profile" : {
+      "top_message" : "Welcome the profile page of : ",
+      "top_message2" : "Welcome to your profile page !",
+      "pfp_message" : "User's profile picture :",
+      "user_name" : "User's name is : ",
+      "user_language" : "User's language is : ",
+      "user_crd_the" : "User's account created the : ",
+      "user_thr_ls" : "User's thread(s) list : ",
+
+      "self_pfp_message" : "Profile picture :",
+      "self_user_name" : "Public Username is : ",
+      "self_full_name" : "Private First name and Last name are : ",
+      "self_user_language" : "Public language is : ",
+      "self_user_crd_the" : "Account created the : ",
+      "self_user_thr_ls" : "Your thread list : "
+    }
+
+  },
+  "time" : {
+    "ago_seconds" : "A few seconds ago",
+    "ago_minute" : "{n} minute ago",
+    "ago_minutes" : "{n} minutes ago",
+    "ago_hour" : "{n} hour ago",
+    "ago_hours" : "{n} hours ago",
+    "ago_day" : "{n} day ago",
+    "ago_days" : "{n} days ago"
   }
 }

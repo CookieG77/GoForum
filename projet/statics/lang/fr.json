@@ -1,8 +1,236 @@
 {
-  "pageNames" : {
-    "home" : "Accueil"
+  "langs" : {
+    "en" : "Anglais",
+    "fr" : "Français"
   },
-  "home" : {
-    "test" : "Ceci est un test"
+  "themes" : {
+    "light" : "Clair",
+    "dark"  : "Sombre"
+  },
+  "pageNames" : {
+    "home" : "Accueil",
+    "register" : "Inscription",
+    "confirmMail" : "Confirmer votre email",
+    "resetPassword" : "Réinitialiser votre mot de passe",
+    "error": "Erreur",
+    "thread": "thread",
+    "threadNewMessage" : "Nouveau Post",
+    "profile" : "Profil",
+    "user_settings" : "Paramètres"
+  },
+  "pages" : {
+    "base" : {
+      "header" : {
+        "logo_alt"                     : "Icône du logo",
+        "website_name"                 : "GoForum",
+        "post_button"                  : "Publier",
+        "create_thread_button"         : "Créer un Thread",
+        "register_account_button"      : "Créer un compte",
+        "login_button"                 : "Connexion",
+        "search_bar_placeholder"       : "Rechercher...",
+        "search_button"                : "Rechercher",
+        "profile_button"               : "Profil",
+        "settings_button"              : "Paramètres",
+        "logout_button"                : "Déconnexion"
+      },
+      "connection_popup" : {
+        "title"                        : "Connexion",
+        "login_server_error"           : "Une erreur est survenue lors de la tentative de connexion. Veuillez réessayer plus tard.",
+        "login_invalid_credentials"    : "Identifiants invalides.",
+        "login_missing_fields"         : "Veuillez remplir tous les champs.",
+        "login_account_is_google"      : "Ce compte est associé à un compte Google. Veuillez vous connecter avec Google.",
+        "login_account_is_github"      : "Ce compte est associé à un compte GitHub. Veuillez vous connecter avec GitHub.",
+        "login_account_is_discord"     : "Ce compte est associé à un compte Discord. Veuillez vous connecter avec Discord.",
+        "login_missing_field_email"    : "Veuillez remplir le champ 'email'.",
+        "login_missing_field_password" : "Veuillez remplir le champ 'mot de passe'.",
+        "email_field_label"            : "Email",
+        "password_field_label"         : "Mot de passe",
+        "forgot_password_button"       : "Mot de passe oublié ?",
+        "remember_me_checkbox"         : "Se souvenir de moi",
+        "login_button"                 : "Connexion",
+        "separator_or"                 : "ou",
+        "login_with"                   : "Se connecter avec",
+        "register_instead"             : "Pas encore membre ?",
+        "register_instead_button"      : "Créer un compte !"
+      }
+    },
+    "home" : {
+      "thread_list_title" : "Liste des threads : "
+    },
+    "register" : {
+      "title"                          : "Inscription",
+      "error_message"                  : "Une erreur est survenue lors de l'inscription. Veuillez réessayer plus tard. Si le problème persiste, veuillez contacter le support.",
+      "enter_information_message"      : "Veuillez entrer vos informations ci-dessous.",
+      "missing_field_first_name"       : "Veuillez remplir le champ 'prénom'.",
+      "missing_field_last_name"        : "Veuillez remplir le champ 'nom'.",
+      "missing_field_username"         : "Veuillez remplir le champ 'nom d'utilisateur'.",
+      "missing_field_email"            : "Veuillez remplir le champ 'email'.",
+      "missing_field_password"         : "Veuillez remplir le champ 'mot de passe'.",
+      "missing_field_password_confirm" : "Veuillez remplir le champ 'confirmer le mot de passe'.",
+      "missing_field_terms"            : "Veuillez accepter les conditions d'utilisation.",
+      "field_first_name_label"         : "Prénom",
+      "field_last_name_label"          : "Nom",
+      "username_error_already_exists"  : "Ce nom d'utilisateur est déjà pris.",
+      "username_error_invalid"         : "Nom d'utilisateur invalide : Doit contenir entre 3 et 20 caractères et ne doit être composé que de lettres, chiffres, tirets bas et tirets.",
+      "field_username_label"           : "Nom d'utilisateur",
+      "email_error_is_google"          : "Cet email est déjà associé à un compte Google.",
+      "email_error_is_github"          : "Cet email est déjà associé à un compte GitHub.",
+      "email_error_is_discord"         : "Cet email est déjà associé à un compte Discord.",
+      "email_error_already_exists"     : "Cet email est déjà pris.",
+      "email_error_invalid"            : "Email invalide.",
+      "field_email_label"              : "Email",
+      "password_error_mismatch"        : "Les mots de passe ne correspondent pas.",
+      "password_error_invalid"         : "Mot de passe invalide : Doit contenir au moins 8 caractères, moins de 64 caractères, au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.",
+      "password_field_label"           : "Mot de passe",
+      "password_confirm_field_label"   : "Confirmer le mot de passe",
+      "terms_checkbox_label"           : "J'accepte les conditions d'utilisation",
+      "register_button"                : "S'inscrire",
+      "register_with"                  : "S'inscrire avec",
+      "login_instead"                  : "Déjà un membre ?",
+      "login_instead_button"           : "Connectez-vous !",
+      "logout_button" : "Abandonner l'inscription"
+    },
+    "user_settings" : {
+      "title" : "Paramètres Utilisateur",
+      "profile_picture_change" : "Changez votre photo de profil",
+      "user_lang": "Langue de l'utilisateur",
+      "change_settings" : "Modifier les Paramètres",
+      "choose_language" : "Choisissez une langue",
+      "close" : "Fermer",
+      "change_pfp" : "Changement de Photo de Profil",
+      "select_new_pfp" : "Cliquez pour sélectionner un fichier",
+      "accepted_formats" : "Formats acceptés",
+      "size_warning" : "La taille de l'image doit être inférieure à 20 Mo !"
+    },
+    "thread" : {
+      "banned_message" : "Vous êtes banni(e) de ce thread. Vous n'êtes pas autorisé(e) à y accéder.",
+      "rank" : {
+        "moderator" : "Modérateur",
+        "administrator" : "Administrateur",
+        "owner" : "Propriétaire"
+      },
+      "must_connect_message" : "Vous devez être connecté pour voir cette page.",
+      "must_join_thread_message" : "Vous devez rejoindre ce thread pour voir son contenu.",
+      "must_login_to_join_message" : "Pour rejoindre ce thread, vous devez être connecté.",
+      "join_button" : "Rejoindre",
+      "leave_button" : "Quitter",
+      "edit_button" : "Editer",
+      "order_label" : "Ordre des messages : ",
+      "new_post_title_label" : "Titre : ",
+      "new_post_title_placeholder" : "Titre du post",
+      "new_post_content_label" : "Message : ",
+      "new_post_content_placeholder" : "Écrivez votre message ici",
+      "new_post_send_button" : "Publier",
+      "sidebar" : {
+        "moderation_team" : "Equipe de modération du thread",
+        "tags" : "Etiquettes"
+      },
+      "was_modified" : "[modifié]",
+      "option_menu" : {
+        "edit_button" : "Editer",
+        "delete_button" : "Supprimer",
+        "report_button" : "Signaler",
+        "ban_button" : "Bannir"
+      },
+      "report" : {
+        "title" : "Signaler un Post",
+        "description" : "Merci de décrire la raison de votre signalement",
+        "reason_label" : "Raison : ",
+        "reason_placeholder" : "Raison du Signalement",
+        "report_button" : "Signalement",
+        "comment_label" : "Commentaire : ",
+        "comment_placeholder" : "Laissez un commentaire pour l'équipe de modération",
+        "report_success" : "Votre signalement a été envoyé. Merci pour votre contribution.",
+        "report_error" : "Une erreur est survenue lors de l'envoi du signalement. Merci de réessayer ultérieurement."
+      },
+      "edit" : {
+        "title" : "Editer le Post",
+        "new_title_label" : "Nouveau Titre",
+        "new_content_label" : "Nouvelle Description",
+        "send" : "Envoyer"
+      },
+      "load_more_posts" : "Charger plus de Posts"
+    },
+    "thread_creation" : {
+      "thread_name" : "Nom du thread",
+      "thread_description" : "Description",
+      "name_already_exist" : "Ce nom de thread existe déjà.",
+      "name_invalid" : "Nom de thread invalide : Doit contenir entre 3 et 20 caractères et ne doit être composé que de lettres, chiffres, tirets bas et tirets.",
+      "description_invalid" : "Description invalide : Doit contenir entre 20 et 500 caractères et ne doit être composé que de lettres, chiffres, tirets bas et tirets.",
+      "thread_creation_error" : "Une erreur est survenue lors de la création du thread. Veuillez réessayer plus tard.",
+      "thread_creation_submit" : "Créer le thread"
+    },
+    "threadPost" : {
+      "comments_title" : "Commentaires : ",
+      "comment_content_label" : "Ajouter un commentaire : ",
+      "comment_placeholder" : "Ecrivez un commentaire...",
+      "comment_send_button" : "Envoyer",
+      "edit" : {
+        "title" : "Editez votre commentaire",
+        "new_content_label" : "Nouveau Commentaire",
+        "send" : "Envoyer"
+      }
+    },
+    "thread_edit" : {
+      "title" : "Edition de thread",
+      "tags_edit" : "Edition des Etiquettes",
+      "tag_name" : "Nom de l'Etiquette : ",
+      "tag_color" : "Couleur de l'Etiquette : ",
+      "add_tag" : "Ajouter l'Etiquette",
+      "pictures_edit" : "Edition des Images",
+      "roles_edit" : "Edition des Roles",
+      "user_pseudo" : "Pseudo de l'Utilisateur : ",
+      "promote" : "Promouvoir",
+      "demote" : "Destituer",
+      "promote_failed_message": "Echec de la promotion de l'utilisateur.",
+      "promote_success_message": "Utilisateur {n} promu avec succès au rang : ",
+      "promote_error_message": "Erreur lors de la promotion de l'utilisateur :",
+
+      "demote_failed_message": "Echec de la destitution de l'utilisateur.",
+      "demote_success_message": "Utilisateur {n} destitué avec succès du rang : ",
+      "demote_error_message": "Erreur lors de la destitution de l'utilisateur :",
+
+      "rank_0": "User",
+      "rank_1": "Moderator",
+      "rank_2": "Administrator"
+    },
+    "thread_reports" : {
+      "report_title" : "Signalements",
+      "reported_by" : "Signalé par : ",
+      "report_id" : "ID du Signalement : ",
+      "report_type" : "Type du Signalement : ",
+      "report_content_type" : "Type du Contenu du Signalement : ",
+      "post" : "Post",
+      "comment" : "Commentaire",
+      "reported_content" : "Lien du Contenu Signalé : ",
+      "link" : "Lien",
+      "report_description" : "Description du signalement : ",
+      "resolve_report" : "Résoudre le Signalement"
+    },
+    "profile" : {
+      "top_message" : "Bienvenue sur la page de : ",
+      "top_message2" : "Bienvenue sur votre page de profile !",
+      "pfp_message" : "Image de l'utilisateur : ",
+      "user_name" : "Pseudo de l'utilisateur : ",
+      "user_language" : "Langue de l'utilisateur : ",
+      "user_crd_the" : "Date de création de l'utilisateur : ",
+      "user_thr_ls" : "Thread(s) de de l'utilisateur : ",
+
+      "self_pfp_message" : "Votre image de profile : ",
+      "self_user_name" : "Votre pseudo public : ",
+      "self_full_name" : "Votre nom complet privé : ",
+      "self_user_language" : "Votre langue public : ",
+      "self_user_crd_the" : "Votre date de création du profile : ",
+      "self_user_thr_ls" : "Votre/Vos thread(s) : "
+    }
+  },
+  "time" : {
+    "ago_seconds" : "Il y a quelques secondes",
+    "ago_minute" : "Il y a {n} minute",
+    "ago_minutes" : "Il y a {n} minutes",
+    "ago_hour" : "Il y a {n} heure",
+    "ago_hours" : "Il y a {n} heures",
+    "ago_day" : "Il y a {n} jour",
+    "ago_days" : "Il y a {n} jours"
   }
 }

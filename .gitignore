@@ -45,3 +45,7 @@ docker\bin
 docker\logs
 docker/go.mod
 docker/go.sum
+.idea
+
+# Uploaded files from the webapp
+uploads/

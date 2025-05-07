@@ -1,0 +1,14 @@
+#email-verification-container {
+    background-color: silver;
+    position: absolute;
+    margin: 0 8px;
+    align-self: center;
+}
+
+#email-verification-content {
+    gap: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}

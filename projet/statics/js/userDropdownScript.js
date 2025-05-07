@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (!trigger.matches(':hover') && !dropdown.matches(':hover')) {
                     dropdown.classList.remove("active");
                 }
-            }, 200);
+            }, 300);
         }
 
         // Attach event listeners to the trigger

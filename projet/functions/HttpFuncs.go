@@ -1,14 +1,15 @@
 package functions
 
 import (
+	"bytes"
 	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
 	"os"
 )
 
-var isCertified bool = false
-var isInitialized bool = false
+var isCertified = false
+var isInitialized = false
 
 // baseTemplates is a list of base templates to be used by the templates.
 var baseTemplates []string
@@ -22,7 +23,9 @@ func AddBaseTemplate(templatePath ...string) {
 // It will use the base templates defined in the baseTemplates variable.
 func MakeTemplate(w http.ResponseWriter, templatesDir ...string) *template.Template {
 	templatesDir = append(templatesDir, baseTemplates...)
-	tmpl, err := template.New("base.html").ParseFiles(templatesDir...)
+	tmpl, err := template.New("base.html").Funcs(template.FuncMap{
+		"interfaceToString": interfaceToString,
+	}).ParseFiles(templatesDir...)
 	if err != nil {
 		ErrorPrintf("An error occurred while trying to parse the template -> %v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -44,24 +47,43 @@ func ExecuteTemplate(w http.ResponseWriter, tmpl *template.Template, content int
 	}
 }
 
-// MakeTemplateAndExecute is to be used for pages that do not require any particular processing
-func MakeTemplateAndExecute(w http.ResponseWriter, r *http.Request, content interface{}, templatesDir ...string) {
+// MakeTemplateAndExecute is to be used for pagesHandlers that do not require any particular processing
+func MakeTemplateAndExecute(w http.ResponseWriter, content interface{}, templatesDir ...string) {
 	tmpl := MakeTemplate(w, templatesDir...)
 	ExecuteTemplate(w, tmpl, content)
 }
 
+// TemplateToText execute a template and return the result as a string.
+func TemplateToText(tmpl *template.Template, content interface{}) string {
+	// Check if the template is nil
+	if tmpl == nil {
+		ErrorPrintln("An error occurred while trying to execute a template -> Template is nil")
+		return ""
+	}
+	// Create a buffer to store the content
+	var contentBuffer bytes.Buffer
+
+	// Execute the template
+	if err := tmpl.Execute(&contentBuffer, content); err != nil {
+		ErrorPrintf("An error occurred while trying to execute a template in TemplateToText -> %v\n", err)
+		return ""
+	}
+	return contentBuffer.String()
+}
+
 // NewContentInterface return a map[string]interface{} with a title given as parameter
 // It also set the language of the user and the list of available languages, as well as the page theme.
-func NewContentInterface(pageTitleKey string, w http.ResponseWriter, r *http.Request) map[string]interface{} {
+func NewContentInterface(pageTitleKey string, r *http.Request) map[string]interface{} {
 	ContentInterface := make(map[string]interface{})
 	// Getting the user language
-	currentLang := GetAndResetUserLang(w, r)
+	currentLang := GetUserLang(r)
 	langText, err := GetLangContent(currentLang)
 	if err != nil {
-		ErrorPrintf("An error occurred while trying to get the language content -> %v/n", err)
+		ErrorPrintf("An error occurred while trying to get the language content -> %v\n", err)
 	} else {
 		ContentInterface["Lang"] = langText
 		ContentInterface["Title"] = langText["pageNames"].(map[string]interface{})[pageTitleKey]
+		ContentInterface["PageTitleKey"] = pageTitleKey
 	}
 	// On va initialiser les listes de styles et de scripts supplémentaires.
 	// Ces listes serviront à ajouter des styles et des scripts supplémentaires pour qu'ils soient chargés par le template.
@@ -69,12 +91,16 @@ func NewContentInterface(pageTitleKey string, w http.ResponseWriter, r *http.Req
 	ContentInterface["AdditionalScripts"] = []string{}
 
 	// Setting the language
-	ContentInterface["LangList"] = LangListToStrList(langList)
 	ContentInterface["CurrentLang"] = string(currentLang)
 
 	// Setting the theme
-	currentTheme := GetAndResetUserTheme(w, r)
+	currentTheme := GetUserTheme(r)
 	ContentInterface["CurrentTheme"] = string(currentTheme)
+
+	// Login page data
+	ContentInterface["ShowLoginPage"] = false
+	ContentInterface["ShowCustomLoginMessage"] = false
+	ContentInterface["LoginPageMessage"] = ""
 
 	return ContentInterface
 }
@@ -147,4 +173,13 @@ func LaunchServer(r *mux.Router, port string) {
 // IsCertified returns true if the server is running in HTTPS mode, false otherwise.
 func IsCertified() bool {
 	return isCertified
+}
+
+// ================================
+// |Functions for inside the pages|
+// ================================
+
+// interfaceToString is a function to convert an interface to a string.
+func interfaceToString(i interface{}) string {
+	return i.(string)
 }

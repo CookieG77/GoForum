@@ -1,0 +1,118 @@
+#t-post{
+    width: 90%;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#t-post-content{
+    display: flex;
+    flex-direction: column;
+    right: 0;
+}
+
+#t-post-container{
+    width: 100%;
+    background-color: silver;
+    position: absolute;
+}
+
+#t-post-header {
+    position: relative;
+    width: calc(100%);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
+}
+
+#t-option-menu{
+    right: 6px;
+}
+
+.option-menu.active{
+    transform: scale(1);
+}
+
+#t-post-content-text, #t-post-media-container{
+    position: relative;
+    right: 0;
+    width: auto;
+}
+
+.menu-button{
+    width: 100%;
+    gap: 4px;
+}
+
+.prev-button,
+.next-button {
+    cursor: url('../img/pointer95.cur'), pointer;
+    width: auto;
+    top: 50%;
+}
+
+.prev-button { left: 24px !important;}
+.next-button { right: 24px !important;}
+
+.post-picture {
+    height: 700px;
+    width: auto;
+    overflow: hidden;
+    display: none;
+}
+
+.comment-content{
+    padding: 4px;
+}
+
+.comment-date-edit-container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    width: 100%;
+    padding: 8px;
+}
+
+#comments-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    gap: 8px;
+}
+
+#t-post-comment-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#t-post-comment-title {
+    padding: 0 0 0 16px;
+}
+
+#t-post-vote-field {
+    padding: 8px 8px 8px 16px;
+}
+
+#t-post-date-and-edited {
+    padding: 0 0 0 16px;
+}
+
+#new-comment-send-button {
+    width: fit-content;
+}
+
+#load-more-comments-button {
+    width: fit-content;
+}
+
+#new-comment-content {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: calc(100% - 16px);
+    height: 10vh;
+    resize: none;
+}

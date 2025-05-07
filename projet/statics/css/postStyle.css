@@ -1,0 +1,226 @@
+.post-box {
+    position: relative;
+    background-color: silver;
+    width: 100%;
+    display: grid;
+    grid-template-rows: auto auto auto;
+    gap: 8px;
+    padding: 8px;
+}
+
+.post-header {
+    position: relative;
+    width: calc(100% + 8px);
+    top : -4px;
+    left: -4px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto auto;
+}
+
+.post-content {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.post-vote {
+    width: 100%;
+    display: flex;
+    align-items: start;
+    justify-content: start;
+    gap: 16px;
+}
+
+.post-profile, .comment-profile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.post-profile span, .comment-profile span{
+    max-width: max-content;
+}
+
+.post-profile-picture, .comment-profile-picture {
+    position: relative;
+    height: 64px;
+    width: 64px;
+    border-radius: 50%;
+    margin-right: 8px;
+    overflow: hidden;
+}
+
+.post-profile-picture:hover, .comment-profile-picture:hover{
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+
+.author-and-time{
+    display: inline-flex;
+    align-items: center;
+}
+
+.author-pseudo{
+    font-size: 22px;
+}
+
+.author-pseudo:hover{
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+
+.time-ago{
+    font-size: 14px;
+}
+
+.edit-status, .post-description{
+    grid-column: 1/-1;
+}
+
+.edit-status{
+    font-size: 16px;
+}
+
+.post-description{
+    position: relative;
+    width: 100%;
+    padding: 8px;
+    max-height: 58px;
+    overflow: hidden;
+}
+
+.post-content{
+    position: relative;
+    display: flex;
+    align-items: center;
+    right: 8px;
+}
+
+.post-picture {
+    height: 500px;
+    width: auto;
+    overflow: hidden;
+    display: none;
+    grid-column: 2/3;
+}
+
+.post-title, #new-post-title-static{
+    grid-row: 2;
+    grid-column: 1/-1;
+    font-size: 32px;
+    padding: 0 4px;
+}
+
+.post-title:hover{
+    background-color: #00ffff;
+    color: black;
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+
+.post-vote-field, .comment-vote-field{
+    display: grid;
+    grid-template-columns: 46px min(5ch) 46px;
+    gap: 8px;
+    width: auto;
+    margin: 4px;
+}
+
+.post-vote-image, .comment-vote-image{
+    position: relative;
+    height: 32px;
+    width: 32px;
+}
+
+.post-vote-button, .comment-vote-button{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.post-vote-value, .comment-vote-value{
+    font-size: 32px;
+    text-align: center;
+}
+
+.post-media-container{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.post-medias{
+    position: relative;
+    width: 100%;
+    display: inline-grid;
+    align-items: center;
+    padding: 8px;
+    overflow: hidden;
+}
+
+.prev-button,
+.next-button {
+    position: absolute;
+    cursor: url('../img/pointer95.cur'), pointer;
+    width: auto;
+    transform: translateY(-50%);
+    top: 50%;
+}
+.prev-button {
+    left: 8px;
+    grid-column: 1/2;
+}
+.next-button {
+    right: 8px;
+    grid-column: 3/4;
+}
+
+/* dots */
+.dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
+}
+.dot {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin: 0 4px;
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+.dot.active { background: #717171; }
+
+.prev-img, .next-img{
+    width: 32px;
+}
+
+.option-menu{
+    position: absolute;
+    right: 4px;
+    display: flex;
+    max-width: max-content;
+    flex-direction: column;
+    align-content: center;
+    background-color: silver;
+    margin-top: 4px;
+    z-index: 1;
+    transform: scale(0);
+    transform-origin: top right;
+    transition: transform 0.2s steps(4, start), opacity 0.5s steps(4, start);
+    padding: 4px;
+    color: black;
+}
+
+.option-menu ul li{
+    padding: 4px 8px;
+}
+
+.option-menu.active{
+    transform: scale(1);
+}
+
+#load-more-posts-button, #load-more-comments-button{
+    margin-top: 4px;
+}

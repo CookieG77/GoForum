@@ -1,0 +1,58 @@
+{{ define "content" }}
+<div class="win95-border" id="send-message-box">
+  <div class="send-message-section win95-border-indent">
+    <label for="threadSelect">In which thread</label>
+    <select id="threadSelect">
+      {{ range $thread := .UserThreads }}
+      <option value="{{ $thread.ThreadName }}">{{ $thread.ThreadName }}</option>
+      {{ end }}
+    </select>
+  </div>
+
+  <br>
+
+  <div id="titleBox">
+    <label for="messageTitle">Message title</label>
+    <input type="text" id="messageTitle" placeholder="Type your message title here..." minlength="5" maxlength="50"/>
+  </div>
+
+  <br>
+  <div id="messageBox">
+    <label for="messageContent">Message content</label>
+    <textarea id="messageContent" placeholder="Type your message here..." minlength="5" maxlength="500"></textarea>
+  </div>
+  <br>
+  <div id="mediaBox">
+    <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif" multiple>
+    <div id="imagePreviewContainer">
+    </div>
+  </div>
+
+
+  <br>
+  <button id="sendMessageButton">Send</button>
+  <br>
+  <div id="afterMessageSendOptionContainer" class="hidden">
+    <p>Last message data</p>
+    <div style="border: 0.5rem solid blue;">
+      <div id="messageThreadContainer"></div>
+      <div id="messageIDContainer"></div>
+    </div>
+    <button  id="deleteMessageButton">Delete last message</button>
+    <button  id="upvoteButton">Upvote last message</button>
+    <button  id="downvoteButton">Downvote last message</button>
+    <br>
+    <p>Update last message</p>
+    <div>
+      <label for="updatedMessageTitle">Message title</label>
+      <input type="text" id="updatedMessageTitle" placeholder="Type your message title here..." />
+      <br>
+      <label for="updatedMessageContent">Message content</label>
+      <input type="text" id="updatedMessageContent" placeholder="Type your message here..." />
+      <br>
+      <button id="updateMessageButton">Send</button>
+    </div>
+  </div>
+</div>
+
+{{ end }}

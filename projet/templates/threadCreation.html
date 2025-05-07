@@ -1,0 +1,36 @@
+{{ define "content" }}
+<div class="win95-border" id="thread-creation-box">
+    <section class="win95-header">
+        <h1>Create Thread</h1>
+    </section>
+    <section class="win95-border-indent">
+        <form method="POST" id="thread-creation-form">
+            {{ if .NameAlreadyExist }}
+            <p class="error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" scr="/img/warningIcon.png">{{ .Lang.pages.thread_creation.name_already_exist }}</p>
+            {{ end }}
+            {{ if .NameNotValid }}
+            <p class="error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" scr="/img/warningIcon.png">{{ .Lang.pages.thread_creation.name_invalid }}</p>
+            {{ end }}
+            <div class="thread-creation-form-section">
+                <label for="thread_name">{{ .Lang.pages.thread_creation.thread_name }} :</label>
+                <input class="win95-input-indent" type="text" name="thread_name" id="thread_name" required minlength="5" maxlength="50">
+            </div>
+            {{ if .DescriptionNotValid }}
+            <p class="error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" scr="/img/warningIcon.png">{{ .Lang.pages.thread_creation.description_invalid }}</p>
+            {{ end }}
+            <div class="thread-creation-form-section">
+                <label for="thread_description">{{ .Lang.pages.thread_creation.thread_description }} :</label>
+                <textarea class="win95-input-indent" name="thread_description" id="thread_description" required maxlength="500" minlength="20"></textarea>
+            </div>
+            {{ if .ErrorCreationThread }}
+            <p class="error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" scr="/img/warningIcon.png">{{ .Lang.pages.thread_creation.thread_creation_error }}</p>
+            {{ end }}
+            <button type="submit" class="win95-button">{{ .Lang.pages.thread_creation.thread_creation_submit }}</button>
+
+        </form>
+    </section>
+
+</div>
+
+
+{{ end }}

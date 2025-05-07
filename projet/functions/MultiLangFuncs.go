@@ -19,12 +19,47 @@ const (
 // langList is a list of all the languages
 var langList = []Lang{En, Fr}
 
+// DefaultLang is the default language
+var DefaultLang Lang
+
+// InitDefaultLangConfig set up the default language
+func InitDefaultLangConfig() {
+	defaultLang := os.Getenv("DEFAULT_LANG")
+	if defaultLang == "" {
+		DefaultLang = En
+		WarningPrintf("No default language was given switching to : %s\n", DefaultLang)
+		return
+	}
+	DefaultLang = StrToLang(defaultLang)
+	SuccessPrintf("Default Language set to : %s\n", DefaultLang)
+}
+
 // GetLangContent returns the map[string]string containing each field text adapted to the given language
+// In case some fields are missing we first load the default version and overwrite it with the given language
 // Also returns an error if the file can't be read or if the json can't be unmarshalled
 func GetLangContent(language Lang) (map[string]interface{}, error) {
-	filePath := fmt.Sprintf("statics/lang/%s.json", language)
 
-	file, err := os.ReadFile(filePath)
+	// First we load the default language
+	defaultLangFilePath := fmt.Sprintf("statics/lang/%s.json", DefaultLang)
+
+	file, err := os.ReadFile(defaultLangFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	var defaultContent map[string]interface{}
+	err = json.Unmarshal(file, &defaultContent)
+	if err != nil {
+		return nil, err
+	}
+	if language == DefaultLang {
+		return defaultContent, nil
+	}
+
+	// Now we load the language asked
+	langFilePath := fmt.Sprintf("statics/lang/%s.json", language)
+
+	file, err = os.ReadFile(langFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +70,11 @@ func GetLangContent(language Lang) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	return content, nil
+	// We overwrite the default content with the language content
+	// Since both defaultContent and content are map[string]interface{} that may also contain map[string]interface{} that may contain map[string]interface{} and so on...
+	// We need to use a recursive function to merge the two maps
+	mergedContent := mergeMap(defaultContent, content)
+	return mergedContent, nil
 }
 
 // StrToLang converts a string to a Lang
@@ -58,15 +97,39 @@ func LangListToStrList(langList []Lang) []string {
 	return strList
 }
 
-// GetAndResetUserLang return the language of the user if it exists
-// // Otherwise it will set it at its default value (En)
-func GetAndResetUserLang(w http.ResponseWriter, r *http.Request) Lang {
-	cookie := GetCookie(w, r, "lang")
-	if cookie == nil {
-		SetCookie(w, "lang", string(En))
-		DebugPrintf("Resetting user language -> %v\n", En)
-		return En
+// GetUserLang return the language of the user.
+func GetUserLang(r *http.Request) Lang {
+	if !IsAuthenticated(r) {
+		return DefaultLang
 	}
-	DebugPrintf("User language -> %v\n", StrToLang(cookie.Value))
-	return StrToLang(cookie.Value)
+	u := GetUser(r)
+	c := GetUserConfig(u)
+	return StrToLang(c.Lang)
+}
+
+// GetLangList return the list of all the languages
+func GetLangList() []Lang {
+	return langList
+}
+
+// mergeMap is a recursive function that merge two maps
+// It will overwrite the values of the first map with the values of the second map
+// If a value is a map, it will call itself with the two maps
+func mergeMap(m1, m2 map[string]interface{}) map[string]interface{} {
+	for k, v := range m2 {
+		if _, ok := m1[k]; ok {
+			if m1Map, ok := m1[k].(map[string]interface{}); ok {
+				if m2Map, ok := v.(map[string]interface{}); ok {
+					m1[k] = mergeMap(m1Map, m2Map)
+				} else {
+					m1[k] = v
+				}
+			} else {
+				m1[k] = v
+			}
+		} else {
+			m1[k] = v
+		}
+	}
+	return m1
 }

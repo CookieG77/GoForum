@@ -1,12 +1,14 @@
 {{ define "content" }}
-
-<div id="home-wrapper">
-    <p>{{ .Lang.home.test }}</p>
-    <p><a href="/auth/google">Google</a></p>
-    <p><a href="/auth/github">Github</a></p>
-    <p><a href="/auth/discord">Discord</a></p>
-    <p><a href="/auth/twitter">Twitter</a></p>
-    <p><a href="/auth/twitch">Twitch</a></p>
-</div>
-
+    <div id="thread-menu" class="win95-border">
+        <p class="win95-header">{{ .Lang.pages.home.thread_list_title }}</p>
+        <ul id="thread-list" class="win95-border-indent">
+            {{ range .AllThreads }}
+                <li class="win95-menu-box thread-list-element">
+                    <!--TODO Connect the database to get the thread's icon -->
+                    <img class="thread-menu-icon unselectable" draggable="false" src="/upload/{{ .ThreadIconLink }}" alt="Thread Icon">
+                    <a class="thread-link win95-menu-button" href="/t/{{ .ThreadName }}"><span>{{ .ThreadName }}</span></a>
+                </li>
+            {{ end }}
+        </ul>
+    </div>
 {{ end }}

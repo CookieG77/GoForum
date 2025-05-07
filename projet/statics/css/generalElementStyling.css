@@ -1,0 +1,169 @@
+.win95-border {
+    border: 4px solid #fff;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    outline: 4px solid #808080;
+    outline-offset: -8px;
+    padding: 4px;
+}
+
+.win95-border-indent, .win95-input-indent {
+    border: 4px solid #fff;
+    border-left-color: #404040;
+    border-top-color: #404040;
+    padding: 4px;
+}
+
+.win95-border-outdent, .win95-input-outdent {
+    border: 4px solid #ff8080;
+    border-right-color: #800000;
+    border-bottom-color: #800000;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.win95-border-bulge{
+    border: 4px solid #ffffff;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.win95-border-indent, .win95-border-outdent {
+    margin: 8px;
+}
+
+.win95-input-indent, .win95-input-outdent {
+    outline: 1px solid #c0c0c0;
+    outline-offset: -5px;
+}
+
+.win95-checkbox {
+    width: 16px;
+    height: 16px;
+    appearance: none;
+    background: #c0c0c0;
+    border: 3px solid #fff;
+    border-left-color: #404040;
+    border-top-color: #404040;
+    position: relative;
+    cursor: url('../img/pointer95.cur'), pointer;
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.win95-checkbox:checked::before {
+    content: "✓";
+    font-size: 15px;
+    font-weight: bold;
+    top: -6px;
+    position: absolute;
+    color: black;
+}
+
+.win95-header {
+    position: relative;
+    width: 100%;
+    background: #0000ff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font: bold 20px sans-serif;
+    padding: 0.5em;
+}
+
+.win95-button {
+    min-height: 30px;
+    min-width: 30px;
+    color: #000;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 20px;
+    background: #c0c0c0;
+    border: 2px solid #fff;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    cursor: url('../img/pointer95.cur'), pointer;
+    box-shadow: inset -1px -1px 0 0 #808080;
+    user-select: none;
+    text-align: center;
+}
+
+.win95-button:active, .win95-button:disabled {
+    border-top-color: #404040;
+    border-left-color: #404040;
+    border-right-color: #ffffff;
+    border-bottom-color: #ffffff;
+    box-shadow: inset 1px 1px 0 0 #808080;
+}
+
+.win95-button-space {
+    margin-left: auto;
+    display: flex;
+    gap: 5px;
+}
+
+.win95-menu-button {
+    background-color: silver;
+    border: none;
+    font-size: 22px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.win95-menu-button span::first-letter {
+    text-decoration: underline !important;
+}
+
+.win95-menu-button:hover {
+    background-color: white;
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+
+/* Error Popup */
+
+.error-message {
+    margin: 0 2em;
+    position: relative;
+    display: block;
+    top: 1%;
+    background-color: red;
+    padding: 4px 1rem;
+    z-index: 1000;
+    font-size: 20px;
+    color: white;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+
+.win95-minor-logo{
+    width: 32px;
+    height: 32px;
+    margin-right: 5px;
+}
+
+.win95-important-logo {
+    width: 128px;
+    height: 128px;
+    margin-right: 5px;
+    margin-left: 5px;
+    border-radius: 50%;
+}
+
+.win95-description{
+    padding: 8px;
+}
+
+.win95-menu-box{
+    border-top: grey 2px solid;
+    border-bottom: white 2px solid;
+    width: 100%;
+}

@@ -1,0 +1,232 @@
+{{ define "content" }}
+<div id="thread">
+    <div id="thread-container" class="win95-border">
+        <div id="thread-header" class="win95-header">
+            <div class="thread-title">
+                <img class="thread-icon unselectable" draggable="false" src="/upload/{{ .ThreadIcon }}" alt="Thread Icon">
+            </div>
+        </div>
+        <div id="thread-info" class="win95-description">
+            <div class="thread-banner-container">
+                <img class="thread-banner unselectable" draggable="false" src="/upload/{{ .ThreadBanner }}" alt="Thread Banner">
+            </div>
+            <div id="thread-description" class="win95-border-indent">
+                <p>{{ .ThreadComplementaryInfos.ThreadDescription }}</p>
+                <div id="thread-description-join">
+                    {{ if ne .UserRank 3 }}
+                        {{ if not .ShowLoginPage }}
+                            {{ if .MustJoinThread }}
+                                {{ if eq .IsAuthenticated false }}
+                                    <p class="grid-align-right win95-border-bulge">{{ .Lang.pages.thread.must_login_to_join_message }}</p>
+                                {{ else }}
+                                    <div id="join-button" class="grid-align-right">
+                                        <button id="LeaveThreadButton" class="win95-button hidden">{{ .Lang.pages.thread.leave_button }}</button>
+                                        <button id="JoinThreadButton" class="win95-button">{{ .Lang.pages.thread.join_button }}</button>
+                                    </div>
+                                {{ end }}
+                            {{ else }}
+                                {{ if .IsAMember }}
+                                    <div id="join-button" class="grid-align-right">
+                                        <button id="LeaveThreadButton" class="win95-button">{{ .Lang.pages.thread.leave_button }}</button>
+                                        <button id="JoinThreadButton" class="win95-button hidden">{{ .Lang.pages.thread.join_button }}</button>
+                                        {{ if gt .UserRank 0 }}
+                                        <button id="ModerationThreadButton" class="win95-button">{{ .Lang.pages.thread.moderate_button }}</button>
+                                        {{ end }}
+                                    </div>
+                                {{ else }}
+                                    <div id="join-button" class="grid-align-right">
+                                        <button id="LeaveThreadButton" class="win95-button hidden">{{ .Lang.pages.thread.leave_button }}</button>
+                                        <button id="JoinThreadButton" class="win95-button">{{ .Lang.pages.thread.join_button }}</button>
+                                    </div>
+                                {{ end }}
+                            {{ end }}
+                        {{ end }}
+                    {{ else }}
+                    <div id="join-button" class="grid-align-right">
+                        <button id="LeaveThreadButton" class="hidden"></button>
+                        <button id="JoinThreadButton" class="hidden"></button>
+                        <button id="EditThreadButton" class="win95-button">{{ .Lang.pages.thread.edit_button }}</button>
+                        <button id="ModerationThreadButton" class="win95-button">{{ .Lang.pages.thread.moderate_button }}</button>
+                    </div>
+                    {{ end }}
+                    <div id="order-container" class="grid-align-right">
+                        <label for="order">{{ .Lang.pages.thread.order_label }}</label>
+                        <select id="order" class="win95-input-indent">
+                            {{ range $order := .MessageOrdering }}
+                            <option value="{{ $order }}">{{ $order }}</option>
+                            {{ end }}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="thread-content" class="win95-border-indent">
+            {{ if .ShowLoginPage }}
+                <p>{{ .Lang.pages.thread.must_connect_message }}</p>
+            {{ else }}
+                {{ if .MustJoinThread }}
+                    <p>{{ .Lang.pages.thread.must_join_thread_message }}</p>
+                {{ end }}
+            {{ end }}
+            <div id="i18n" class="hidden">
+                <span id="username">{{ .Username }}</span>
+                <span id="isAuthenticated">{{ .IsAuthenticated }}</span>
+                <span id="isAMember">{{ .IsAMember }}</span>
+                <span id="userRank">{{ .UserRank }}</span>
+                <span data-key="ago-seconds">{{ .Lang.time.ago_seconds }}</span>
+                <span data-key="ago-minute">{{ .Lang.time.ago_minute }}</span>
+                <span data-key="ago-minutes">{{ .Lang.time.ago_minutes }}</span>
+                <span data-key="ago-hour">{{ .Lang.time.ago_hour }}</span>
+                <span data-key="ago-hours">{{ .Lang.time.ago_hours }}</span>
+                <span data-key="ago-day">{{ .Lang.time.ago_day }}</span>
+                <span data-key="ago-days">{{ .Lang.time.ago_days }}</span>
+                <span data-key="was-edited">{{ .Lang.pages.thread.was_modified }}</span>
+                <span data-key="option-menu-edit-button-text">{{ .Lang.pages.thread.option_menu.edit_button }}</span>
+                <span data-key="option-menu-delete-button-text">{{ .Lang.pages.thread.option_menu.delete_button }}</span>
+                <span data-key="option-menu-report-button-text">{{ .Lang.pages.thread.option_menu.report_button }}</span>
+                <span data-key="option-menu-ban-button-text">{{ .Lang.pages.thread.option_menu.ban_button }}</span>
+                <span data-key="edited-post-text">{{ .Lang.pages.thread.was_modified }}</span>
+            </div>
+            <div id="new-post-box" class="post-box, win95-border">
+                <section class="win95-header">
+                    <div id="new-post-title-static">
+                        <label for="new-post-title">{{ .Lang.pages.thread.new_post_title_label }}</label>
+                        <input type="text" id="new-post-title" class="win95-input-indent" placeholder="{{ .Lang.pages.thread.new_post_title_placeholder }}" required minlength="5" maxlength="50">
+                    </div>
+                </section>
+                <section class="new-post-content">
+                    <div id="new-post-content-container" class="win95-border-indent">
+                        <label for="new-post-content">{{ .Lang.pages.thread.new_post_content_label }}</label>
+                        <div id="new-post-content-holder">
+                            <textarea id="new-post-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.new_post_content_placeholder }}" required maxlength="500" minlength="20"></textarea>
+                            <div id="new-post-content-char-count">
+                                <span id="new-post-content-char-count-value">0</span> / 500
+                            </div>
+                        </div>
+                        <div id="new-post-tags-container">
+
+                        </div>
+                        <div id="new-post-medias">
+                            <input type="file" id="new-post-file-input" accept="image/png image/jpeg image/gif" class="win95-input" multiple/>
+                            <div id="new-post-medias-container" class="grid-align-right">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <button id="new-post-send-button" class="hidden, win95-button" type="button">
+                        {{ .Lang.pages.thread.new_post_send_button }}
+                    </button>
+                </section>
+
+            </div>
+            <div id="posts-container">
+
+            </div>
+            <button id="load-more-posts-button" class="win95-button" type="button">
+                {{ .Lang.pages.thread.load_more_posts}}
+            </button>
+        </div>
+    </div>
+    <div id="thread-sidebar" class=win95-border>
+        <h3>{{ .Lang.pages.thread.sidebar.moderation_team }}</h3>
+        <section class="thread-sidebar-section win95-border-indent">
+            {{ range $modTeamMember := .ThreadModerationTeam }}
+                <div class="thread-moderation-team-member win95-border-bulge" onclick="window.location='/profile/{{ $modTeamMember.Username }}'">
+                    <img class="moderation-icon unselectable" draggable="false" src="/upload/{{ $modTeamMember.PfpAddress }}" alt="User Icon">
+                    <div class="thread-sidebar-team-member-name">
+                        <h4>{{ $modTeamMember.Username }}</h4>
+                        <p class="moderation-title">
+                            {{ if eq $modTeamMember.RightsLevel 1 }}
+                                {{ $.Lang.pages.thread.rank.moderator }}
+                            {{ end }}
+                            {{ if eq $modTeamMember.RightsLevel 2 }}
+                                {{ $.Lang.pages.thread.rank.administrator }}
+                            {{ end }}
+                            {{ if eq $modTeamMember.RightsLevel 3 }}
+                                {{ $.Lang.pages.thread.rank.owner }}
+                            {{ end }}
+                        </p>
+                    </div>
+                </div>
+            {{ end }}
+        </section>
+        <br>
+        <h3>{{ .Lang.pages.thread.sidebar.tags }}</h3>
+        <section class="thread-sidebar-section win95-border-indent">
+            <div id="tagList"></div>
+            <div id="noTagsMessage" class="no-tags-message" style="display: none;">No tags available.</div>
+        </section>
+    </div>
+</div>
+<div id="report-button-menu" class="full-screen-menu hidden">
+    <div class="full-screens-menu-background"></div>
+    <div class="full-screen-menu-content win95-border">
+        <div class="win95-header">
+            <h3>{{ .Lang.pages.thread.report.title }}</h3>
+            <div>
+                <button class="win95-button" type="button" id="close-report-menu">
+                    X
+                </button>
+            </div>
+        </div>
+        <p id="report-message">{{ .Lang.pages.thread.report.description }}</p>
+        <div class="win95-border-indent  report-content">
+            <div class="report-section">
+                <label for="report-reason">{{ .Lang.pages.thread.report.reason_label }}</label>
+                <select id="report-reason" class="win95-input-indent">
+                    {{ range $reason := .ReportReasons }}
+                    <option value="{{ $reason }}">{{ $reason }}</option>
+                    {{ end }}
+                </select>
+            </div>
+            <div class="report-section">
+                <label for="report-content">{{ .Lang.pages.thread.report.comment_label}}</label>
+                <div class="report-description">
+                    <textarea id="report-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.report.comment_placeholder }}" maxlength="500" minlength="5"></textarea>
+                    <div id="report-content-char-count">
+                        <span id="report-content-char-count-value">0</span> / 500
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button id="send-report-button" class="win95-button" type="button">{{ .Lang.pages.thread.report.report_button }}</button>
+        <div id="report-success-message" class="hidden">
+            <p>{{ .Lang.pages.thread.report.report_success }}</p>
+        </div>
+        <div id="report-error-message" class="hidden">
+            <p class="error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" src="/img/warningIcon.png">{{ .Lang.pages.thread.report.report_error }}</p>
+        </div>
+    </div>
+</div>
+<div id="edit-post-button-menu" class="full-screen-menu hidden">
+    <div class="full-screens-menu-background"></div>
+    <div class="full-screen-menu-content win95-border">
+        <div class="win95-header">
+            <h3>{{ .Lang.pages.thread.edit.title }}</h3>
+            <div>
+                <button class="win95-button" type="button" id="close-edit-post-menu">
+                    X
+                </button>
+            </div>
+        </div>
+        <div class="win95-border-indent edit-content">
+            <div class="edit-section">
+                <label for="edit-post-title">{{ .Lang.pages.thread.edit.new_title_label }} :</label>
+                <input type="text" id="edit-post-title" class="win95-input-indent" placeholder="{{ .Lang.pages.thread.edit.title_placeholder }}" required minlength="5" maxlength="50">
+            </div>
+            <div class="edit-section">
+                <label for="edit-post-content">{{ .Lang.pages.thread.edit.new_content_label }} :</label>
+                <div class="edit-description">
+                    <textarea id="edit-post-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.edit.content_placeholder }}" required maxlength="500" minlength="20"></textarea>
+                    <div id="edit-post-content-char-count">
+                        <span id="edit-post-content-char-count-value">0</span> / 500
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button id="edit-post-send-button" class="win95-button" type="button">{{ .Lang.pages.thread.edit.send }}</button>
+    </div>
+</div>
+
+{{ end }}

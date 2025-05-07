@@ -1,0 +1,46 @@
+{{ define "content" }}
+    <div id="profile-container" class="win95-border">
+        <div class="win95-header">
+            <p>{{ .Lang.pages.profile.top_message }}<span>{{ .myUserUsername }}</span></p>
+        </div>
+        
+        <!-- ============================== BIG USER'S PFP ========================== -->
+
+        <div id="pfp-big-container">
+                <p>{{ .Lang.pages.profile.pfp_message }}</p>
+                <div id="pfp-container">
+                    <div>
+                        <img id="pfp" class="unselectable" draggable="false" src="/upload/{{ .myUserPfpAddress }}" alt="profile picture">
+                    </div>
+                </div> 
+        </div>
+
+        <!-- ================================== User's INFO LIST ======================== -->
+        <div id="content" class="win95-border-indent">
+            <div class="field">
+                <p>{{ .Lang.pages.profile.user_name }}{{ .myUserUsername }}</p>
+            </div>
+
+            <div class="field">
+                <p> {{ .Lang.pages.profile.user_language }}
+                    {{ range $key, $value := .Lang.langs }}
+                        {{ if eq (interfaceToString $key) $.myUserLang }}
+                            {{ $value }}
+                        {{ end }}
+                    {{ end }}
+                </p>
+            </div>
+
+            <div class="field">
+                <p> {{ .Lang.pages.profile.user_crd_the }} {{ .myUserCreatedAt }}</p>
+            </div>
+
+            <p> {{ .Lang.pages.profile.user_thr_ls }}
+                {{ range .myUserThreads }}
+                    <div class="win95-border"><a href="/t/{{ .ThreadName }}" style="color: rgb(0, 0, 255);">{{ .ThreadName }}</a></div>
+                {{ end }}
+                <br>
+            </p>
+        </div>
+    </div>
+{{ end }}

@@ -1,0 +1,369 @@
+#thread {
+    width: 90%;
+    display: grid;
+    grid-template-columns: 8fr 2fr;
+    position: absolute;
+    gap: 8px;
+}
+
+#thread-container{
+    width: 100%;
+    background-color: silver;
+    position: absolute;
+    grid-column: 1/2;
+}
+
+#thread-sidebar{
+    width: 100%;
+    position: relative;
+    height: 100%;
+    grid-column: 2/3;
+    background-color: silver;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    gap: 2px;
+}
+
+.thread-banner-container{
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thread-banner {
+    width: 100%;
+}
+
+.thread-icon{
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin: 4px;
+}
+
+.thread-title{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#thread-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.thread-sidebar-section{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.moderation-icon{
+    height: 96px;
+    width: 96px;
+    border-radius: 50%;
+}
+
+.thread-moderation-team-member{
+    display: grid;
+    grid-template-columns: auto 1fr;
+    padding: 4px;
+    gap: 8px;
+    width: 100%;
+}
+
+.thread-moderation-team-member:hover{
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+
+.thread-sidebar-team-member-name{
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.moderation-title{
+    font-size: 24px;
+}
+
+#thread-description{
+    position: relative;
+    display: grid;
+    grid-template-columns: 5fr 2fr;
+}
+
+#thread-description p{
+    position: relative;
+    width: 100%;
+    word-break: break-word;
+}
+
+#thread-description-join{
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+}
+
+.grid-align-right{
+    justify-self: right;
+}
+
+#order-container {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-top: 4px;
+}
+
+#posts-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+}
+
+/* Tags Display */
+
+.tag-container {
+    width: 100%;
+    margin: 0;
+    display: flex;
+    gap: 8px;
+    position: relative;
+}
+
+.tag-item {
+    background-color: #ffffff;
+    padding: 5px;
+    margin: 5px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+}
+
+.clickable-tag-item {
+    cursor: url('../img/pointer95.cur'), pointer;
+    border: #808080 2px solid;
+    border-left: #404040 2px solid;
+    border-top: #404040 2px solid;
+    box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.5);
+    outline: 2px solid #808080;
+    color: #ffffff;
+}
+
+.clickable-tag-item span{
+    width: 100%;
+    position: relative;
+
+}
+
+.clickable-tag-item span::first-letter{
+    text-decoration: underline;
+}
+
+.unclickable-tag-item{
+    border: #404040 4px solid;
+    border-left: #808080 4px solid;
+    border-top: #808080 4px solid;
+    position: relative;
+}
+
+.unclickable-tag-item span{
+    width: auto;
+    position: relative;
+}
+
+.tag-item.selected {
+    background-color: #000000;
+    color: black;
+    border: white 2px solid;
+    border-right: black 2px solid;
+    border-bottom: black 2px solid;
+    box-shadow: none;
+}
+
+.tag-item:hover {
+    background-color: #d3d3d3;
+}
+
+.tag-item input[type="checkbox"] {
+    display: none;
+}
+
+.tag-item button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: url('../img/pointer95.cur'), pointer;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.tag-item button:hover {
+    background-color: #cc0000;
+}
+
+.no-tags-message {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+}
+
+
+/* Style for the new post elements */
+#new-post-box {
+    margin-bottom: 8px;
+}
+
+.new-post-content {
+    margin: 4px;
+    left: 0;
+    right: -8px;
+}
+
+#new-post-content-container {
+    display: grid;
+    grid-template-columns: 1fr 9fr;
+    grid-template-rows: 15vh 1fr;
+    gap: 8px;
+    width: 100%;
+    position: relative;
+    margin: 0 auto;
+    padding: 8px;
+
+}
+
+#new-post-content-container label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#new-post-content-holder {
+    display: flex;
+    flex-direction: column;
+    justify-content: right;
+    align-items: end;
+    width: 100%;
+    height: 100%;
+
+}
+
+#new-post-content-holder textarea {
+    position: relative;
+    left: 8px;
+    top: 0;
+    width: 100%;
+    padding: 8px;
+    height: 10vh;
+    resize: none;
+}
+
+
+#new-post-medias {
+    grid-column: span 2;
+    width:  100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+#new-post-medias-container img {
+    width: 40%;
+}
+
+#new-post-send-button {
+    margin: 12px;
+}
+
+#new-post-tags-container {
+    display: flex;
+    width: 100%;
+    padding: 8px;
+    gap: 8px;
+}
+
+.menu-img{
+    position: relative;
+    height: 32px;
+    width: 32px;
+}
+
+/* Style for the popups windows */
+.full-screens-menu-background {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    width: calc(100% - 40px);
+    height: calc(100% - 152px);
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.full-screen-menu-content {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 11;
+    background-color: silver;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#report-message, #report-error-message{
+    margin: 4px;
+}
+
+#report-success-message{
+    margin: 0 8px;
+    margin-bottom: 4px;
+}
+
+#edit-post-content, #report-content, #edit-comment-content{
+    width: 50ch;
+    resize: vertical;
+    min-height: 48px;
+    max-height: 128px;
+    margin: 0;
+}
+
+.edit-section, .report-section{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.edit-description, .report-description{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.edit-content, .report-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+#edit-post-send-button, #send-report-button, #edit-comment-send-button{
+    margin-bottom: 4px;
+}
