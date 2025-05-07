@@ -29,7 +29,7 @@ func UserSelfProfilePage(w http.ResponseWriter, r *http.Request) {
 	// Handle the user logout/login
 	ConnectFromHeader(w, r, &PageInfo)
 
-	// TODO : Display the user profile of the 'user'
+	// : Display of the user profile
 	myUser := f.GetUser(r)
 	myUserConfig := f.GetUserConfig(r)
 	myUserThreads := f.GetUserThreads(myUser)

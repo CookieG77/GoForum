@@ -1,4 +1,4 @@
-#self-profile-container {
+#profile-container {
     width: calc(100% - 16px);
     position: absolute;
     background-color: silver;
@@ -53,12 +53,12 @@
 
 /* =================== Info part ================== */
 
-#settings-content {
-    /* display: flex; */
+#content{
+    /* gap: 8px; */
     align-items: center;
 }
 
-.settings-field {
+.field {
     position: relative;
     display: grid;
     grid-template-columns: 2fr 1fr auto;

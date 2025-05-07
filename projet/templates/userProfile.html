@@ -1,11 +1,58 @@
 {{ define "content" }}
     <div id="profile-container" class="win95-border">
         <div class="win95-header">
-            <p>Welcome to the user profile page !</p>
+            <p>Welcome to <span>{{ .myUserUsername }}</span> profile !</p>
         </div>
-        <div id="profile-content" class="border">
+        
+        <!-- ============================== BIG USER'S PFP ========================== -->
 
+        <div id="pfp-big-container">
+                <p>User's profile picture</p>
+                <div id="pfp-container">
+                    <div>
+                        <img id="pfp" class="unselectable" draggable="false" src="/upload/{{ .UserPfpPath }}" alt="profile picture">
+                    </div>
+                </div> 
+        </div>
+
+        <!-- ================================== User's INFO LIST ======================== -->
+        <div id="content" class="win95-border-indent">
+            <div class="field">
+                <p> User's name is :
+                    <span>
+                        {{ .myUserUsername }}
+                    </span>
+                </p>
+            </div>
+
+            <div class="field">
+                <p> User's language is :
+                    <span>
+                        {{ range $key, $value := .Lang.langs }}
+                            {{ if eq (interfaceToString $key) $.myUserLang }}
+                                {{ $value }}
+                            {{ end }}
+                        {{ end }}
+                    </span>
+                </p>
+            </div>
+
+            <div class="field">
+                <p> User's account created the :
+                    <span>
+                        {{ .myUserCreatedAt }}
+                    </span>
+                </p>
+            </div>
+
+            <p> User's thread list :
+                <span>
+                    {{ range .myUserThreads }}
+                        <div class="win95-border"><a href="/t/{{ .ThreadName }}" style="color: rgb(0, 0, 255);">{{ .ThreadName }}</a></div>
+                    {{ end }}
+                </span>
+                <br>
+            </p>
         </div>
     </div>
-
 {{ end }}

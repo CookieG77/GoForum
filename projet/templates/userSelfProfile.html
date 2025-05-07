@@ -1,5 +1,5 @@
 {{ define "content" }}
-    <div id="self-profile-container" class="win95-border">
+    <div id="profile-container" class="win95-border">
         <div class="win95-header">
             <p>Welcome to your profile page !</p>
         </div>
@@ -16,9 +16,8 @@
         </div>
 
         <!-- ================================== User's INFO LIST ======================== -->
-        <div id="settings-content" class="win95-border-indent">
-            <!-- <div id=""></div> -->
-            <div class="settings-field">
+        <div id="content" class="win95-border-indent">
+            <div class="field">
                 <p> Public Username is :
                     <span>
                         {{ .myUserUsername }}
@@ -26,13 +25,13 @@
                 </p>
             </div>
 
-            <div class="settings-field">
+            <div class="field">
                 <p> Private First name and Last name are :
                     <span>{{ .myUserFirstname }}, {{ .myUserLastname }}</span>
                 </p>
             </div>
 
-            <div class="settings-field">
+            <div class="field">
                 <p> Public language is :
                     <span>
                         {{ range $key, $value := .Lang.langs }}
@@ -44,7 +43,7 @@
                 </p>
             </div>
 
-            <div class="settings-field">
+            <div class="field">
                 <p> Account created the :
                     <span>
                         {{ .myUserCreatedAt }}

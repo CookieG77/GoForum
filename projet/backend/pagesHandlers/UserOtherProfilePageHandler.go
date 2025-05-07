@@ -2,8 +2,10 @@ package pagesHandlers
 
 import (
 	f "GoForum/functions"
-	"github.com/gorilla/mux"
+	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // UserOtherProfilePage handles the user profile page for other users
@@ -35,9 +37,20 @@ func UserOtherProfilePage(w http.ResponseWriter, r *http.Request) {
 	// Handle the user logout/login
 	ConnectFromHeader(w, r, &PageInfo)
 
-	// TODO : Display the user profile of the 'user'
+	// Display the user's profile
+	myUser, err := f.GetUserFromUsername(user)
+	if err != nil {
+		ErrorPage404(w, r)
+		return
+	}
+	myUserConfig := f.GetUserConfig(r)
+	myUserThreads := f.GetUserThreads(myUser)
+	PageInfo["myUserUsername"] = myUser.Username
+	PageInfo["myUserCreatedAt"] = fmt.Sprintf("%d/%d/%d", myUser.CreatedAt.Day(), myUser.CreatedAt.Month(), myUser.CreatedAt.Year())
+	PageInfo["myUserLang"] = myUserConfig.Lang
+	PageInfo["myUserThreads"] = myUserThreads
 
 	// Add additional styles to the content interface
-	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/userProfile.css", "/css/generalElementStyling.css")
+	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/userSelfProfile.css", "/css/generalElementStyling.css")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/userProfile.html")
 }
