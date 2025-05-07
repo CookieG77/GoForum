@@ -16,7 +16,7 @@
     "thread": "thread",
     "threadNewMessage" : "threadNewMessage",
     "profile" : "Profil",
-    "settings" : "Paramètres"
+    "user_settings" : "Paramètres"
   },
   "pages" : {
     "base" : {
@@ -88,6 +88,18 @@
       "login_instead"                  : "Déjà un membre ?",
       "login_instead_button"           : "Connecte toi!"
     },
+    "user_settings" : {
+      "title" : "Paramètres Utilisateur",
+      "profile_picture_change" : "Changez votre photo de profil",
+      "user_lang": "Langage de l'utilisateur",
+      "change_settings" : "Modifier les Paramètres",
+      "choose_language" : "Choisir une Langue",
+      "close" : "Fermer",
+      "change_pfp" : "Changement de Photo de Profil",
+      "select_new_pfp" : "Cliquez pour sélectionner un fichier",
+      "accepted_formats" : "Formats acceptés",
+      "size_warning" : "L'Image doit faire moins de"
+    },
     "thread" : {
       "banned_message" : "Vous êtes banni de ce thread. Vous n'êtes pas autorisé à y accéder.",
       "rank" : {
@@ -98,6 +110,8 @@
       "must_connect_message" : "Vous devez être connecté pour voir cette page.",
       "must_join_thread_message" : "Vous devez rejoindre ce thread pour voir son contenu.",
       "must_login_to_join_message" : "Pour rejoindre ce thread, vous devez être connecté.",
+      "join" : "Rejoindre",
+      "leave" : "Quitter",
       "order_label" : "Ordre des messages : ",
       "new_post_title_label" : "Titre : ",
       "new_post_title_placeholder" : "Titre du post",
@@ -106,9 +120,33 @@
       "new_post_send_button" : "Publier",
       "sidebar" : {
         "moderation_team" : "Equipe de modération du thread",
-        "tags" : "Tags"
+        "tags" : "Etiquettes"
       },
-      "was_modified" : "[modifié]"
+      "was_modified" : "[modifié]",
+      "option_menu" : {
+        "edit_button" : "Editer",
+        "delete_button" : "Supprimer",
+        "report_button" : "Signaler",
+        "ban_button" : "Bannir"
+      },
+      "report" : {
+        "title" : "Signaler un Post",
+        "description" : "Merci de décrire la raison de votre signalement",
+        "reason_label" : "Raison : ",
+        "reason_placeholder" : "Raison du Signalement",
+        "report_button" : "Signalement",
+        "comment_label" : "Commentaire : ",
+        "comment_placeholder" : "Laissez un commentaire pour l'équipe de modération",
+        "report_success" : "Votre signalement a été envoyé. Merci pour votre contribution.",
+        "report_error" : "Une erreur est survenu lors de l'envoi du signalement. Merci de réessayer ultérieurement."
+      },
+      "edit" : {
+        "title" : "Editer le Post",
+        "new_title_label" : "Nouveau Titre",
+        "new_content_label" : "Nouvelle Description",
+        "send" : "Envoyer"
+      },
+      "load_more_posts" : "Charger plus de Posts"
     },
     "thread_creation" : {
       "thread_name" : "Nom du thread",

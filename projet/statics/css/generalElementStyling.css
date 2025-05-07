@@ -90,6 +90,7 @@
     cursor: url('../img/pointer95.cur'), pointer;
     box-shadow: inset -1px -1px 0 0 #808080;
     user-select: none;
+    text-align: center;
 }
 
 .win95-button:active, .win95-button:disabled {

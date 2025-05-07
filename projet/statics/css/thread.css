@@ -144,8 +144,6 @@
     justify-content: center;
     align-items: center;
     gap: 4px;
-    width: auto;
-    max-width: max-content;
 }
 
 .clickable-tag-item {
@@ -156,6 +154,12 @@
     box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.5);
     outline: 2px solid #808080;
     color: #ffffff;
+}
+
+.clickable-tag-item span{
+    width: 100%;
+    position: relative;
+
 }
 
 .clickable-tag-item span::first-letter{
@@ -282,10 +286,10 @@
 }
 
 #new-post-tags-container {
-    display: inline;
+    display: flex;
     width: 100%;
-    height: fit-content;
     padding: 8px;
+    gap: 8px;
 }
 
 .menu-img{
@@ -312,9 +316,50 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 40rem;
-    height: 30rem;
     z-index: 11;
     background-color: silver;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
+#report-message, #report-error-message{
+    margin: 4px;
+}
+
+#report-success-message{
+    margin: 0 8px;
+    margin-bottom: 4px;
+}
+
+#edit-post-content, #report-content{
+    width: 50ch;
+    resize: vertical;
+    min-height: 48px;
+    max-height: 128px;
+    margin: 0;
+}
+
+.edit-section, .report-section{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.edit-description, .report-description{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.edit-content, .report-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+#edit-post-send-button, #send-report-button{
+    margin-bottom: 4px;
+}

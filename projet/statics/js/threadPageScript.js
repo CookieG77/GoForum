@@ -202,7 +202,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const tagText = document.createElement('span');
-            tagText.textContent = tag.tag_name;
+            tagText.textContent = tag.tag_name.replaceAll(' ', "_");
             tagText.classList.add('unselectable');
             tagItem.appendChild(tagText);
 
@@ -608,7 +608,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Make sure to update the vote visual when the post is created so that if the user is already upvoting or downvoting the post, the visual is correct
         updateVoteVisual(currentVoteState, upvoteImg, downvoteImg);
         if (data.message_tags != null) {
-            renderTags(data.message_tags, tags, false);
+            renderTags(data.message_tags, tags, false, false);
         }
         container.appendChild(tags);
 
