@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", function (){
     const loadMoreCommentsButton = document.getElementById("load-more-comments-button");
-    const postMenu = document.getElementById("t-post-menu");
-    const optionMenu = document.getElementById("t-option-menu");
     const postContent = document.getElementById("t-post-content");
     const mediaContainer = document.createElement("div");
     const medias = document.createElement("div");
@@ -133,26 +131,8 @@ document.addEventListener("DOMContentLoaded", function (){
         postVoteDownButton.disabled = true;
     }
 
-    if (postMenu && optionMenu) {
-        postMenu.addEventListener("click", function(e) {
-            if (!optionMenu.classList.contains("active")) {
-                const options = document.querySelectorAll(".option-menu");
-                e.stopPropagation();
-                options.forEach(opt => opt.classList.remove("active"));
-                optionMenu.classList.add("active");
-            }
-        });
-
-        window.addEventListener("click", function(e) {
-            if (!optionMenu.contains(e.target)) {
-                optionMenu.classList.remove("active");
-            }
-        });
-    } else {
-        console.log("elements do not exist");
-    }
-
     mediaContainer.classList.add("post-media-container");
+    mediaContainer.id = "t-post-media-container";
     postContent.appendChild(mediaContainer);
 
     medias.classList.add("post-medias");

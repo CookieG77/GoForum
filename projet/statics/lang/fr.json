@@ -24,6 +24,7 @@
         "logo_alt"                     : "Icône du logo",
         "website_name"                 : "GoForum",
         "post_button"                  : "Publier",
+        "create_thread_button"         : "Créer un Thread",
         "register_account_button"      : "Créer un compte",
         "login_button"                 : "Connexion",
         "search_bar_placeholder"       : "Rechercher...",

@@ -7,9 +7,8 @@
 }
 
 #t-post-content{
-    position: relative;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     right: 0;
 }
 
@@ -33,6 +32,12 @@
 
 .option-menu.active{
     transform: scale(1);
+}
+
+#t-post-content-text, #t-post-media-container{
+    position: relative;
+    right: 0;
+    width: auto;
 }
 
 .menu-button{

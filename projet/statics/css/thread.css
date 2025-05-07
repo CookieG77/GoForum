@@ -80,6 +80,10 @@
     width: 100%;
 }
 
+.thread-moderation-team-member:hover{
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+
 .thread-sidebar-team-member-name{
     align-self: center;
     display: flex;

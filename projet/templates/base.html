@@ -46,6 +46,7 @@
         <nav class="options header-sections">
             {{ if .IsAuthenticated }}
                 <button class="win95-menu-button" onclick="window.location.href = '/tnm'"><span>{{ .Lang.pages.base.header.post_button }}</span></button>
+                <button class="win95-menu-button" ><span>{{ .Lang.pages.base.header.create_thread_button }}</span></button>
             {{ else }}
                 <button onclick="window.location.href = '/register'" class="win95-menu-button"><span>{{ .Lang.pages.base.header.register_account_button }}</span></button>
                 <button id="login-popup-opener" class="win95-menu-button"><span>{{ .Lang.pages.base.header.login_button }}</span></button>
