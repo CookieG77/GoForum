@@ -221,7 +221,9 @@ func InitDatabaseConnection() {
 		InitDatabase()
 
 		// Debug func call to fill the database with test data
-		FillDatabase()
+		if shouldLogDebug {
+			FillDatabase()
+		}
 	}
 }
 
@@ -1340,6 +1342,44 @@ func LeaveThread(thread ThreadGoForum, user User) error {
 		return err
 	}
 	InfoPrintf("User %s left the thread %s\n", user.Email, thread.ThreadName)
+	return nil
+}
+
+// PromoteUserInThread promotes the user in the thread
+// Returns an error if there is one
+func PromoteUserInThread(thread ThreadGoForum, user User) error {
+	rightLevel := GetThreadMemberRightsLevel(thread, user)
+	if rightLevel >= 2 {
+		ErrorPrintf("Error: user %s is already an admin or owner in the thread %s\n", user.Email, thread.ThreadName)
+		return fmt.Errorf("user %s is already an admin or owner in the thread %s", user.Email, thread.ThreadName)
+	}
+	rightLevel++
+	updateThreadMember := "UPDATE ThreadGoForumMembers SET rights_level = ? WHERE thread_id = ? AND user_id = ?"
+	_, err := db.Exec(updateThreadMember, rightLevel, thread.ThreadID, user.UserID)
+	if err != nil {
+		ErrorPrintf("Error promoting the user in the thread: %v\n", err)
+		return err
+	}
+	InfoPrintf("User %s promoted in the thread %s\n", user.Email, thread.ThreadName)
+	return nil
+}
+
+// DemoteUserInThread demotes the user in the thread
+// Returns an error if there is one
+func DemoteUserInThread(thread ThreadGoForum, user User) error {
+	rightLevel := GetThreadMemberRightsLevel(thread, user)
+	if rightLevel <= 0 {
+		ErrorPrintf("Error: user %s is already a banned member in the thread %s\n", user.Email, thread.ThreadName)
+		return fmt.Errorf("user %s is already a banned member in the thread %s", user.Email, thread.ThreadName)
+	}
+	rightLevel--
+	updateThreadMember := "UPDATE ThreadGoForumMembers SET rights_level = ? WHERE thread_id = ? AND user_id = ?"
+	_, err := db.Exec(updateThreadMember, rightLevel, thread.ThreadID, user.UserID)
+	if err != nil {
+		ErrorPrintf("Error demoting the user in the thread: %v\n", err)
+		return err
+	}
+	InfoPrintf("User %s demoted in the thread %s\n", user.Email, thread.ThreadName)
 	return nil
 }
 

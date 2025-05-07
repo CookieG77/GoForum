@@ -501,6 +501,46 @@ function getThreadTags(threadName) {
     });
 }
 
+/**
+ * Promote the user with the given username in the given thread.
+ * @description This function sends a request to promote a user in the current thread. It does not handle the response.
+ * @description But a success response means that the user has been promoted.
+ * @param threadName {string} - The name of the thread to promote the user in.
+ * @param username {string} - The username of the user to promote.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function promoteUser(threadName, username) {
+    return fetch( `/api/thread/${threadName}/promoteUser`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            username: username
+        })
+    });
+}
+
+/**
+ * Demote the user with the given username in the given thread.
+ * @description This function sends a request to demote a user in the current thread. It does not handle the response.
+ * @description But a success response means that the user has been demoted.
+ * @param threadName {string} - The name of the thread to demote the user in.
+ * @param username {string} - The username of the user to demote.
+ * @returns {Promise<Response>} - The response from the server.
+ */
+function demoteUser(threadName, username) {
+    return fetch( `/api/thread/${threadName}/demoteUser`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            username: username
+        })
+    });
+}
+
 
 /**
  * Get the i18n text for the given key.
