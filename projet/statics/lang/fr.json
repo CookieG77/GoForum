@@ -87,7 +87,8 @@
       "register_button"                : "S'inscrire",
       "register_with"                  : "S'inscrire avec",
       "login_instead"                  : "Déjà un membre ?",
-      "login_instead_button"           : "Connectez-vous !"
+      "login_instead_button"           : "Connectez-vous !",
+      "logout_button" : "Abandonner l'inscription"
     },
     "user_settings" : {
       "title" : "Paramètres Utilisateur",

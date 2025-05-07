@@ -76,3 +76,7 @@
 .register-section {
     width: calc(100% - 16px);
 }
+
+#give-up-registration{
+    margin-bottom: 4px;
+}
