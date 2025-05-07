@@ -206,6 +206,22 @@
       "link" : "Lien",
       "report_description" : "Description du signalement : ",
       "resolve_report" : "Résoudre le Signalement"
+    },
+    "profile" : {
+      "top_message" : "Bienvenue sur la page de : ",
+      "top_message2" : "Bienvenue sur votre page de profile !",
+      "pfp_message" : "Image de l'utilisateur : ",
+      "user_name" : "Pseudo de l'utilisateur : ",
+      "user_language" : "Langue de l'utilisateur : ",
+      "user_crd_the" : "Date de création de l'utilisateur : ",
+      "user_thr_ls" : "Thread(s) de de l'utilisateur : ",
+
+      "self_pfp_message" : "Votre image de profile : ",
+      "self_user_name" : "Votre pseudo public : ",
+      "self_full_name" : "Votre nom complet privé : ",
+      "self_user_language" : "Votre langue public : ",
+      "self_user_crd_the" : "Votre date de création du profile : ",
+      "self_user_thr_ls" : "Votre/Vos thread(s) : "
     }
   },
   "time" : {

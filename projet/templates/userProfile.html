@@ -1,13 +1,13 @@
 {{ define "content" }}
     <div id="profile-container" class="win95-border">
         <div class="win95-header">
-            <p>{{ .Lang.pages.profile.top_message }}<span>{{ .myUserUsername }}</span> profile !</p>
+            <p>{{ .Lang.pages.profile.top_message }}<span>{{ .myUserUsername }}</span></p>
         </div>
         
         <!-- ============================== BIG USER'S PFP ========================== -->
 
         <div id="pfp-big-container">
-                <p>User's profile picture</p>
+                <p>{{ .Lang.pages.profile.pfp_message }}</p>
                 <div id="pfp-container">
                     <div>
                         <img id="pfp" class="unselectable" draggable="false" src="/upload/{{ .myUserPfpAddress }}" alt="profile picture">
@@ -18,11 +18,11 @@
         <!-- ================================== User's INFO LIST ======================== -->
         <div id="content" class="win95-border-indent">
             <div class="field">
-                <p> User's name is : {{ .myUserUsername }}</p>
+                <p>{{ .Lang.pages.profile.user_name }}{{ .myUserUsername }}</p>
             </div>
 
             <div class="field">
-                <p> User's language is :
+                <p> {{ .Lang.pages.profile.user_language }}
                     {{ range $key, $value := .Lang.langs }}
                         {{ if eq (interfaceToString $key) $.myUserLang }}
                             {{ $value }}
@@ -32,10 +32,10 @@
             </div>
 
             <div class="field">
-                <p> User's account created the : {{ .myUserCreatedAt }}</p>
+                <p> {{ .Lang.pages.profile.user_crd_the }} {{ .myUserCreatedAt }}</p>
             </div>
 
-            <p> User's thread list :
+            <p> {{ .Lang.pages.profile.user_thr_ls }}
                 {{ range .myUserThreads }}
                     <div class="win95-border"><a href="/t/{{ .ThreadName }}" style="color: rgb(0, 0, 255);">{{ .ThreadName }}</a></div>
                 {{ end }}
