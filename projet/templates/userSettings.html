@@ -24,17 +24,17 @@
                         </span>
                     </p>
                 </div>
-<!--                <div class="settings-field">-->
-<!--                    <p> User theme :-->
-<!--                        <span>-->
-<!--                            {{ range $key, $value := .Lang.themes }}-->
-<!--                                {{ if eq (interfaceToString $key) $.UserTheme }}-->
-<!--                                    {{ $value }}-->
-<!--                                {{ end }}-->
-<!--                            {{ end }}-->
-<!--                        </span>-->
-<!--                    </p>-->
-<!--                </div>-->
+                <div class="hidden">
+                    <p> User theme :
+                        <span>
+                            {{ range $key, $value := .Lang.themes }}
+                                {{ if eq (interfaceToString $key) $.UserTheme }}
+                                    {{ $value }}
+                                {{ end }}
+                            {{ end }}
+                        </span>
+                    </p>
+                </div>
                 <button id="change-settings-button" class="win95-button">{{ .Lang.pages.user_settings.change_settings }}</button>
             </div>
             <div id="change-settings" class="hidden">
@@ -62,14 +62,13 @@
                             {{ end }}
                         </select>
                     </div>
-<!--                    <div class="settings-field">-->
-<!--                        <label for="theme">Choose a theme:</label>-->
-<!--                        <select name="theme" id="theme" class="win95-input-indent">-->
-<!--                            <option value="light">Light</option>-->
-<!--                            <option value="dark">Dark</option>-->
-<!--                        </select>-->
-<!--                        <input type="submit" value="Submit" class="win95-button">-->
-<!--                    </div>-->
+                   <div class="hidden">
+                       <label for="theme">Choose a theme:</label>
+                       <select name="theme" id="theme" class="win95-input-indent">
+                           <option value="light">Light</option><option value="dark">Dark</option>
+                       </select>
+                   </div>
+                   <input type="submit" value="Submit" class="win95-button">
                 </form>
                 <button id="close-change-settings-button" class="win95-button">{{ .Lang.pages.user_settings.close }}</button>
             </div>
