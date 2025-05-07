@@ -169,6 +169,19 @@
         "new_content_label" : "Nouveau Commentaire",
         "send" : "Envoyer"
       }
+    },
+    "thread_report" : {
+      "report_title" : "Signalements",
+      "reported_by" : "Signalé par : ",
+      "report_id" : "ID du Signalement : ",
+      "report_type" : "Type du Signalement : ",
+      "report_content_type" : "Type du Contenu du Signalement : ",
+      "post" : "Post",
+      "comment" : "Commentaire",
+      "reported_content" : "Lien du Contenu Signalé : ",
+      "link" : "Lien",
+      "report_description" : "Description du signalement : ",
+      "resolve_report" : "Résoudre le Signalement"
     }
   },
   "time" : {

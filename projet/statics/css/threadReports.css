@@ -1,0 +1,42 @@
+.thread-reports{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.thread-report{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+#thread-reports-container{
+    position: absolute;
+    background-color: silver;
+}
+
+.thread-report-header-content, .report-section, .thread-report-content{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.thread-report-content{
+    width: calc(100% - 16px);
+}
+
+.thread-report-link, .thread-report-link:visited{
+    color: white;
+}
+
+.thread-report-link:hover{
+    background-color: #00ffff;
+    color: black;
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+
+.resolve-report{
+    margin-bottom: 4px;
+}

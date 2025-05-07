@@ -2,6 +2,7 @@ package pagesHandlers
 
 import (
 	f "GoForum/functions"
+	"fmt"
 	"net/http"
 )
 
@@ -28,9 +29,18 @@ func UserSelfProfilePage(w http.ResponseWriter, r *http.Request) {
 	// Handle the user logout/login
 	ConnectFromHeader(w, r, &PageInfo)
 
-	// TODO : Display the user profile of the 'user'
-
+	// : Display of the user profile
+	myUser := f.GetUser(r)
+	myUserConfig := f.GetUserConfig(r)
+	myUserThreads := f.GetUserThreads(myUser)
+	PageInfo["myUserUsername"] = myUser.Username
+	PageInfo["myUserFirstname"] = myUser.Firstname
+	PageInfo["myUserLastname"] = myUser.Lastname
+	PageInfo["myUserCreatedAt"] = fmt.Sprintf("%d/%d/%d", myUser.CreatedAt.Day(), myUser.CreatedAt.Month(), myUser.CreatedAt.Year())
+	PageInfo["myUserLang"] = myUserConfig.Lang
+	PageInfo["myUserThreads"] = myUserThreads
 	// Add additional styles to the content interface
+
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/userSelfProfile.css", "/css/generalElementStyling.css")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/userSelfProfile.html")
 }
