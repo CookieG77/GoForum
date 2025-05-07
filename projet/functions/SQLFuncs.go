@@ -203,11 +203,7 @@ const ThreadRankOwner = 3
 // InitDatabaseConnection initialises the database connection
 func InitDatabaseConnection() {
 	if !databaseInitialised {
-		if os.Getenv("DB_URL") == "" {
-			ErrorPrintf("DB_URL environment variable not set\n")
-			return
-		}
-		testDB, err := sql.Open(os.Getenv("DB_URL"), os.Getenv("DB_NAME"))
+		testDB, err := sql.Open("sqlite3", os.Getenv("DB_NAME"))
 		if err != nil {
 			ErrorPrintf("Error opening database: %v\n", err)
 			return
