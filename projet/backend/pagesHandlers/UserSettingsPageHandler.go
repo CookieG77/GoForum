@@ -21,7 +21,7 @@ func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
 		f.InfoPrintf("User Settings page accessed at %s by verified : %s\n", f.GetIP(r), f.GetUserEmail(r))
 	} else {
 		f.InfoPrintf("User Settings page accessed at %s\n", f.GetIP(r))
-		// If the user is not authenticated, show him a forbidden page
+		// If the user is not authenticated, redirect to the login page
 		RedirectToLogin(w, r)
 		return
 	}

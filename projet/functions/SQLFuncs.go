@@ -49,6 +49,16 @@ type SimplifiedUser struct {
 	RightsLevel int
 }
 
+// OAuthProvider is a type used to determine the OAuth provider
+type OAuthProvider string
+
+// Constants used to determine the OAuth provider
+const (
+	GoogleOAuthProvider  OAuthProvider = "google"  // Google OAuth provider
+	GitHubOAuthProvider  OAuthProvider = "github"  // GitHub OAuth provider
+	DiscordOAuthProvider OAuthProvider = "discord" // Discord OAuth provider
+)
+
 // EmailType is a type used to determine the type of the email
 type EmailType string
 
@@ -503,6 +513,62 @@ func GetEmailFromID(userID int) string {
 	return ""
 }
 
+func GetUserFromOAuthProviderAndID(provider OAuthProvider, providerId string) (User, error) {
+	getUser := "SELECT * FROM Users WHERE oauth_provider = ? AND oauth_id = ?"
+	rows, err := db.Query(getUser, provider, providerId)
+	if err != nil {
+		ErrorPrintf("Error getting the user from the OAuth provider and ID: %v\n", err)
+		return User{}, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		var user User
+		err := rows.Scan(
+			&user.UserID,
+			&user.Email,
+			&user.Username,
+			&user.Firstname,
+			&user.Lastname,
+			&user.PasswordHash,
+			&user.EmailVerified,
+			&user.OAuthProvider,
+			&user.OAuthID,
+			&user.CreatedAt,
+		)
+		if err != nil {
+			ErrorPrintf("Error scanning the rows in GetUserFromOAuthProviderAndID: %v\n", err)
+			return User{}, err
+		}
+		return user, nil
+	}
+	return User{}, fmt.Errorf("user not found")
+}
+
+// UserWithProviderAndIDExist returns true if the user with the given provider and ID exists in the database
+func UserWithProviderAndIDExist(provider OAuthProvider, providerId string) bool {
+	getUser := "SELECT * FROM Users WHERE oauth_provider = ? AND oauth_id = ?"
+	rows, err := db.Query(getUser, provider, providerId)
+	if err != nil {
+		ErrorPrintf("Error getting the user from the OAuth provider and ID: %v\n", err)
+		return false
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			ErrorPrintf("Error closing the rows: %v\n", err)
+		}
+	}(rows)
+	if rows.Next() {
+		return true
+	}
+	return false
+}
+
 // IsUserVerified checks if the user is verified, i.e. if the email is verified.
 // Returns true if the user is verified and false otherwise.
 func IsUserVerified(r *http.Request) bool {
@@ -688,6 +754,38 @@ func AddUser(email, username, firstname, lastname, password string) error {
 	_, err = db.Exec(insertUserConfigs, email)
 	if err != nil {
 		ErrorPrintf("Error inserting the user into the 'UserConfigs' table: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// AddUserWithOAuth adds a user to the database with OAuth.
+// As well as in the 'UserConfigs' table.
+// Returns an error if there is one.
+func AddUserWithOAuth(email, username string, provider OAuthProvider, providerId string) error {
+	insertUser := "INSERT INTO Users (email, username, firstname, lastname, oauth_provider, oauth_id) VALUES (?, ?, ?, ?, ?, ?)"
+	_, err := db.Exec(insertUser, email, username, "TEMPORARY FIRSTNAME", "TEMPORARY LASTNAME", string(provider), providerId)
+	if err != nil {
+		ErrorPrintf("Error inserting the user into the 'Users' database: %v\n", err)
+		return err
+	}
+	insertUserConfigs := "INSERT INTO UserConfigs (user_id) VALUES ((SELECT user_id FROM Users WHERE email = ?))"
+	_, err = db.Exec(insertUserConfigs, email)
+	if err != nil {
+		ErrorPrintf("Error inserting the user into the 'UserConfigs' table: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// CompleteOAuthRegistration completes the OAuth registration of the user.
+// Replaces the defaulted values with the given values.
+// Returns an error if there is one.
+func CompleteOAuthRegistration(user User, username, firstname, lastname string) error {
+	updateUser := "UPDATE Users SET username = ?, firstname = ?, lastname = ?, email_verified = true WHERE user_id = ?"
+	_, err := db.Exec(updateUser, username, firstname, lastname, user.UserID)
+	if err != nil {
+		ErrorPrintf("Error updating the user in the 'Users' database: %v\n", err)
 		return err
 	}
 	return nil
@@ -2879,8 +2977,8 @@ func InitDatabase() {
 			user_id INTEGER PRIMARY KEY AUTOINCREMENT,
 			email TEXT NOT NULL UNIQUE,
 			username TEXT NOT NULL UNIQUE,
-			firstname TEXT NOT NULL,
-			lastname TEXT NOT NULL,
+			firstname TEXT,
+			lastname TEXT,
 			password_hash TEXT,
 			email_verified BOOLEAN DEFAULT FALSE,
 			oauth_provider TEXT,

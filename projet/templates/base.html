@@ -93,6 +93,9 @@
                     </div>
                     <section class="login-popup-section win95-border-indent">
                         <form id="login-popup-form" method="Post">
+                            {{ if .ShowLoginMessage }}
+                                <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" draggable="false" class="unselectable"> {{ .LoginPageMessage }}</p>
+                            {{ end }}
                             {{ if eq .LoginError "serverError"}}
                                 <p class="error-message win95-border-outdent"> <img src="/img/warningIcon.png" draggable="false" class="unselectable"> {{ .Lang.pages.base.connection_popup.login_server_error }}</p>
                             {{ else if eq .LoginError "invalidCredentials"}}
@@ -142,22 +145,6 @@
                             <button onclick="document.location.href = '/auth/google'" class="win95-button">
                                 <img src="/img/googleIconMini.png" alt="google icon" draggable="false" class="unselectable">
                                 <span>Google</span>
-                            </button>
-                            <button onclick="document.location.href = '/auth/github'" class="win95-button">
-                                <img src="/img/githubIconMini.png" alt="github icon" draggable="false" class="unselectable">
-                                <span>GitHub</span>
-                            </button>
-                            <button onclick="document.location.href = '/auth/discord'" class="win95-button">
-                                <img src="/img/discordIconMini.png" alt="discord icon" draggable="false" class="unselectable">
-                                <span>Discord</span>
-                            </button>
-                            <button onclick="document.location.href = '/auth/discord'" class="win95-button">
-                                <img src="/img/discordIconMini.png" alt="discord icon" draggable="false" class="unselectable">
-                                <span>Discord</span>
-                            </button>
-                            <button onclick="document.location.href = '/auth/discord'" class="win95-button">
-                                <img src="/img/discordIconMini.png" alt="discord icon" draggable="false" class="unselectable">
-                                <span>Discord</span>
                             </button>
                             <button onclick="document.location.href = '/auth/discord'" class="win95-button">
                                 <img src="/img/discordIconMini.png" alt="discord icon" draggable="false" class="unselectable">

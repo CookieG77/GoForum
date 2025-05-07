@@ -97,6 +97,11 @@ func NewContentInterface(pageTitleKey string, r *http.Request) map[string]interf
 	currentTheme := GetUserTheme(r)
 	ContentInterface["CurrentTheme"] = string(currentTheme)
 
+	// Login page data
+	ContentInterface["ShowLoginPage"] = false
+	ContentInterface["ShowCustomLoginMessage"] = false
+	ContentInterface["LoginPageMessage"] = ""
+
 	return ContentInterface
 }
 

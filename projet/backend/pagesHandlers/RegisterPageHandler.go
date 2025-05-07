@@ -142,6 +142,15 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
 			return
 		}
+
+		// Check if the terms are accepted
+		if acceptTerms != "on" {
+			f.DebugPrintf("Terms are not accepted")
+			PageInfo["MissingField"].(map[string]bool)["acceptTerms"] = true
+			f.MakeTemplateAndExecute(w, PageInfo, "templates/register.html")
+			return
+		}
+
 		// Insert the user in the database
 		err = f.AddUser(email, username, firstName, lastName, password)
 		if err != nil {
