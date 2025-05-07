@@ -172,6 +172,19 @@
         "new_content_label" : "New Comment",
         "send" : "Send"
       }
+    },
+    "thread_report" : {
+      "report_title" : "Reports",
+      "reported_by" : "Reported by : ",
+      "report_id" : "Report Id : ",
+      "report_type" : "Report Type : ",
+      "report_content_type" : "Reported Content Type : ",
+      "post" : "Post",
+      "comment" : "Comment",
+      "reported_content" : "Reported Content Link : ",
+      "link" : "Link",
+      "report_description" : "Report description : ",
+      "resolve_report" : "Resolve Report"
     }
   },
   "time" : {
