@@ -1,7 +1,7 @@
 {{ define "content" }}
     <div id="profile-container" class="win95-border">
         <div class="win95-header">
-            <p>Welcome to <span>{{ .myUserUsername }}</span> profile !</p>
+            <p>{{ .Lang.pages.profile.top_message }}<span>{{ .myUserUsername }}</span> profile !</p>
         </div>
         
         <!-- ============================== BIG USER'S PFP ========================== -->
@@ -10,7 +10,7 @@
                 <p>User's profile picture</p>
                 <div id="pfp-container">
                     <div>
-                        <img id="pfp" class="unselectable" draggable="false" src="/upload/{{ .UserPfpPath }}" alt="profile picture">
+                        <img id="pfp" class="unselectable" draggable="false" src="/upload/{{ .myUserPfpAddress }}" alt="profile picture">
                     </div>
                 </div> 
         </div>

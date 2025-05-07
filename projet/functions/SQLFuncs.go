@@ -221,7 +221,9 @@ func InitDatabaseConnection() {
 		InitDatabase()
 
 		// Debug func call to fill the database with test data
-		FillDatabase()
+		if shouldLogDebug {
+			FillDatabase()
+		}
 	}
 }
 
@@ -319,10 +321,9 @@ func GetUser(r *http.Request) User {
 }
 
 // GetUserConfig returns the user configs
-func GetUserConfig(r *http.Request) UserConfigs {
-	email := GetUserEmail(r)
-	getUserConfig := "SELECT * FROM UserConfigs WHERE user_id = (SELECT user_id FROM Users WHERE email = ?)"
-	rows, err := db.Query(getUserConfig, email)
+func GetUserConfig(user User) UserConfigs {
+	getUserConfig := "SELECT * FROM UserConfigs WHERE user_id = (SELECT user_id FROM Users WHERE user_id = ?)"
+	rows, err := db.Query(getUserConfig, user.UserID)
 	if err != nil {
 		ErrorPrintf("Error getting the user configs: %v\n", err)
 		return UserConfigs{}
@@ -853,7 +854,7 @@ func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
 		}
 
 		// Give the user his Pfp
-		userConfig := GetUserConfig(r)
+		userConfig := GetUserConfig(user)
 		(*PageInfo)["UserPfpPath"] = GetMediaLinkFromID(userConfig.PfpID).MediaAddress
 		return
 	}
@@ -1340,6 +1341,44 @@ func LeaveThread(thread ThreadGoForum, user User) error {
 		return err
 	}
 	InfoPrintf("User %s left the thread %s\n", user.Email, thread.ThreadName)
+	return nil
+}
+
+// PromoteUserInThread promotes the user in the thread
+// Returns an error if there is one
+func PromoteUserInThread(thread ThreadGoForum, user User) error {
+	rightLevel := GetThreadMemberRightsLevel(thread, user)
+	if rightLevel >= 2 {
+		ErrorPrintf("Error: user %s is already an admin or owner in the thread %s\n", user.Email, thread.ThreadName)
+		return fmt.Errorf("user %s is already an admin or owner in the thread %s", user.Email, thread.ThreadName)
+	}
+	rightLevel++
+	updateThreadMember := "UPDATE ThreadGoForumMembers SET rights_level = ? WHERE thread_id = ? AND user_id = ?"
+	_, err := db.Exec(updateThreadMember, rightLevel, thread.ThreadID, user.UserID)
+	if err != nil {
+		ErrorPrintf("Error promoting the user in the thread: %v\n", err)
+		return err
+	}
+	InfoPrintf("User %s promoted in the thread %s\n", user.Email, thread.ThreadName)
+	return nil
+}
+
+// DemoteUserInThread demotes the user in the thread
+// Returns an error if there is one
+func DemoteUserInThread(thread ThreadGoForum, user User) error {
+	rightLevel := GetThreadMemberRightsLevel(thread, user)
+	if rightLevel <= 0 {
+		ErrorPrintf("Error: user %s is already a banned member in the thread %s\n", user.Email, thread.ThreadName)
+		return fmt.Errorf("user %s is already a banned member in the thread %s", user.Email, thread.ThreadName)
+	}
+	rightLevel--
+	updateThreadMember := "UPDATE ThreadGoForumMembers SET rights_level = ? WHERE thread_id = ? AND user_id = ?"
+	_, err := db.Exec(updateThreadMember, rightLevel, thread.ThreadID, user.UserID)
+	if err != nil {
+		ErrorPrintf("Error demoting the user in the thread: %v\n", err)
+		return err
+	}
+	InfoPrintf("User %s demoted in the thread %s\n", user.Email, thread.ThreadName)
 	return nil
 }
 

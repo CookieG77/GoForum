@@ -135,7 +135,9 @@ func ThreadContentHandler(w http.ResponseWriter, r *http.Request) {
 		action == "setReportToResolved" ||
 		action == "createThreadTag" ||
 		action == "editThreadTag" ||
-		action == "deleteThreadTag") {
+		action == "deleteThreadTag" ||
+		action == "promoteUser" ||
+		action == "demoteUser") {
 
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
 		http.Error(w, "Action is empty or does not exist !", http.StatusNotFound)
@@ -228,6 +230,12 @@ func ThreadContentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	case "editThreadTag":
 		editThreadTag(w, r, thread, user)
+		return
+	case "promoteUser":
+		promoteUser(w, r, thread, user)
+		return
+	case "demoteUser":
+		demoteUser(w, r, thread, user)
 		return
 	default:
 		f.DebugPrintf("Action \"%s\" does not exist\n", action)
@@ -1523,6 +1531,164 @@ func editThreadTag(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte(`{"status":"success"}`))
+	if err != nil {
+		f.ErrorPrintf("Error while writing the response: %v\n", err)
+		http.Error(w, "Error while writing the response", http.StatusInternalServerError)
+		return
+	}
+}
+
+// promoteUser handles the promote user action
+// Take a jsonUserDesignator as input
+// promote the designated user to a higher rank (user -> moderator -> admin)
+// But cannot promote a user to owner
+// Also check if the user is allowed to promote a user
+// The user can only promote a user to a rank lower than his own
+// Send a JSON response with the status of the action and the promoted user and his new rank
+func promoteUser(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	if !(f.GetUserRankInThread(thread, user) >= f.ThreadRankModerator) {
+		f.DebugPrintf("User is not allowed to promote a user in this thread\n")
+		http.Error(w, "User is not allowed to promote a user in this thread", http.StatusForbidden)
+		return
+	}
+
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	// Getting the form values
+	var msg jsonUserDesignator
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&msg); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user username is empty
+	if msg.Username < "" {
+		f.DebugPrintln("User MessageID is empty")
+		http.Error(w, "User MessageID is empty", http.StatusBadRequest)
+		return
+	}
+	// Check if the user username is valid
+	userToPromote, err := f.GetUserFromUsername(msg.Username)
+	if err != nil {
+		f.DebugPrintln("User MessageID is not valid")
+		http.Error(w, "User MessageID is not valid", http.StatusBadRequest)
+		return
+	}
+	if (userToPromote == f.User{}) {
+		f.DebugPrintln("User MessageID is not valid")
+		http.Error(w, "User MessageID is not valid", http.StatusBadRequest)
+		return
+	}
+	// Check if the user is already promoted in the thread
+	if f.GetUserRankInThread(thread, userToPromote) >= f.GetUserRankInThread(thread, user) {
+		f.DebugPrintln("User cannot promote an other to a higher or equal rank")
+		http.Error(w, "User cannot promote an other to a higher or equal rank", http.StatusBadRequest)
+		return
+	}
+
+	err = f.PromoteUserInThread(thread, userToPromote)
+	if err != nil {
+		f.ErrorPrintf("Error while promoting the user: %v\n", err)
+		http.Error(w, "Error while promoting the user", http.StatusInternalServerError)
+		return
+	}
+
+	f.DebugPrintf("User %s was promoted in thread %s by %s\n", userToPromote.Username, thread.ThreadName, user.Username)
+
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(fmt.Sprintf(`{"status":"success","username":"%s","user_rank":%d}`, userToPromote.Username, f.GetUserRankInThread(thread, userToPromote))))
+}
+
+// demoteUser handles the demote user action
+// Take a jsonUserDesignator as input
+// demote the designated user to a lower rank (admin -> moderator -> user)
+// But cannot demote a user to banned
+// Also check if the user is allowed to demote a user
+// The user can only demote a user with a lower rank than his own
+// Send a JSON response with the status of the action and the promoted user and his new rank
+func demoteUser(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForum, user f.User) {
+	if !(f.GetUserRankInThread(thread, user) >= f.ThreadRankModerator) {
+		f.DebugPrintf("User is not allowed to demote a user in this thread\n")
+		http.Error(w, "User is not allowed to demote a user in this thread", http.StatusForbidden)
+		return
+	}
+
+	if r.Method != "POST" {
+		f.DebugPrintf("Method is not POST\n")
+		http.Error(w, "Method is not POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		f.ErrorPrintf("Error while parsing the form: %v\n", err)
+		http.Error(w, "Error while parsing the form", http.StatusBadRequest)
+		return
+	}
+
+	// Getting the form values
+	var msg jsonUserDesignator
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&msg); err != nil {
+		f.ErrorPrintf("Error while decoding the JSON: %v\n", err)
+		http.Error(w, "Error while decoding the JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user username is empty
+	if msg.Username < "" {
+		f.DebugPrintln("User MessageID is empty")
+		http.Error(w, "User MessageID is empty", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user username is valid
+	userToDemote, err := f.GetUserFromUsername(msg.Username)
+	if err != nil {
+		f.DebugPrintln("User MessageID is not valid")
+		http.Error(w, "User MessageID is not valid", http.StatusBadRequest)
+		return
+	}
+	if (userToDemote == f.User{}) {
+		f.DebugPrintln("User MessageID is not valid")
+		http.Error(w, "User MessageID is not valid", http.StatusBadRequest)
+		return
+	}
+
+	if f.GetUserRankInThread(thread, userToDemote) >= f.GetUserRankInThread(thread, user) {
+		f.DebugPrintln("User cannot demote an other user with a higher or equal rank")
+		http.Error(w, "User cannot demote an other user with a higher or equal rank", http.StatusBadRequest)
+		return
+	}
+
+	err = f.DemoteUserInThread(thread, userToDemote)
+	if err != nil {
+		f.ErrorPrintf("Error while demoting the user: %v\n", err)
+		http.Error(w, "Error while demoting the user", http.StatusInternalServerError)
+		return
+	}
+
+	f.DebugPrintf("User %s was demoted in thread %s by %s\n", userToDemote.Username, thread.ThreadName, user.Username)
+
+	// Return the response
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(fmt.Sprintf(`{"status":"success","username":"%s","user_rank":%d}`, userToDemote.Username, f.GetUserRankInThread(thread, userToDemote))))
 	if err != nil {
 		f.ErrorPrintf("Error while writing the response: %v\n", err)
 		http.Error(w, "Error while writing the response", http.StatusInternalServerError)

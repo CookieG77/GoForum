@@ -38,8 +38,6 @@ func ErrorPage(w http.ResponseWriter, r *http.Request, status int) {
 		PageInfo["ErrorMessage"] = "Error"
 	}
 
-	// Add additional styles to the content interface and make the template
-	f.AddAdditionalStylesToContentInterface(&PageInfo, "css/error.css")
 	f.MakeTemplateAndExecute(w, PageInfo, "templates/error.html")
 }
 

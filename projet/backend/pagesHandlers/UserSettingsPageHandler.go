@@ -25,8 +25,8 @@ func UserSettingsPage(w http.ResponseWriter, r *http.Request) {
 		RedirectToLogin(w, r)
 		return
 	}
-
-	userConfig := f.GetUserConfig(r)
+	user := f.GetUser(r)
+	userConfig := f.GetUserConfig(user)
 
 	// Check if the user is changing his settings
 	if r.Method == "POST" {
