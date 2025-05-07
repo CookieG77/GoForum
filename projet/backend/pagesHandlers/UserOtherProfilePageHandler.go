@@ -40,7 +40,7 @@ func UserOtherProfilePage(w http.ResponseWriter, r *http.Request) {
 	// Display the user's profile
 	myUser, err := f.GetUserFromUsername(user)
 	if err != nil {
-		ErrorPage404(w, r)
+		ErrorPage500(w, r)
 		return
 	}
 	myUserConfig := f.GetUserConfig(r)
