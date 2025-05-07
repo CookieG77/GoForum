@@ -146,7 +146,7 @@ header{
     border-radius: 50%;
     visibility: visible;
     max-width: 32px;
-    height: auto;
+    max-height: 32px;
 }
 
 #user-dropdown {
