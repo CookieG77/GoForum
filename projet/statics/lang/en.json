@@ -87,7 +87,8 @@
       "register_button"                : "Register",
       "register_with"                  : "Register with",
       "login_instead"                  : "Already a member ?",
-      "login_instead_button"           : "Login"
+      "login_instead_button"           : "Login",
+      "logout_button" : "Give-up registration"
     },
     "user_settings" : {
       "title" : "User Settings",
