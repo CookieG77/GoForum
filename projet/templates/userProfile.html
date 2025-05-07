@@ -18,39 +18,27 @@
         <!-- ================================== User's INFO LIST ======================== -->
         <div id="content" class="win95-border-indent">
             <div class="field">
-                <p> User's name is :
-                    <span>
-                        {{ .myUserUsername }}
-                    </span>
-                </p>
+                <p> User's name is : {{ .myUserUsername }}</p>
             </div>
 
             <div class="field">
                 <p> User's language is :
-                    <span>
-                        {{ range $key, $value := .Lang.langs }}
-                            {{ if eq (interfaceToString $key) $.myUserLang }}
-                                {{ $value }}
-                            {{ end }}
+                    {{ range $key, $value := .Lang.langs }}
+                        {{ if eq (interfaceToString $key) $.myUserLang }}
+                            {{ $value }}
                         {{ end }}
-                    </span>
+                    {{ end }}
                 </p>
             </div>
 
             <div class="field">
-                <p> User's account created the :
-                    <span>
-                        {{ .myUserCreatedAt }}
-                    </span>
-                </p>
+                <p> User's account created the : {{ .myUserCreatedAt }}</p>
             </div>
 
             <p> User's thread list :
-                <span>
-                    {{ range .myUserThreads }}
-                        <div class="win95-border"><a href="/t/{{ .ThreadName }}" style="color: rgb(0, 0, 255);">{{ .ThreadName }}</a></div>
-                    {{ end }}
-                </span>
+                {{ range .myUserThreads }}
+                    <div class="win95-border"><a href="/t/{{ .ThreadName }}" style="color: rgb(0, 0, 255);">{{ .ThreadName }}</a></div>
+                {{ end }}
                 <br>
             </p>
         </div>

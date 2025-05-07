@@ -173,7 +173,7 @@
         "send" : "Send"
       }
     },
-    "thread_report" : {
+    "thread_reports" : {
       "report_title" : "Reports",
       "reported_by" : "Reported by : ",
       "report_id" : "Report Id : ",

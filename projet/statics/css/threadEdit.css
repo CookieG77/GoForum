@@ -9,6 +9,9 @@
     position: absolute;
     align-self: center;
     background-color: silver;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 #tag-manager-form{
@@ -44,4 +47,8 @@
 .tag-editor{
     display: flex;
     align-items: center;
+}
+
+.editor-section{
+    width: calc(100% - 16px);
 }

@@ -265,8 +265,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         authorPfp.src = `/upload/${data.user_pfp_address}`;
         authorPfp.alt = "Author profile picture";
-        authorPfp.classList.add("post-profile-picture", "unselectable");
+        authorPfp.classList.add("post-profile-picture");
         authorPfp.draggable = false;
+        authorPfp.onclick = function (){
+            window.location.href = `/profile/${data.user_name}`
+        }
         postAuthor.appendChild(authorPfp);
 
         authorAndTime.classList.add("anthor-and-time")
@@ -274,6 +277,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         author.classList.add("author-pseudo")
         author.innerText = `${data.user_name}`;
+        author.onclick = function (){
+            window.location.href = `/profile/${data.user_name}`
+        }
         authorAndTime.appendChild(author);
 
         time.classList.add("time-ago");

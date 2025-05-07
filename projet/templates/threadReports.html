@@ -1,7 +1,7 @@
 {{ define "content" }}
 <div id="thread-reports-container" class="win95-border">
     <section class="win95-header">
-        <h1>{{ .Lang.pages.thread_report.report_title }}</h1>
+        <h1>{{ .Lang.pages.thread_reports.report_title }}</h1>
     </section>
 
     <div class="thread-reports win95-border-indent">
@@ -10,41 +10,41 @@
                 <div class="win95-header report-header">
                     <div class="thread-report-header-content">
                         <p>
-                            <strong>{{ $.Lang.pages.thread_report.reported_by }}</strong><a class="thread-report-link" href="/profile/{{ .UserName }}">{{ .UserName }}</a>
+                            <strong>{{ $.Lang.pages.thread_reports.reported_by }}</strong><a class="thread-report-link" href="/profile/{{ .UserName }}">{{ .UserName }}</a>
                         </p>
                         <p>
-                            <strong>{{ $.Lang.pages.thread_report.report_id }}</strong>{{ .ReportID }}
+                            <strong>{{ $.Lang.pages.thread_reports.report_id }}</strong>{{ .ReportID }}
                         </p>
                     </div>
                 </div>
                 <div class="win95-border-indent thread-report-content">
                     <div class="report-section">
                         <p>
-                            <strong>{{ $.Lang.pages.thread_report.report_type }}</strong>
+                            <strong>{{ $.Lang.pages.thread_reports.report_type }}</strong>
                             {{ .ReportType }}
                         </p>
                     </div>
                     <div class="report-section">
                         <p>
-                            <strong>{{ $.Lang.pages.thread_report.report_content_type }}</strong>
-                            {{ if eq .IsAPostAndNotAComment true }}{{ $.Lang.pages.thread_report.post }}{{ else }}{{ $.Lang.pages.thread_report.comment }}{{ end }}
+                            <strong>{{ $.Lang.pages.thread_reports.report_content_type }}</strong>
+                            {{ if eq .IsAPostAndNotAComment true }}{{ $.Lang.pages.thread_reports.post }}{{ else }}{{ $.Lang.pages.thread_reports.comment }}{{ end }}
                         </p>
                     </div>
                     <div class="report-section">
                         <p>
-                            <strong>{{ $.Lang.pages.thread_report.reported_content }}</strong>
-                            <a href="/t/{{ $.ThreadName }}/p/{{ .PostID }}">{{ $.Lang.pages.thread_report.link }}</a>
+                            <strong>{{ $.Lang.pages.thread_reports.reported_content }}</strong>
+                            <a href="/t/{{ $.ThreadName }}/p/{{ .PostID }}">{{ $.Lang.pages.thread_reports.link }}</a>
                         </p>
                     </div>
                     <div class="report-section">
                         <p>
-                            <strong>{{ $.Lang.pages.thread_report.report_description }}</strong>
+                            <strong>{{ $.Lang.pages.thread_reports.report_description }}</strong>
                             {{ .ReportContent }}
                         </p>
                     </div>
                 </div>
                 <button id="resolveReportButton" class="win95-button resolve-report" onclick="ResolveReport('{{ $.ThreadName }}', '{{ .ReportID }}')">
-                    {{ $.Lang.pages.thread_report.resolve_report }}
+                    {{ $.Lang.pages.thread_reports.resolve_report }}
                 </button>
             </div>
         {{ end }}
