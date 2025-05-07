@@ -20,20 +20,23 @@
                                     <p class="grid-align-right win95-border-bulge">{{ .Lang.pages.thread.must_login_to_join_message }}</p>
                                 {{ else }}
                                     <div id="join-button" class="grid-align-right">
-                                        <button id="LeaveThreadButton" class="win95-button hidden">{{ .Lang.pages.thread.leave }}</button>
-                                        <button id="JoinThreadButton" class="win95-button">{{ .Lang.pages.thread.join }}</button>
+                                        <button id="LeaveThreadButton" class="win95-button hidden">{{ .Lang.pages.thread.leave_button }}</button>
+                                        <button id="JoinThreadButton" class="win95-button">{{ .Lang.pages.thread.join_button }}</button>
                                     </div>
                                 {{ end }}
                             {{ else }}
                                 {{ if .IsAMember }}
                                     <div id="join-button" class="grid-align-right">
-                                        <button id="LeaveThreadButton" class="win95-button">{{ .Lang.pages.thread.leave }}</button>
-                                        <button id="JoinThreadButton" class="win95-button hidden">{{ .Lang.pages.thread.join }}</button>
+                                        <button id="LeaveThreadButton" class="win95-button">{{ .Lang.pages.thread.leave_button }}</button>
+                                        <button id="JoinThreadButton" class="win95-button hidden">{{ .Lang.pages.thread.join_button }}</button>
+                                        {{ if gt .UserRank 0 }}
+                                        <button id="ModerationThreadButton" class="win95-button">{{ .Lang.pages.thread.moderate_button }}</button>
+                                        {{ end }}
                                     </div>
                                 {{ else }}
                                     <div id="join-button" class="grid-align-right">
-                                        <button id="LeaveThreadButton" class="win95-button hidden">{{ .Lang.pages.thread.leave }}</button>
-                                        <button id="JoinThreadButton" class="win95-button">{{ .Lang.pages.thread.join }}</button>
+                                        <button id="LeaveThreadButton" class="win95-button hidden">{{ .Lang.pages.thread.leave_button }}</button>
+                                        <button id="JoinThreadButton" class="win95-button">{{ .Lang.pages.thread.join_button }}</button>
                                     </div>
                                 {{ end }}
                             {{ end }}
@@ -42,7 +45,7 @@
                     <div id="join-button" class="grid-align-right">
                         <button id="LeaveThreadButton" class="hidden"></button>
                         <button id="JoinThreadButton" class="hidden"></button>
-                        <button id="EditThreadButton" class="win95-button" onclick="">Edit</button>
+                        <button id="EditThreadButton" class="win95-button">{{ .Lang.pages.thread.edit_button }}</button>
                     </div>
                     {{ end }}
                     <div id="order-container" class="grid-align-right">

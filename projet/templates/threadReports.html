@@ -1,0 +1,42 @@
+{{ define "content" }}
+<div id="threadReportsContainer">
+    <h1>Thread Reports</h1>
+    <div class="threadReports win95-border-indent">
+        {{ range .Reports }}
+            <div class="threadReport" id="report-{{ .ReportID }}">
+                <div class="win95-header">
+                    <p>
+                        <strong>Reported by: </strong>
+                        <a href="/profile/{{ .UserName }}">{{ .UserName }}</a>
+                    </p>
+                    <p>
+                        <strong>Report Id: </strong>
+                        {{ .ReportID }}
+                    </p>
+                </div>
+                <div class="win95-border-indent">
+                    <p>
+                        <strong>Report Type: </strong>
+                        {{ .ReportType }}
+                    </p>
+                    <p>
+                        <strong>Reported Content Type:</strong>
+                        {{ if eq .IsAPostAndNotAComment true }}Post{{ else }}Comment{{ end }}
+                    </p>
+                    <p>
+                        <strong>Reported on: </strong>
+                        <a href="/t/{{ $.ThreadName }}/p/{{ .PostID }}">link</a>
+                    </p>
+                    <p>
+                        <strong>Report description: </strong>
+                        {{ .ReportContent }}
+                    </p>
+                    <button id="resolveReportButton" class="win95-button" onclick="ResolveReport('{{ $.ThreadName }}', '{{ .ReportID }}')">
+                        Resolve Report
+                    </button>
+                </div>
+            </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}

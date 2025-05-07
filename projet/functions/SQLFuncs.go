@@ -186,9 +186,10 @@ var ReportTypes = []ReportType{
 // ReportedContent is a struct used to represent a reported content
 type ReportedContent struct {
 	ReportID              int        `json:"report_id"`
-	UserID                int        `json:"user_id"`
+	UserName              string     `json:"username"`
 	ReportedContentID     int        `json:"reported_content_id"`
 	IsAPostAndNotAComment bool       `json:"is_a_post_and_not_a_comment"`
+	PostID                int        `json:"post_id"`
 	ReportType            ReportType `json:"report_type"`
 	ReportContent         string     `json:"report_content"`
 }
@@ -2880,9 +2881,9 @@ func SetReportAsResolved(reportID int) error {
 
 // AddReportedMessage adds the reported message to the database
 // Returns an error if there is one
-func AddReportedMessage(user User, messageID int, reportType ReportType, content string) error {
-	addReport := "INSERT INTO Reports (user_id, message_id, report_type, report_content) VALUES (?, ?, ?, ?)"
-	_, err := db.Exec(addReport, messageID, user.UserID, string(reportType), content)
+func AddReportedMessage(user User, thread ThreadGoForum, messageID int, reportType ReportType, content string) error {
+	addReport := "INSERT INTO Reports (username, message_id, report_type, report_content, thread_id) VALUES (?, ?, ?, ?, ?)"
+	_, err := db.Exec(addReport, user.Username, messageID, string(reportType), content, thread.ThreadID)
 	if err != nil {
 		ErrorPrintf("Error adding the reported message to the database: %v\n", err)
 		return err
@@ -2892,9 +2893,9 @@ func AddReportedMessage(user User, messageID int, reportType ReportType, content
 
 // AddReportedComment adds the reported comment to the database
 // Returns an error if there is one
-func AddReportedComment(user User, commentID int, reportType ReportType, content string) error {
-	addReport := "INSERT INTO Reports (user_id, comment_id, report_type, report_content) VALUES (?, ?, ?, ?)"
-	_, err := db.Exec(addReport, commentID, user.UserID, string(reportType), content)
+func AddReportedComment(user User, thread ThreadGoForum, commentID, messageID int, reportType ReportType, content string) error {
+	addReport := "INSERT INTO Reports (username, comment_id, message_id, report_type, report_content, thread_id) VALUES (?, ?, ?, ?, ?, ?)"
+	_, err := db.Exec(addReport, user.Username, commentID, messageID, string(reportType), content, thread.ThreadID)
 	if err != nil {
 		ErrorPrintf("Error adding the reported comment to the database: %v\n", err)
 		return err
@@ -2905,7 +2906,7 @@ func AddReportedComment(user User, commentID int, reportType ReportType, content
 // GetReportedContentInThread returns the reported messages and comments in the thread
 // Returns a slice of ReportedContent and an error if there is one
 func GetReportedContentInThread(thread ThreadGoForum) ([]ReportedContent, error) {
-	getReports := "SELECT * FROM Reports WHERE thread_id = ?"
+	getReports := "SELECT report_id, username, message_id, comment_id, report_type, report_content FROM Reports WHERE thread_id = ? AND is_resolved = 0"
 	rows, err := db.Query(getReports, thread.ThreadID)
 	if err != nil {
 		ErrorPrintf("Error getting the reported content from the database: %v\n", err)
@@ -2921,22 +2922,26 @@ func GetReportedContentInThread(thread ThreadGoForum) ([]ReportedContent, error)
 	var messageID, commentID int
 	for rows.Next() {
 		var report ReportedContent
-		err := rows.Scan(&report.ReportID, &report.UserID, &messageID, &commentID, &report.ReportType, &report.ReportContent)
+		err := rows.Scan(
+			&report.ReportID,
+			&report.UserName,
+			&messageID,
+			&commentID,
+			&report.ReportType,
+			&report.ReportContent)
 		if err != nil {
 			ErrorPrintf("Error scanning the rows in GetReportedContent: %v\n", err)
 			return nil, err
 		}
 		// Fill the remaining fields of the report
-		if messageID != 0 {
-			report.ReportID = messageID
-			report.IsAPostAndNotAComment = true
-		} else if commentID != 0 {
-			report.ReportID = commentID
+		if commentID != 0 {
+			report.ReportedContentID = commentID
 			report.IsAPostAndNotAComment = false
 		} else {
-			ErrorPrintf("Error: message_id and comment_id are both 0 in GetReportedContent\n")
-			continue
+			report.ReportedContentID = messageID
+			report.IsAPostAndNotAComment = true
 		}
+		report.PostID = messageID
 		reports = append(reports, report)
 	}
 	return reports, nil
@@ -3176,15 +3181,17 @@ func InitDatabase() {
 	ReportsTableSQL := `
 		CREATE TABLE IF NOT EXISTS Reports (
 		    report_id INTEGER PRIMARY KEY AUTOINCREMENT,
-		    user_id INTEGER NOT NULL,
-		    message_id INTEGER,
-		    comment_id INTEGER,
+		    username TEXT NOT NULL,
+		    message_id INTEGER DEFAULT 0,
+		    comment_id INTEGER DEFAULT 0,
+		    thread_id INTEGER NOT NULL,
 		    report_type TEXT NOT NULL,
 		    report_content TEXT NOT NULL,
 		    is_resolved BOOLEAN DEFAULT FALSE NOT NULL,
-		    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+		    FOREIGN KEY (username) REFERENCES Users(username) ON DELETE CASCADE,
 		    FOREIGN KEY (message_id) REFERENCES ThreadMessages(message_id) ON DELETE CASCADE,
-		    FOREIGN KEY (comment_id) REFERENCES ThreadComments(comment_id) ON DELETE CASCADE
+		    FOREIGN KEY (comment_id) REFERENCES ThreadComments(comment_id) ON DELETE CASCADE,
+		    FOREIGN KEY (thread_id) REFERENCES ThreadGoForum(thread_id) ON DELETE CASCADE
 		);`
 	_, err = db.Exec(ReportsTableSQL)
 	if err != nil {

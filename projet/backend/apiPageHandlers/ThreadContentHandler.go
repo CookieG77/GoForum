@@ -617,7 +617,7 @@ func reportMessage(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 	reportType, _ := f.GetReportTypeFromString(message.ReportType)
 
 	// Send the report
-	err = f.AddReportedMessage(user, message.ID, reportType, message.Content)
+	err = f.AddReportedMessage(user, thread, message.ID, reportType, message.Content)
 	if err != nil {
 		f.ErrorPrintf("Error while sending the report: %v\n", err)
 		http.Error(w, "Error while sending the report", http.StatusInternalServerError)
@@ -1067,7 +1067,7 @@ func reportComment(w http.ResponseWriter, r *http.Request, thread f.ThreadGoForu
 	reportType, _ := f.GetReportTypeFromString(comment.ReportType)
 
 	// Send the report
-	err = f.AddReportedComment(user, comment.ID, reportType, comment.Content)
+	err = f.AddReportedComment(user, thread, comment.ID, comment.MessageID, reportType, comment.Content)
 	if err != nil {
 		f.ErrorPrintf("Error while sending the report: %v\n", err)
 		http.Error(w, "Error while sending the report", http.StatusInternalServerError)

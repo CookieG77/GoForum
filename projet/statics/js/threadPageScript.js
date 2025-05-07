@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const leaveButton = document.getElementById("LeaveThreadButton");
     const joinButton = document.getElementById("JoinThreadButton");
     const editThreadButton = document.getElementById("EditThreadButton");
+    const moderationThreadBUtton = document.getElementById("ModerationThreadButton" +
+        "");
 
     // Debug button
     const loadMorePostsButton = document.getElementById("load-more-posts-button");
@@ -72,6 +74,9 @@ document.addEventListener("DOMContentLoaded", function () {
         scrollbar.classList.add("hidden");
         messageToReport = messageID;
         reportMenuSendButton.disabled = true;
+        reportContent.disabled = false;
+        reportContent.innerText = "";
+        reportReason.disabled = false;
     }
 
     /**
@@ -623,13 +628,14 @@ document.addEventListener("DOMContentLoaded", function () {
     // Add each button its event listener if it exists
     if (leaveButton) {
         leaveButton.addEventListener("click", function() {
-            const result = leaveThread(getCurrentThreadName());
+            const result = leaveThread(threadName);
             result.then(async (response) => {
                 if (response.ok) {
                     joinButton.classList.remove("hidden");
                     leaveButton.classList.add("hidden");
                     newPostContainer.classList.add("hidden");
                     console.log("You have left the thread");
+                    moderationThreadBUtton.classList.add("hidden");
                 } else {
                     console.error(response);
                 }
@@ -638,7 +644,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (joinButton) {
         joinButton.addEventListener("click", function() {
-            const result = joinThread(getCurrentThreadName())
+            const result = joinThread(threadName)
             result.then(async (response) => {
                 if (response.ok) {
                     joinButton.classList.add("hidden");
@@ -653,7 +659,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (editThreadButton) {
         editThreadButton.addEventListener("click", function() {
-            window.location = `/t/${getCurrentThreadName()}/edit`;
+            window.location = `/t/${threadName}/edit`;
+        });
+    }
+    if (moderationThreadBUtton) {
+        moderationThreadBUtton.addEventListener("click", function() {
+            window.location = `/t/${threadName}/reports`;
         });
     }
 
