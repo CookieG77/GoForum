@@ -1,13 +1,13 @@
 {{ define "content" }}
     <div id="profile-container" class="win95-border">
         <div class="win95-header">
-            <p>{{ .Lang.pages.profile.top_message }}<span>{{ .myUserUsername }}</span> profile !</p>
+            <p>{{ .Lang.pages.profile.top_message }}<span>{{ .myUserUsername }}</span>{{ .Lang.pages.profile.top_message2 }}</p>
         </div>
         
         <!-- ============================== BIG USER'S PFP ========================== -->
 
         <div id="pfp-big-container">
-                <p>User's profile picture</p>
+                <p>{{ .Lang.pages.profile.pfp_message }}</p>
                 <div id="pfp-container">
                     <div>
                         <img id="pfp" class="unselectable" draggable="false" src="/upload/{{ .myUserPfpAddress }}" alt="profile picture">

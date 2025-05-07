@@ -187,7 +187,10 @@
       "resolve_report" : "Resolve Report"
     },
     "profile" : {
-      "top_message" : "Welcome to "
+      "top_message" : "Welcome to ",
+      "top_message2" : "profile !",
+      "pfp_message" : "User's profile picture",
+      
     }
 
   },
