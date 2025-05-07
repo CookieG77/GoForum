@@ -1,16 +1,16 @@
 {{ define "content" }}
 <div class="hidden" id="i18n">
-    <span data-key="promote_failed_message">Failed to promote user.</span>
-    <span data-key="promote_success_message">User {n} promoted successfully to : </span>
-    <span data-key="promote_error_message">Error promoting user:</span>
+    <span data-key="promote_failed_message">{{ .Lang.pages.thread_edit.promote_failed_message }}</span>
+    <span data-key="promote_success_message">{{ .Lang.pages.thread_edit.promote_success_message }}</span>
+    <span data-key="promote_error_message">{{ .Lang.pages.thread_edit.promote_error_message }}</span>
 
-    <span data-key="demote_failed_message">Failed to demote user.</span>
-    <span data-key="demote_success_message">User {n} demoted successfully to : </span>
-    <span data-key="demote_error_message">Error demoting user:</span>
+    <span data-key="demote_failed_message">{{ .Lang.pages.thread_edit.demote_failed_message }}.</span>
+    <span data-key="demote_success_message">{{ .Lang.pages.thread_edit.demote_success_message }}</span>
+    <span data-key="demote_error_message">{{ .Lang.pages.thread_edit.demote_error_message }}</span>
 
-    <span data-key="rank_0">User</span>
-    <span data-key="rank_1">Moderator</span>
-    <span data-key="rank_2">Administrator</span>
+    <span data-key="rank_0">{{ .Lang.pages.thread_edit.rank_0 }}</span>
+    <span data-key="rank_1">{{ .Lang.pages.thread_edit.rank_1 }}</span>
+    <span data-key="rank_2">{{ .Lang.pages.thread_edit.rank_2 }}</span>
 </div>
 <div id="thread-edit-box" class="win95-border">
     <section class="win95-header">

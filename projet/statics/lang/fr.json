@@ -181,7 +181,18 @@
       "roles_edit" : "Edition des Roles",
       "user_pseudo" : "Pseudo de l'Utilisateur : ",
       "promote" : "Promouvoir",
-      "demote" : "Destituer"
+      "demote" : "Destituer",
+      "promote_failed_message": "Echec de la promotion de l'utilisateur.",
+      "promote_success_message": "Utilisateur {n} promu avec succès au rang : ",
+      "promote_error_message": "Erreur lors de la promotion de l'utilisateur :",
+
+      "demote_failed_message": "Echec de la destitution de l'utilisateur.",
+      "demote_success_message": "Utilisateur {n} destitué avec succès du rang : ",
+      "demote_error_message": "Erreur lors de la destitution de l'utilisateur :",
+
+      "rank_0": "User",
+      "rank_1": "Moderator",
+      "rank_2": "Administrator"
     },
     "thread_reports" : {
       "report_title" : "Signalements",

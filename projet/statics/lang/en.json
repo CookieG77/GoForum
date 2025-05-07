@@ -183,7 +183,18 @@
       "roles_edit" : "Roles Edit",
       "user_pseudo" : "User Pseudo : ",
       "promote" : "Promote",
-      "demote" : "Demote"
+      "demote" : "Demote",
+      "promote_failed_message": "Failed to promote user.",
+      "promote_success_message": "User {n} promoted successfully to : ",
+      "promote_error_message": "Error promoting user : ",
+
+      "demote_failed_message": "Failed to demote user.",
+      "demote_success_message": "User {n} demoted successfully to : ",
+      "demote_error_message": "Error demoting user:",
+
+      "rank_0": "User",
+      "rank_1": "Moderator",
+      "rank_2": "Administrator"
     },
     "thread_reports" : {
       "report_title" : "Reports",
