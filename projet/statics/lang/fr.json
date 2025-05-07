@@ -102,7 +102,7 @@
       "size_warning" : "L'Image doit faire moins de"
     },
     "thread" : {
-      "banned_message" : "Vous êtes banni de ce thread. Vous n'êtes pas autorisé à y accéder.",
+      "banned_message" : "Vous êtes banni(e) de ce thread. Vous n'êtes pas autorisé(e) à y accéder.",
       "rank" : {
         "moderator" : "Modérateur",
         "administrator" : "Administrateur",
@@ -159,7 +159,15 @@
       "thread_creation_submit" : "Créer le thread"
     },
     "threadPost" : {
-      "comments_title" : "Comments : "
+      "comments_title" : "Commentaires : ",
+      "comment_content_label" : "Ajouter un commentaire : ",
+      "comment_placeholder" : "Ecrivez un commentaire...",
+      "comment_send_button" : "Envoyer",
+      "edit" : {
+        "title" : "Editez votre commentaire",
+        "new_content_label" : "Nouveau Commentaire",
+        "send" : "Envoyer"
+      }
     }
   },
   "time" : {

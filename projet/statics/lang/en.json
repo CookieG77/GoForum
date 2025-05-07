@@ -163,7 +163,12 @@
       "comments_title" : "Comments : ",
       "comment_content_label" : "Add comment : ",
       "comment_placeholder" : "Write a comment...",
-      "comment_send_button" : "Send"
+      "comment_send_button" : "Send",
+      "edit" : {
+        "title" : "Edit Comment",
+        "new_content_label" : "New Comment",
+        "send" : "send"
+      }
     }
   },
   "time" : {

@@ -42,8 +42,6 @@
 
 .menu-button{
     width: 100%;
-    display: grid;
-    grid-template-columns: 16px auto;
     gap: 4px;
 }
 

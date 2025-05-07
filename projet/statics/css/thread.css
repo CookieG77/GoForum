@@ -336,7 +336,7 @@
     margin-bottom: 4px;
 }
 
-#edit-post-content, #report-content{
+#edit-post-content, #report-content, #edit-comment-content{
     width: 50ch;
     resize: vertical;
     min-height: 48px;
