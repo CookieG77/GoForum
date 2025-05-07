@@ -16,6 +16,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const htreadBannerPreviewImg = document.getElementById('thread-banner-preview');
     const threadBannerInput = document.getElementById('new-thread-banner');
 
+    const rankUpdateUserSelect = document.getElementById('user-pseudo');
+    const rankUpdatePromoteButton = document.getElementById('promote-button');
+    const rankUpdateDemoteButton = document.getElementById('demote-button');
+
     function renderTags() {
         tagList.innerHTML = '';
         editTagList.innerHTML = '';
@@ -204,4 +208,74 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Error uploading image");
         });
     }
+
+    rankUpdateUserSelect.addEventListener('change', function () {
+        const selectedUser = this.value;
+        if (selectedUser) {
+            rankUpdatePromoteButton.disabled = false;
+            rankUpdateDemoteButton.disabled = false;
+        } else {
+            rankUpdatePromoteButton.disabled = true;
+            rankUpdateDemoteButton.disabled = true;
+        }
+    });
+
+    function getRankName(rank) {
+        if (rank === 0) {
+            return getI18nText("rank_0");
+        }
+        if (rank === 1) {
+            return getI18nText("rank_1");
+        }
+        if (rank === 2) {
+            return getI18nText("rank_2");
+        }
+        return "Rank " + rank;
+    }
+
+    rankUpdatePromoteButton.addEventListener('click', function () {
+        const selectedUser = rankUpdateUserSelect.value;
+        if (selectedUser) {
+            promoteUser(threadName, selectedUser)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        alert(getI18nText("promote_failed_message"));
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        alert(getI18nText("promote_success_message", data.username) + `${getRankName(data.user_rank)}`);
+                    }
+                })
+                .catch(err => {
+                    console.error(getI18nText("promote_error_message"), err);
+                    alert('Error promoting user.');
+                });
+        }
+    });
+
+    rankUpdateDemoteButton.addEventListener('click', function () {
+        const selectedUser = rankUpdateUserSelect.value;
+        if (selectedUser) {
+            demoteUser(threadName, selectedUser)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        alert(getI18nText("demote_failed_message"));
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        alert(getI18nText("demote_success_message", data.username) + `${getRankName(data.user_rank)}`);
+                    }
+                })
+                .catch(err => {
+                    console.error(getI18nText("demote_error_message"), err);
+                    alert('Error demoting user.');
+                });
+        }
+    });
 });

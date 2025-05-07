@@ -1,4 +1,17 @@
 {{ define "content" }}
+<div class="hidden" id="i18n">
+    <span data-key="promote_failed_message">Failed to promote user.</span>
+    <span data-key="promote_success_message">User {n} promoted successfully to : </span>
+    <span data-key="promote_error_message">Error promoting user:</span>
+
+    <span data-key="demote_failed_message">Failed to demote user.</span>
+    <span data-key="demote_success_message">User {n} demoted successfully to : </span>
+    <span data-key="demote_error_message">Error demoting user:</span>
+
+    <span data-key="rank_0">User</span>
+    <span data-key="rank_1">Moderator</span>
+    <span data-key="rank_2">Administrator</span>
+</div>
 <div id="thread-edit-box" class="win95-border">
     <section class="win95-header">
         <h1>Thread Editor</h1>
@@ -38,8 +51,8 @@
             <label for="tagName">User Pseudo:</label>
             <input class="win95-input-indent" type="text" id="user-pseudo" required>
         </div>
-        <button class="win95-button">Promote</button>
-        <button class="win95-button">Demote</button>
+        <button class="win95-button" id="promote-button" disabled>Promote</button>
+        <button class="win95-button" id="demote-button" disabled>Demote</button>
     </section>
 </div>
 
