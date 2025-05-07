@@ -31,7 +31,7 @@ func UserSelfProfilePage(w http.ResponseWriter, r *http.Request) {
 
 	// : Display of the user profile
 	myUser := f.GetUser(r)
-	myUserConfig := f.GetUserConfig(r)
+	myUserConfig := f.GetUserConfig(myUser)
 	myUserThreads := f.GetUserThreads(myUser)
 	PageInfo["myUserUsername"] = myUser.Username
 	PageInfo["myUserFirstname"] = myUser.Firstname

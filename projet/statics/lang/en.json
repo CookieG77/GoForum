@@ -185,7 +185,11 @@
       "link" : "Link",
       "report_description" : "Report description : ",
       "resolve_report" : "Resolve Report"
+    },
+    "profile" : {
+      "top_message" : "Welcome to "
     }
+
   },
   "time" : {
     "ago_seconds" : "A few seconds ago",
