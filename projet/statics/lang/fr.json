@@ -112,8 +112,9 @@
       "must_connect_message" : "Vous devez être connecté pour voir cette page.",
       "must_join_thread_message" : "Vous devez rejoindre ce thread pour voir son contenu.",
       "must_login_to_join_message" : "Pour rejoindre ce thread, vous devez être connecté.",
-      "join" : "Rejoindre",
-      "leave" : "Quitter",
+      "join_button" : "Rejoindre",
+      "leave_button" : "Quitter",
+      "edit_button" : "Editer",
       "order_label" : "Ordre des messages : ",
       "new_post_title_label" : "Titre : ",
       "new_post_title_placeholder" : "Titre du post",
@@ -170,7 +171,7 @@
         "send" : "Envoyer"
       }
     },
-    "thread_report" : {
+    "thread_reports" : {
       "report_title" : "Signalements",
       "reported_by" : "Signalé par : ",
       "report_id" : "ID du Signalement : ",

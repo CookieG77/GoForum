@@ -52,6 +52,10 @@
     overflow: hidden;
 }
 
+.post-profile-picture:hover, .comment-profile-picture:hover{
+    cursor: url('../img/pointer95.cur'), pointer;
+}
+
 .author-and-time{
     display: inline-flex;
     align-items: center;
@@ -59,6 +63,10 @@
 
 .author-pseudo{
     font-size: 22px;
+}
+
+.author-pseudo:hover{
+    cursor: url('../img/pointer95.cur'), pointer;
 }
 
 .time-ago{

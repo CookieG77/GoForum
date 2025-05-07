@@ -18,45 +18,31 @@
         <!-- ================================== User's INFO LIST ======================== -->
         <div id="content" class="win95-border-indent">
             <div class="field">
-                <p> Public Username is :
-                    <span>
-                        {{ .myUserUsername }}
-                    </span>
-                </p>
+                <p> Public Username is : {{ .myUserUsername }}</p>
             </div>
 
             <div class="field">
-                <p> Private First name and Last name are :
-                    <span>{{ .myUserFirstname }}, {{ .myUserLastname }}</span>
-                </p>
+                <p> Private First name and Last name are : {{ .myUserFirstname }}, {{ .myUserLastname }}</p>
             </div>
 
             <div class="field">
                 <p> Public language is :
-                    <span>
-                        {{ range $key, $value := .Lang.langs }}
-                            {{ if eq (interfaceToString $key) $.myUserLang }}
-                                {{ $value }}
-                            {{ end }}
+                    {{ range $key, $value := .Lang.langs }}
+                        {{ if eq (interfaceToString $key) $.myUserLang }}
+                            {{ $value }}
                         {{ end }}
-                    </span>
+                    {{ end }}
                 </p>
             </div>
 
             <div class="field">
-                <p> Account created the :
-                    <span>
-                        {{ .myUserCreatedAt }}
-                    </span>
-                </p>
+                <p> Account created the : {{ .myUserCreatedAt }}</p>
             </div>
 
             <p> User Thread list :
-                <span>
-                    {{ range .myUserThreads }}
-                        <div class="win95-border"><a href="/t/{{ .ThreadName }}" style="color: rgb(0, 0, 255);">{{ .ThreadName }}</a></div>
-                    {{ end }}
-                </span>
+                {{ range .myUserThreads }}
+                    <div class="win95-border"><a href="/t/{{ .ThreadName }}" style="color: rgb(0, 0, 255);">{{ .ThreadName }}</a></div>
+                {{ end }}
                 <br>
             </p>
         </div>

@@ -16,7 +16,8 @@
     <section class="win95-header">
         <h1>Thread Editor</h1>
     </section>
-    <section class="tag-manager win95-border-indent">
+    <h2 class="section-title">Tags Edit</h2>
+    <section class="editor-section tag-manager win95-border-indent">
         <div id="tag-manager-form">
             <div class="tag-manager-section">
                 <label for="tagName">Tag Name:</label>
@@ -30,13 +31,13 @@
             <div id="error" class="error"></div>
             <div id="tagList"></div>
         </div>
-
         <div class="tag-manager-edit">
             <div id="editTagList"></div>
         </div>
         <br>
     </section>
-    <section class="win95-border-indent">
+    <h2 class="section-title">Pictures Edit</h2>
+    <section class="editor-section win95-border-indent">
         <img id="thread-icon-preview" alt="Icon Preview" src="/upload/{{ .ThreadIconPath }}">
         <br>
         <input type="file" id="new-thread-icon" accept="image/png, image/jpeg, image/gif">
@@ -46,7 +47,8 @@
             <input type="file" id="new-thread-banner" accept="image/png, image/jpeg, image/gif">
         </div>
     </section>
-    <section class="win95-border-indent">
+    <h2 class="section-title">Roles Edit</h2>
+    <section class="editor-section win95-border-indent">
         <div class="tag-manager-section">
             <label for="tagName">User Pseudo:</label>
             <input class="win95-input-indent" type="text" id="user-pseudo" required>
