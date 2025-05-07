@@ -62,6 +62,7 @@ func GetUserTheme(r *http.Request) Theme {
 	if !IsAuthenticated(r) {
 		return DefaultTheme
 	}
-	c := GetUserConfig(r)
+	u := GetUser(r)
+	c := GetUserConfig(u)
 	return StrToTheme(c.Theme)
 }

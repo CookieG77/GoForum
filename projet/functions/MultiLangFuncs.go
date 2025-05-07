@@ -102,7 +102,8 @@ func GetUserLang(r *http.Request) Lang {
 	if !IsAuthenticated(r) {
 		return DefaultLang
 	}
-	c := GetUserConfig(r)
+	u := GetUser(r)
+	c := GetUserConfig(u)
 	return StrToLang(c.Lang)
 }
 

@@ -321,10 +321,9 @@ func GetUser(r *http.Request) User {
 }
 
 // GetUserConfig returns the user configs
-func GetUserConfig(r *http.Request) UserConfigs {
-	email := GetUserEmail(r)
-	getUserConfig := "SELECT * FROM UserConfigs WHERE user_id = (SELECT user_id FROM Users WHERE email = ?)"
-	rows, err := db.Query(getUserConfig, email)
+func GetUserConfig(user User) UserConfigs {
+	getUserConfig := "SELECT * FROM UserConfigs WHERE user_id = (SELECT user_id FROM Users WHERE user_id = ?)"
+	rows, err := db.Query(getUserConfig, user.UserID)
 	if err != nil {
 		ErrorPrintf("Error getting the user configs: %v\n", err)
 		return UserConfigs{}
@@ -855,7 +854,7 @@ func GiveUserHisRights(PageInfo *map[string]interface{}, r *http.Request) {
 		}
 
 		// Give the user his Pfp
-		userConfig := GetUserConfig(r)
+		userConfig := GetUserConfig(user)
 		(*PageInfo)["UserPfpPath"] = GetMediaLinkFromID(userConfig.PfpID).MediaAddress
 		return
 	}

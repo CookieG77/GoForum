@@ -74,7 +74,7 @@ func ImgUploader(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "User is not authenticated", http.StatusUnauthorized)
 			return
 		}
-		userConfigs = f.GetUserConfig(r)
+		userConfigs = f.GetUserConfig(user)
 	}
 
 	// Check if the user is authenticated
