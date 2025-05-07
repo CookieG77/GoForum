@@ -4,8 +4,6 @@ import (
 	f "GoForum/functions"
 	"github.com/gorilla/mux"
 	"net/http"
-	"os"
-	"strconv"
 )
 
 func ThreadPage(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +37,7 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 	thread := f.GetThreadFromName(threadName)
 
 	// Get User and user rights
+	PageInfo["Username"] = ""
 	PageInfo["UserRank"] = 0
 	user := f.GetUser(r)
 	if (user != f.User{}) {
@@ -47,6 +46,7 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 			f.MakeTemplateAndExecute(w, PageInfo, "templates/youAreBanned.html")
 			return
 		}
+		PageInfo["Username"] = user.Username
 		PageInfo["UserRank"] = userRank
 	}
 
@@ -69,31 +69,27 @@ func ThreadPage(w http.ResponseWriter, r *http.Request) {
 	PageInfo["ShowContent"] = false
 	PageInfo["ThreadIcon"] = threadIcon
 	PageInfo["ThreadBanner"] = threadBanner
+	PageInfo["IsAMember"] = false
 
 	// If the user is not verified and this thread does not accept non-connected users, do not display the thread and open the login popup
 	if !threadConfig.IsOpenToNonConnectedUsers && !PageInfo["IsAuthenticated"].(bool) {
 		PageInfo["ShowLoginPage"] = true
+
 		// If the user is not a member of the thread and this thread does not accept non-members, do not display the thread messages and show the 'must join' message
 	} else if !threadConfig.IsOpenToNonMembers && !f.IsUserInThread(thread, user) {
 		PageInfo["MustJoinThread"] = true
-		// If the user is a member of the thread, display the thread normally
+
+		// If the user is a member of the thread or the thread is open to non-members, we can display the thread messages
 	} else {
 		PageInfo["ShowContent"] = true
 		PageInfo["IsAMember"] = f.IsThreadMember(thread, r)
-		maxMessagesPerPageLoad := 10
-		if os.Getenv("MAX_MESSAGES_PER_PAGE_LOAD") != "" {
-			var err error
-			maxMessagesPerPageLoad, err = strconv.Atoi(os.Getenv("MAX_MESSAGES_PER_PAGE_LOAD"))
-			if err != nil {
-				maxMessagesPerPageLoad = 10
-			}
-		}
-		PageInfo["MaxMessagesPerPageLoad"] = maxMessagesPerPageLoad
+
 	}
 	// Add the thread moderation team to the page
 	PageInfo["ThreadModerationTeam"] = f.GetThreadModerationTeam(thread)
 
 	PageInfo["MessageOrdering"] = f.OrderingList
+	PageInfo["ReportReasons"] = f.GetReportTypesAsStrings()
 
 	// Add additional styles to the content interface and make the template
 	f.AddAdditionalStylesToContentInterface(&PageInfo, "/css/thread.css", "/css/postStyle.css")

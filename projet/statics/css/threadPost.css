@@ -6,6 +6,13 @@
     align-items: center;
 }
 
+#t-post-content{
+    position: relative;
+    display: flex;
+    align-items: center;
+    right: 0;
+}
+
 #t-post-container{
     width: 100%;
     background-color: silver;
@@ -24,21 +31,15 @@
     right: 6px;
 }
 
-.option-menu{
-    position: relative;
-    right: 4px;
-    width: 200px;
-    height: 200px;
-    background-color: silver;
-    margin-top: 4px;
-    z-index: 1;
-    transform: scale(0);
-    transform-origin: top right;
-    transition: transform 0.2s steps(4, start), opacity 0.5s steps(4, start);
-}
-
 .option-menu.active{
     transform: scale(1);
+}
+
+.menu-button{
+    width: 100%;
+    display: grid;
+    grid-template-columns: 16px auto;
+    gap: 4px;
 }
 
 .prev-button,
@@ -60,4 +61,56 @@
 
 .comment-content{
     padding: 4px;
+}
+
+.comment-date-edit-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: start;
+    width: 100%;
+    padding: 8px;
+}
+
+#comments-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    gap: 8px;
+}
+
+#t-post-comment-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#t-post-comment-title {
+    padding: 0 0 0 16px;
+}
+
+#t-post-vote-field {
+    padding: 8px 8px 8px 16px;
+}
+
+#t-post-date-and-edited {
+    padding: 0 0 0 16px;
+}
+
+#new-comment-send-button {
+    width: fit-content;
+}
+
+#load-more-comments-button {
+    width: fit-content;
+}
+
+#new-comment-content {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: calc(100% - 16px);
+    height: 10vh;
+    resize: none;
 }

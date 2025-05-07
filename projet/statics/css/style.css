@@ -45,6 +45,10 @@ button {
     padding: 5px;
 }
 
+li{
+    text-decoration: none;
+}
+
 header{
     position: sticky;
     top: 0;
@@ -151,7 +155,7 @@ header{
     top: 136px;
     z-index: 90;
     background-color: silver;
-    padding: 16px;
+    padding: 8px;
     transform: scale(0);
     transform-origin: top right;
     transition: transform 0.2s steps(4, start), opacity 0.5s steps(4, start);

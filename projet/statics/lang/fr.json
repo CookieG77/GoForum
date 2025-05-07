@@ -54,7 +54,7 @@
       }
     },
     "home" : {
-      "test" : "Ceci est un test !"
+      "thread_list_title" : "Liste des threads : "
     },
     "register" : {
       "title"                          : "Inscription",
@@ -108,7 +108,7 @@
         "moderation_team" : "Equipe de modération du thread",
         "tags" : "Tags"
       },
-      "was_modified" : "(modifié)",
+      "was_modified" : "[modifié]"
     },
     "thread_creation" : {
       "thread_name" : "Nom du thread",
@@ -118,6 +118,9 @@
       "description_invalid" : "Description invalide : Doit contenir entre 3 et 100 caractères et ne doit être composé que de lettres, chiffres, tirets bas et tirets.",
       "thread_creation_error" : "Une erreur est survenue lors de la création du thread. Veuillez réessayer plus tard.",
       "thread_creation_submit" : "Créer le thread"
+    },
+    "threadPost" : {
+      "comments_title" : "Comments : "
     }
   },
   "time" : {

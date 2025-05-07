@@ -1,15 +1,17 @@
 {{ define "content" }}
-<div id="datas" class="hidden">
-    <div id="data_postID">{{ .Post.MessageID }}</div>
-    <div id="data_postTitle">{{ .Post.MessageTitle }}</div>
-    <div id="data_postContent">{{ .Post.MessageContent }}</div>
-    <div id="data_wasEdited">{{ .Post.WasEdited }}</div>
-    <div id="data_postDate">{{ .Post.CreationDate }}</div>
-    <div id="data_authorName">{{ .Post.UserName }}</div>
-    <div id="data_authorPfpAddress">{{ .Post.UserPfpAddress }}</div>
-    <div id="data_upvotes">{{ .Post.Upvotes }}</div>
-    <div id="data_downvotes">{{ .Post.Downvotes }}</div>
-    <div id="isAuthenticated" class="hidden">{{ .IsAuthenticated }}</div>
+<div id="i18n" class="hidden">
+    <span id="username">{{ .Username }}</span>
+    <span id="data_postID">{{ .Post.MessageID }}</span>
+    <span id="data_postTitle">{{ .Post.MessageTitle }}</span>
+    <span id="data_wasEdited">{{ .Post.WasEdited }}</span>
+    <span data-key="data_postDate">{{ .Post.CreationDate }}</span>
+    <span id="data_authorName">{{ .Post.UserName }}</span>
+    <span id="data_authorPfpAddress">{{ .Post.UserPfpAddress }}</span>
+    <span data-key="data_upvotes">{{ .Post.Upvotes }}</span>
+    <span data-key="data_downvotes">{{ .Post.Downvotes }}</span>
+    <span id="isAuthenticated">{{ .IsAuthenticated }}</span>
+    <span id="isAMember">{{ .IsAMember }}</span>
+    <span id="userRank">{{ .UserRank }}</span>
     <div id="data_MediaLinks">
         {{ range $i := .Post.MediaLinks }}
             <div>{{ $i }}</div>
@@ -20,7 +22,19 @@
             <div>{{ $i }}</div>
         {{ end }}
     </div>
-    <div id="data_postVoteState">{{ .Post.VoteState }}</div>
+    <span data-key="data_postVoteState">{{ .Post.VoteState }}</span>
+    <span data-key="ago-seconds">{{ .Lang.time.ago_seconds }}</span>
+    <span data-key="ago-minute">{{ .Lang.time.ago_minute }}</span>
+    <span data-key="ago-minutes">{{ .Lang.time.ago_minutes }}</span>
+    <span data-key="ago-hour">{{ .Lang.time.ago_hour }}</span>
+    <span data-key="ago-hours">{{ .Lang.time.ago_hours }}</span>
+    <span data-key="ago-day">{{ .Lang.time.ago_day }}</span>
+    <span data-key="ago-days">{{ .Lang.time.ago_days }}</span>
+    <span data-key="was-edited">{{ .Lang.pages.thread.was_modified }}</span>
+    <span data-key="option-menu-edit-button-text">{{ .Lang.pages.thread.option_menu.edit_button }}</span>
+    <span data-key="option-menu-delete-button-text">{{ .Lang.pages.thread.option_menu.delete_button }}</span>
+    <span data-key="option-menu-ban-button-text">{{ .Lang.pages.thread.option_menu.ban_button }}</span>
+    <span data-key="option-menu-report-button-text">{{ .Lang.pages.thread.option_menu.report_button }}</span>
 </div>
 
 <div id="t-post">
@@ -37,15 +51,137 @@
             <span class="post-title">{{ .Post.MessageTitle }}</span>
         </div>
         <div id="t-post-content">
-
+            <div id="t-post-content-text" class="win95-border-indent">
+                    {{ .Post.MessageContent }}
+            </div>
         </div>
+        <div id="t-post-vote-field">
+            <div id="t-vote-field-container" class="post-vote-field">
+                <button id="t-post-vote-up-button" type="button" class="win95-button post-vote-button">
+                    <img src="/img/upvote_empty.png" alt="Upvote icon" class="unselectable post-vote-image" draggable="false" id="t-post-vote-up-image">
+                </button>
+                <span id="t-vote-count" class="post-vote-value"></span>
+                <button id="t-post-vote-down-button" type="button" class="win95-button post-vote-button">
+                    <img src="/img/downvote_empty.png" alt="Downvote icon" class="unselectable post-vote-image" draggable="false" id="t-post-vote-down-image">
+                </button>
+            </div>
+        </div>
+        <br>
+        <div id="t-post-date-and-edited">
+            <span id="t-post-date"></span>
+            <span id="t-post-edited">{{ if .Post.WasEdited }}{{ .Lang.pages.thread.was_modified }}{{ end }}</span>
+        </div>
+        <br>
+        <h3 id="t-post-comment-title">{{.Lang.pages.threadPost.comments_title }}</h3>
         <div id="t-post-comment-section" class="win95-border-indent">
+            {{ if .IsAuthenticated }}
+                {{ if .IsAMember }}
+                    <div id="new-comment-box" class="post-box win95-border">
+                        <section class="new-post-content">
+                            <div id="new-comment-content-container">
+                                <label for="new-comment-content">{{ .Lang.pages.threadPost.comment_content_label }}</label>
+                                <div id="new-comment-content-holder">
+                                    <textarea id="new-comment-content" class="win95-border-indent" placeholder="{{ .Lang.pages.threadPost.comment_placeholder }}" required maxlength="500" minlength="20"></textarea>
+                                    <div id="new-comment-content-char-count">
+                                        <span id="new-comment-content-char-count-value">0</span> / 500
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section>
+                            <button id="new-comment-send-button" class="win95-button" type="button" disabled>
+                                {{ .Lang.pages.threadPost.comment_send_button }}
+                            </button>
+                        </section>
+                    </div>
+                {{ end }}
+            {{ end }}
             <div id="comments-container">
 
             </div>
             <button id="load-more-comments-button" class="win95-button" type="button">
                 Load More Comments
             </button>
+        </div>
+    </div>
+</div>
+<div id="report-button-menu" class="full-screen-menu hidden">
+    <div class="full-screens-menu-background"></div>
+    <div class="full-screen-menu-content win95-border">
+        <div class="win95-header">
+            <h3>{{ .Lang.pages.thread.report.title }}</h3>
+            <div>
+                <button class="win95-close-button" type="button" id="close-report-menu">
+                    <img src="/img/close.svg" alt="Close">
+                </button>
+            </div>
+        </div>
+        <div class="win95-border-indent">
+            <p>{{ .Lang.pages.thread.report.description }}</p>
+            <label for="report-reason">{{ .Lang.pages.thread.report.reason_label }}</label>
+            <select id="report-reason" class="win95-input">
+                {{ range $reason := .ReportReasons }}
+                <option value="{{ $reason }}">{{ $reason }}</option>
+                {{ end }}
+            </select>
+            <label for="report-content">{{ .Lang.pages.thread.report.comment_label}}</label>
+            <textarea id="report-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.report.comment_placeholder }}" maxlength="500" minlength="5"></textarea>
+            <div id="report-content-char-count">
+                <span id="report-content-char-count-value">0</span> / 500
+            </div>
+            <button id="send-report-button" class="win95-button" type="button">{{ .Lang.pages.thread.report.report_button }}</button>
+            <div id="report-success-message" class="hidden">
+                <p>{{ .Lang.pages.thread.report.report_success }}</p>
+            </div>
+            <div id="report-error-message" class="hidden">
+                <p>{{ .Lang.pages.thread.report.report_error }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="edit-post-button-menu" class="full-screen-menu hidden">
+    <div class="full-screens-menu-background"></div>
+    <div class="full-screen-menu-content win95-border">
+        <div class="win95-header">
+            <h3>{{ .Lang.pages.thread.edit.title }}</h3>
+            <div>
+                <button class="win95-close-button" type="button" id="close-edit-post-menu">
+                    <img src="/img/close.svg" alt="Close">
+                </button>
+            </div>
+        </div>
+        <div class="win95-border-indent">
+            <label for="edit-post-title">{{ .Lang.pages.thread.edit.new_title_label }}</label>
+            <input type="text" id="edit-post-title" class="win95-input" placeholder="{{ .Lang.pages.thread.edit.title_placeholder }}" required minlength="5" maxlength="50">
+            <label for="edit-post-content">{{ .Lang.pages.thread.edit.new_content_label }}</label>
+            <textarea id="edit-post-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.edit.content_placeholder }}" required maxlength="500" minlength="20"></textarea>
+            <div id="edit-post-content-char-count">
+                <span id="edit-post-content-char-count-value">0</span> / 500
+            </div>
+            <button id="edit-post-send-button" class="win95-button" type="button">{{ .Lang.pages.thread.edit.send }}</button>
+            <div id="edit-post-medias-container">
+            </div>
+        </div>
+    </div>
+</div>
+<div id="edit-comment-button-menu" class="full-screen-menu hidden">
+    <div class="full-screens-menu-background"></div>
+    <div class="full-screen-menu-content win95-border">
+        <div class="win95-header">
+            <h3>{{ .Lang.pages.threadPost.edit.title }}</h3>
+            <div>
+                <button class="win95-close-button" type="button" id="close-comment-post-menu">
+                    <img src="/img/close.svg" alt="Close">
+                </button>
+            </div>
+        </div>
+        <div class="win95-border-indent">
+            <label for="edit-comment-content">{{ .Lang.pages.threadPost.edit.new_content_label }}</label>
+            <textarea id="edit-comment-content" class="win95-border-indent" placeholder="{{ .Lang.pages.thread.edit.content_placeholder }}" required maxlength="500" minlength="5"></textarea>
+            <div id="edit-comment-content-char-count">
+                <span id="edit-comment-content-char-count-value">0</span> / 500
+            </div>
+            <button id="edit-comment-send-button" class="win95-button" type="button">{{ .Lang.pages.thread.edit.send }}</button>
         </div>
     </div>
 </div>

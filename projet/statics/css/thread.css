@@ -92,8 +92,15 @@
 }
 
 #thread-description{
+    position: relative;
     display: grid;
     grid-template-columns: 5fr 2fr;
+}
+
+#thread-description p{
+    position: relative;
+    width: 100%;
+    word-break: break-word;
 }
 
 #thread-description-join{
@@ -219,7 +226,7 @@
 #new-post-content-container {
     display: grid;
     grid-template-columns: 1fr 9fr;
-    grid-template-rows: 20vh 1fr;
+    grid-template-rows: 15vh 1fr;
     gap: 8px;
     width: 100%;
     position: relative;
@@ -250,7 +257,7 @@
     top: 0;
     width: 100%;
     padding: 8px;
-    height: 15vh;
+    height: 10vh;
     resize: none;
 }
 
@@ -280,3 +287,34 @@
     height: fit-content;
     padding: 8px;
 }
+
+.menu-img{
+    position: relative;
+    height: 32px;
+    width: 32px;
+}
+
+/* Style for the popups windows */
+.full-screens-menu-background {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    width: calc(100% - 40px);
+    height: calc(100% - 152px);
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.full-screen-menu-content {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 40rem;
+    height: 30rem;
+    z-index: 11;
+    background-color: silver;
+}
+

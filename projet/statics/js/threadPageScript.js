@@ -1,51 +1,3 @@
-function updateVoteVisual(currentVoteState, upvoteImg, downvoteImg) {
-    let state = parseInt(currentVoteState);
-    if (state === 1){
-        upvoteImg.src = `/img/upvote.png`
-        downvoteImg.src = `/img/downvote_empty.png`
-    } else if(state === 0){
-        upvoteImg.src = `/img/upvote_empty.png`
-        downvoteImg.src = `/img/downvote_empty.png`
-    } else if(state === -1){
-        upvoteImg.src = `/img/upvote_empty.png`
-        downvoteImg.src = `/img/downvote.png`
-    }
-}
-
-function updateVoteState(currentVoteState, currentVoteCount, IsUpvoting, upvoteImg, downvoteImg) {
-    let state = parseInt(currentVoteState);
-    let count = currentVoteCount;
-    if (state === 1){
-        if (IsUpvoting){ // upvoting when already upvoted so we remove the upvote
-            state = 0;
-            count -= 1;
-        } else { // downvoting when already upvoted so we remove the upvote and add a downvote
-            state = -1;
-            count -= 2;
-        }
-    } else if(state === 0){
-        if (IsUpvoting){ // upvoting when not voted so we add an upvote
-            state = 1;
-            count += 1;
-        } else { // downvoting when not voted so we add a downvote
-            state = -1;
-            count -= 1;
-        }
-    } else if(state === -1){
-        if (IsUpvoting){ // upvoting when already downvoted so we remove the downvote and add an upvote
-            state = 1;
-            count += 2;
-        } else { // downvoting when already downvoted so we remove the downvote
-            state = 0;
-            count += 1;
-        }
-    }
-    updateVoteVisual(state, upvoteImg, downvoteImg);
-    console.log("Current Vote State: ", state);
-    console.log("Current Vote Count: ", count);
-    return {state, count};
-}
-
 document.addEventListener("DOMContentLoaded", function () {
 
     const leaveButton = document.getElementById("LeaveThreadButton");
@@ -57,7 +9,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const threadName = getCurrentThreadName()
     let userIsAuthenticated = document.getElementById("isAuthenticated").textContent === "true";
-    let userIsMember = document.getElementById("isMember").textContent === "true";
+    let userIsAMember = document.getElementById("isAMember").textContent === "true";
+    let userRank = parseInt(document.getElementById("userRank").textContent,10);
+    let userIsModerator = userRank >= 1;
+    let userIsAdmin = userRank >= 2;
+    let userIsThreadOwner = userRank >= 3;
     let offset= 0;
     let hasReachedEnd = false;
     let orderSelect = document.getElementById("order")
@@ -79,6 +35,79 @@ document.addEventListener("DOMContentLoaded", function () {
     let titleValid = false;
     let contentValid = false;
     let newPostTags = [];
+
+    const scrollbar = document.getElementsByClassName("custom-scrollbar")[0];
+
+    // Report menu elements
+    const reportMenu = document.getElementById("report-button-menu");
+    const reportMenuBackground = reportMenu.getElementsByClassName("full-screens-menu-background")[0];
+    const reportMenuCloseButton = document.getElementById("close-report-menu");
+    const reportMenuSendButton = document.getElementById("send-report-button");
+    const reportReason = document.getElementById("report-reason");
+    const reportContent = document.getElementById("report-content");
+    const reportContentCharCountValue = document.getElementById("report-content-char-count-value");
+    const reportMenuSuccessMessage = document.getElementById("report-success-message");
+    const reportMenuErrorMessage = document.getElementById("report-error-message");
+    let messageToReport = null;
+
+    // Edit post menu elements
+    const editMenu = document.getElementById("edit-post-button-menu");
+    const editMenuBackground = editMenu.getElementsByClassName("full-screens-menu-background")[0];
+    const editMenuCloseButton = document.getElementById("close-edit-post-menu");
+    const editMenuNewTitleField = document.getElementById("edit-post-title");
+    const editMenuNewContentField = document.getElementById("edit-post-content");
+    const editMenuNewContentCharCountValue = document.getElementById("edit-post-content-char-count-value");
+    const editMenuSendButton = document.getElementById("edit-post-send-button");
+    let editedPostMedias = [];
+    let editedPostID = null;
+    const editMenuMediasPreview = document.getElementById("edit-post-medias-container");
+
+    /**
+     * Show the report menu for a message.
+     * @description This function displays the report menu and sets the message ID to report.
+     * @param messageID {number} - The ID of the message to report
+     */
+    function showReportMenu(messageID) {
+        reportMenu.classList.remove("hidden");
+        scrollbar.classList.add("hidden");
+        messageToReport = messageID;
+        reportMenuSendButton.disabled = true;
+    }
+
+    /**
+     * Hide the report menu.
+     * @description This function hides the report menu and resets the fields.
+     */
+    function hideReportMenu() {
+        reportMenu.classList.add("hidden");
+        scrollbar.classList.remove("hidden");
+        reportMenuSuccessMessage.classList.add("hidden");
+        reportMenuErrorMessage.classList.add("hidden");
+        reportContent.value = "";
+        messageToReport = null;
+        reportMenuSendButton.disabled = true;
+    }
+
+    function showEditMenu(messageID, title, content, medias) {
+        editMenu.classList.remove("hidden");
+        scrollbar.classList.add("hidden");
+        editMenuNewTitleField.value = title;
+        editMenuNewContentField.value = content;
+        editedPostID = messageID;
+        editedPostMedias = medias;
+        editMenuSendButton.disabled = true;
+
+    }
+
+    function hideEditMenu() {
+        editMenu.classList.add("hidden");
+        scrollbar.classList.remove("hidden");
+        editMenuNewTitleField.value = "";
+        editMenuNewContentField.value = "";
+        editedPostID = null;
+        editedPostMedias = [];
+        editMenuSendButton.disabled = true;
+    }
 
     /**
      * Load more posts from the server.
@@ -194,11 +223,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const postHeader = document.createElement("section");
         const postAuthor = document.createElement("div");
         const authorPfp = document.createElement("img");
+        const authorAndTime = document.createElement("div");
         const author = document.createElement("span");
+        const time = document.createElement("span");
         const option = document.createElement("div");
         const optionButton = document.createElement("button");
         const optionMenu = document.createElement("div");
         const title = document.createElement("span");
+        const editStatus = document.createElement("span")
+        const postDescription = document.createElement("p")
         const tags = document.createElement("section");
         const postContent = document.createElement("section");
         const mediaContainer = document.createElement("div");
@@ -211,14 +244,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const downvoteButton = document.createElement("button");
         const downvoteImg = document.createElement("img");
         const messageID = document.createElement("p");
-        const message = document.createElement("p");
-        const wasEdited = document.createElement("p");
-        const date = document.createElement("p");
-        const voteState = document.createElement("p");
         const br = document.createElement("br");
 
         let currentVoteState = data.vote_state;
         let currentVoteCount = data.up_votes - data.down_votes;
+        let isPostOwner = data.user_name === document.getElementById("username").textContent;
 
         container.classList.add("post-box", "win95-border");
 
@@ -234,8 +264,16 @@ document.addEventListener("DOMContentLoaded", function () {
         authorPfp.draggable = false;
         postAuthor.appendChild(authorPfp);
 
+        authorAndTime.classList.add("anthor-and-time")
+        postAuthor.appendChild(authorAndTime);
+
+        author.classList.add("author-pseudo")
         author.innerText = `${data.user_name}`;
-        postAuthor.appendChild(author);
+        authorAndTime.appendChild(author);
+
+        time.classList.add("time-ago");
+        time.innerText = ` - ${timeAgo(data.creation_date)}`;
+        authorAndTime.appendChild(time);
 
         option.classList.add();
         postHeader.appendChild(option)
@@ -243,10 +281,123 @@ document.addEventListener("DOMContentLoaded", function () {
         optionButton.innerText = "...";
         optionButton.type = "button";
         optionButton.classList.add("win95-button");
+        if (!userIsAuthenticated) {
+            optionButton.disabled = true;
+        }
         option.appendChild(optionButton);
 
         optionMenu.classList.add("option-menu", "win95-border");
+
+        let optionMenuReportButtonHTML = `
+            <li class="win95-menu-button message-report menu-button" id="post-report-button-p${data.message_id}">
+                <img src="/img/report.png" alt="" class="win95-minor-logo unselectable" draggable="false">
+                <span>${getI18nText("option-menu-report-button-text")}</span>
+            </li>`
+
+        let optionMenuEditButtonHTML = `
+            <li class="win95-menu-button message-edit menu-button" id="post-edit-button-p${data.message_id}">
+                <img src="/img/edit.png" alt="" class="win95-minor-logo  unselectable" draggable="false">
+                <span>${getI18nText("option-menu-edit-button-text")}</span>
+            </li>`
+
+        let optionMenuDeleteButtonHTML = `
+            <li class="win95-menu-button message-delete menu-button" id="post-delete-button-p${data.message_id}">
+                <img src="/img/delete.png" alt="" class="win95-minor-logo  unselectable" draggable="false">
+                <span>${getI18nText("option-menu-delete-button-text")}</span>
+            </li>`
+
+        let optionMenuBanButtonHTML = `
+            <li class="win95-menu-button message-ban menu-button" id="post-ban-button-p${data.message_id}">
+                <img src="/img/ban.png" alt="" class="win95-minor-logo unselectable" draggable="false">
+                <span>${getI18nText("option-menu-ban-button-text")}</span>
+            </li>`
+        let additionalButtonsHTML = "";
+        let showReportButton = false;
+        let showEditButton = false;
+        let showDeleteButton = false;
+        let showBanButton = false;
+
+        if (userIsAuthenticated) { // If the user is authenticated he can see the option menu
+            if (!isPostOwner) { // If the user is authenticated he can report a post (exept his posts)
+                additionalButtonsHTML += optionMenuReportButtonHTML;
+                showReportButton = true;
+            }
+            if (isPostOwner) { // If the user is the owner of the post he can edit it
+                additionalButtonsHTML += optionMenuEditButtonHTML;
+                showEditButton = true;
+            }
+            if (isPostOwner || userIsModerator || userIsAdmin || userIsAdmin) { // If the user is the owner of the post or his rank is moderator or higher he can delete it
+                additionalButtonsHTML += optionMenuDeleteButtonHTML;
+                showDeleteButton = true;
+            }
+            if ((userIsThreadOwner || userIsAdmin) && !isPostOwner) { // If the user rank is admin or higher he can ban the user (exept himself)
+                additionalButtonsHTML += optionMenuBanButtonHTML;
+                showBanButton = true;
+            }
+        }
+
+        // All user can report a post
+        optionMenu.innerHTML =`
+        <ul>
+            ${additionalButtonsHTML}
+        </ul>
+        
+        `
         option.appendChild(optionMenu);
+
+        // Add the event listener to the edit button
+        if (showEditButton) {
+            const editButton = optionMenu.querySelector(`#post-edit-button-p${data.message_id}`);
+            editButton.addEventListener("click", function() {
+                console.log(`Edit button clicked for post ${data.message_id}`);
+                showEditMenu(data.message_id, data.message_title, data.message_content, data.media_links);
+            });
+        }
+
+        // Add the event listener to the delete button
+        if (showDeleteButton) {
+            const deleteButton = optionMenu.querySelector(`#post-delete-button-p${data.message_id}`);
+            deleteButton.addEventListener("click", function() {
+                console.log(`Delete button clicked for post ${data.message_id}`);
+                const result = deleteMessage(threadName, data.message_id);
+                result.then(async (response) => {
+                    if (response.ok) {
+                        container.remove();
+                        console.log("Post deleted successfully");
+                    } else {
+                        alert("Error while deleting post : " + response.statusText);
+                        console.error(response);
+                    }
+                });
+            });
+        }
+
+        // Add the event listener to the report button
+        if (showReportButton) {
+            const reportButton = optionMenu.querySelector(`#post-report-button-p${data.message_id}`);
+            reportButton.addEventListener("click", function() {
+                console.log(`Report button clicked for post ${data.message_id}`);
+                showReportMenu(data.message_id);
+            });
+        }
+
+        // Add the event listener to the ban button
+        if (showBanButton) {
+            const banButton = optionMenu.querySelector(`#post-ban-button-p${data.message_id}`);
+            banButton.addEventListener("click", function() {
+                console.log(`Ban button clicked for post ${data.message_id}`);
+                const result = banUser(threadName, data.user_name);
+                result.then(async (response) => {
+                    if (response.ok) {
+                        alert("User banned successfully");
+                        console.log("User banned successfully");
+                    } else {
+                        alert("Error while banning user : " + response.statusText);
+                        console.error(response);
+                    }
+                });
+            });
+        }
 
         function toggleOptionMenu() {
             optionMenu.classList.add("active")
@@ -272,6 +423,20 @@ document.addEventListener("DOMContentLoaded", function () {
         title.innerText = `${data.message_title}`;
         title.classList.add("post-title");
         postHeader.appendChild(title);
+
+        title.addEventListener("click", function() {
+            window.location = `/t/${threadName}/p/${data.message_id}`;
+        });
+
+        editStatus.classList.add("edit-status");
+        if (data.was_edited){
+            editStatus.innerText = getI18nText("edited-post-text");
+        }
+        postHeader.appendChild(editStatus);
+
+        postDescription.classList.add("post-description");
+        postDescription.innerText = data.message_content;
+        container.appendChild(postDescription);
 
         tags.classList.add("tag-container");
         container.appendChild(tags);
@@ -372,8 +537,7 @@ document.addEventListener("DOMContentLoaded", function () {
         upvoteButton.classList.add("win95-button", "post-vote-button");
         if (userIsAuthenticated) {
             upvoteButton.addEventListener("click", function () {
-                const messageId = data.message_id.toString();
-                upvoteMessage(threadName, messageId)
+                upvoteMessage(threadName, data.message_id)
                     .then(r => {
                         if (r.ok) {
                             return r.json();
@@ -411,8 +575,7 @@ document.addEventListener("DOMContentLoaded", function () {
         downvoteButton.classList.add("win95-button", "post-vote-button");
         if (userIsAuthenticated) {
             downvoteButton.addEventListener("click", function () {
-                const messageId = data.message_id.toString();
-                downvoteMessage(threadName, messageId)
+                downvoteMessage(threadName, data.message_id)
                     .then(r => {
                         if (r.ok) {
                             return r.json();
@@ -452,16 +615,6 @@ document.addEventListener("DOMContentLoaded", function () {
         messageID.classList.add("hidden", "messageId");
         messageID.innerText = `${data.message_id}`;
         container.appendChild(messageID);
-
-        message.innerText = `Message content : ${data.message_content}`;
-        container.appendChild(message);
-        wasEdited.innerText = data.was_edited ? getI18nText('was-edited') : "";
-        container.appendChild(wasEdited);
-        date.innerText = `${timeAgo(data.creation_date)}`;
-        container.appendChild(date);
-
-        voteState.innerText = `Vote state : ${data.vote_state}`;
-        container.appendChild(voteState);
         container.appendChild(br);
 
         return container;
@@ -608,7 +761,7 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("You must be logged in to create a post.");
             return;
         }
-        if (!userIsMember) {
+        if (!userIsAMember) {
             alert("You must be a member of the thread to create a post.");
             return;
         }
@@ -652,11 +805,80 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // Close the report menu when clicking outside of it
+    reportMenuBackground.addEventListener("click", hideReportMenu);
+    // Close the report menu when clicking on the close button
+    reportMenuCloseButton.addEventListener("click", hideReportMenu);
+    // Send the report when clicking on the send button
+    reportMenuSendButton.addEventListener("click", function() {
+        if (reportMenuSendButton.disabled) {
+            return;
+        }
+        reportMessage(threadName, messageToReport, reportReason.value, reportContent.value)
+            .then(r => {
+                if (r.ok) {
+                    reportMenuSuccessMessage.classList.remove("hidden");
+                    reportMenuSendButton.disabled = true;
+                    reportReason.disabled = true;
+                    reportContent.disabled = true;
+
+                } else {
+                    reportMenuErrorMessage.classList.remove("hidden");
+                    console.error(r);
+                }
+            });
+    });
+    // Update the report content character count
+    reportContent.addEventListener("input", function() {
+        const charCount = reportContent.value.length;
+        reportContentCharCountValue.innerText = `${charCount}`;
+        if (charCount > 500) {
+            reportContent.value = reportContent.value.substring(0, 500);
+            reportContentCharCountValue.innerText = `500`;
+        }
+        reportMenuSendButton.disabled = (charCount < 20 || charCount > 500);
+    });
+
+    // Close the edit menu when clicking outside of it
+    editMenuBackground.addEventListener("click", hideEditMenu);
+    // Close the edit menu when clicking on the close button
+    editMenuCloseButton.addEventListener("click", hideEditMenu);
+    // Send the edit when clicking on the send button
+    editMenuSendButton.addEventListener("click", function() {
+        if (editMenuSendButton.disabled) {
+            return;
+        }
+        editMessage(threadName, editedPostID, editMenuNewTitleField.value, editMenuNewContentField.value)
+            .then(r => {
+                if (r.ok) {
+                    hideEditMenu();
+                    postsContainer.innerHTML = "";
+                    hasReachedEnd = false;
+                    offset = 0;
+                    // Reload more messages
+                    loadMorePosts();
+                } else {
+                    console.error(r);
+                }
+            });
+    });
+    // Update the edit content character count
+    editMenuNewContentField.addEventListener("input", function() {
+        const charCount = editMenuNewContentField.value.length;
+        editMenuNewContentCharCountValue.innerText = `${charCount}`;
+        if (charCount > 500) {
+            editMenuNewContentField.value = editMenuNewContentField.value.substring(0, 500);
+            editMenuNewContentCharCountValue.innerText = `500`;
+        }
+        editMenuSendButton.disabled = (charCount < 20 || charCount > 500);
+    });
+
+
     // Init the page
     loadTags(threadName);
     loadMorePosts();
     updateNewPostButton();
-    if (!userIsAuthenticated || !userIsMember) {
+    if (!userIsAuthenticated || !userIsAMember) {
         newPostContainer.classList.add("hidden");
     }
 });

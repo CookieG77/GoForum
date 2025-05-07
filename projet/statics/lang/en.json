@@ -54,7 +54,7 @@
       }
     },
     "home" : {
-      "test" : "This is a test !"
+      "thread_list_title" : "Thread list : "
     },
     "register" : {
       "title"                          : "Register",
@@ -108,7 +108,24 @@
         "moderation_team" : "Thread moderation team",
         "tags" : "Tags"
       },
-      "was_modified" : "(edited)"
+      "was_modified" : "[edited]",
+      "option_menu" : {
+        "edit_button" : "Edit",
+        "delete_button" : "Delete",
+        "report_button" : "Report",
+        "ban_button" : "Ban"
+      },
+      "report" : {
+        "title" : "Make a report",
+        "description" : "Please describe the reason for your report.",
+        "reason_label" : "Reason : ",
+        "reason_placeholder" : "Reason for the report",
+        "report_button" : "Report",
+        "comment_label" : "Comment : ",
+        "comment_placeholder" : "Comment for the moderation team",
+        "report_success" : "Your report has been sent. Thank you for your contribution.",
+        "report_error" : "An error occurred while trying to send your report. Please try again later."
+      }
     },
     "thread_creation" : {
       "thread_name" : "Thread name",
@@ -118,6 +135,12 @@
       "description_invalid" : "Invalid description : Must be at least between 20 and 500 characters long",
       "thread_creation_error" : "An error occurred while trying to create the thread. Please try again later.",
       "thread_creation_submit" : "Create thread"
+    },
+    "threadPost" : {
+      "comments_title" : "Comments : ",
+      "comment_content_label" : "Add comment : ",
+      "comment_placeholder" : "Write a comment...",
+      "comment_send_button" : "Send"
     }
   },
   "time" : {

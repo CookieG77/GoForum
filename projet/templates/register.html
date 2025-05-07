@@ -4,7 +4,7 @@
 <div id="auth-register" class="auth-container win95-border hidden">
         <div class="win95-header"><h1>{{ .Lang.pages.register.title }}</h1></div>
         {{ if .Error }}
-            <p class="error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" scr="/img/warningIcon.png"> {{ .Lang.pages.register.error_message }}</p>
+            <p class="error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" src="/img/warningIcon.png"> {{ .Lang.pages.register.error_message }}</p>
         {{ end }}
         <section class="register-section win95-border-indent">
             <form id="register-form" class="auth-form" method="POST" action="/register">

@@ -45,10 +45,10 @@
     {{ if not .bareboneBase }}
         <nav class="options header-sections">
             {{ if .IsAuthenticated }}
-                <button class="win95-menu-button" onclick="window.location.href = '/tnm'">{{ .Lang.pages.base.header.post_button }}</button>
+                <button class="win95-menu-button" onclick="window.location.href = '/tnm'"><span>{{ .Lang.pages.base.header.post_button }}</span></button>
             {{ else }}
-                <button onclick="window.location.href = '/register'" class="win95-menu-button">{{ .Lang.pages.base.header.register_account_button }}</button>
-                <button id="login-popup-opener" class="win95-menu-button">{{ .Lang.pages.base.header.login_button }}</button>
+                <button onclick="window.location.href = '/register'" class="win95-menu-button"><span>{{ .Lang.pages.base.header.register_account_button }}</span></button>
+                <button id="login-popup-opener" class="win95-menu-button"><span>{{ .Lang.pages.base.header.login_button }}</span></button>
             {{ end }}
         </nav>
         <section class="search-box header-sections">
@@ -78,9 +78,9 @@
                     <input type="hidden" name="headerForm" value="logout">
                 </form>
                 <ul>
-                    <li onclick="document.location.href='/profile'" class="win95-menu-button"><img class="win95-minor-logo unselectable" draggable="false" src="/img/profileIcon.png">{{ .Lang.pages.base.header.profile_button }}</li>
-                    <li onclick="document.location.href='/settings'" class="win95-menu-button"><img class="win95-minor-logo unselectable" draggable="false" src="/img/settingsIcon.png">{{ .Lang.pages.base.header.settings_button }}</li>
-                    <li onclick="document.logoutForm.submit()" class="win95-menu-button"><img class="win95-minor-logo unselectable" draggable="false" src="/img/logOutIcon.png">{{ .Lang.pages.base.header.logout_button }}</li>
+                    <li onclick="document.location.href='/profile'" class="win95-menu-button"><img class="win95-minor-logo unselectable" draggable="false" src="/img/profileIcon.png"><span class="win95-menu-button-text">{{ .Lang.pages.base.header.profile_button }}</span></li>
+                    <li onclick="document.location.href='/settings'" class="win95-menu-button"><img class="win95-minor-logo unselectable" draggable="false" src="/img/settingsIcon.png"><span class="win95-menu-button-text">{{ .Lang.pages.base.header.settings_button }}</span></li>
+                    <li onclick="document.logoutForm.submit()" class="win95-menu-button"><img class="win95-minor-logo unselectable" draggable="false" src="/img/logOutIcon.png"><span class="win95-menu-button-text">{{ .Lang.pages.base.header.logout_button }}</span></li>
                 </ul>
             </section>
         {{ else }}

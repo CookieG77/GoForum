@@ -1,30 +1,38 @@
 {{ define "content" }}
-<div class="tag-manager">
-    <div class="tag-manager-form">
-        <label for="tagName">Tag Name:</label>
-        <input type="text" id="tagName" required>
+<div id="thread-edit-box" class="win95-border">
+    <section class="win95-header">
+        <h1>Thread Editor</h1>
+    </section>
+    <section class="tag-manager win95-border-indent">
+        <div id="tag-manager-form">
+            <div class="tag-manager-section">
+                <label for="tagName">Tag Name:</label>
+                <input class="win95-input-indent" type="text" id="tagName" required>
+            </div>
+            <div class="tag-manager-section">
+                <label for="tagColor">Tag Color:</label>
+                <input class="win95-input-indent" type="color" id="tagColor" value="#ff0000">
+            </div>
+            <button id="addTagBtn" class="win95-button">Add Tag</button>
+            <div id="error" class="error"></div>
+            <div id="tagList"></div>
+        </div>
 
-        <label for="tagColor">Tag Color:</label>
-        <input type="color" id="tagColor" value="#ff0000">
-
-        <button id="addTagBtn">Add Tag</button>
-        <div id="error" class="error"></div>
-        <div id="tagList"></div>
-    </div>
-
-    <div class="tag-manager-edit">
-        <div id="editTagList"></div>
-    </div>
-    <br>
-    <div>
+        <div class="tag-manager-edit">
+            <div id="editTagList"></div>
+        </div>
+        <br>
+    </section>
+    <section class="win95-border-indent">
         <img id="thread-icon-preview" alt="Icon Preview" src="/upload/{{ .ThreadIconPath }}">
         <br>
         <input type="file" id="new-thread-icon" accept="image/png, image/jpeg, image/gif">
-    </div>
-    <div>
-        <img id="thread-banner-preview" alt="Icon Preview" src="/upload/{{ .ThreadBannerPath }}">
-        <br>
-        <input type="file" id="new-thread-banner" accept="image/png, image/jpeg, image/gif">
-    </div>
+        <div>
+            <img id="thread-banner-preview" alt="Icon Preview" src="/upload/{{ .ThreadBannerPath }}">
+            <br>
+            <input type="file" id="new-thread-banner" accept="image/png, image/jpeg, image/gif">
+        </div>
+    </section>
 </div>
+
 {{ end }}
