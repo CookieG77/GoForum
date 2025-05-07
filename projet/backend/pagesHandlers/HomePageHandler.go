@@ -2,6 +2,7 @@ package pagesHandlers
 
 import (
 	f "GoForum/functions"
+	"fmt"
 	"net/http"
 )
 
@@ -27,6 +28,13 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	// If we come from the register page with the value "openlogin" in the URL, we open the login popup
 	if r.URL.Query().Get("openlogin") == "true" {
 		PageInfo["ShowLoginPage"] = true
+		if r.URL.Query().Get("showloginmessage") == "true" {
+			PageInfo["ShowLoginMessage"] = true
+			PageInfo["LoginPageMessage"] = r.URL.Query().Get("message")
+		} else {
+			PageInfo["ShowLoginMessage"] = false
+			PageInfo["LoginPageMessage"] = ""
+		}
 	}
 
 	PageInfo["AllThreads"] = f.GetAllFormattedThreads()
@@ -40,4 +48,9 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 func RedirectToLogin(w http.ResponseWriter, r *http.Request) {
 	// Redirect to the login page if the user is not authenticated
 	http.Redirect(w, r, "/?openlogin=true", http.StatusFound)
+}
+
+func RedirectToLoginWithMessage(w http.ResponseWriter, r *http.Request, message string) {
+	// Redirect to the login page if the user is not authenticated
+	http.Redirect(w, r, fmt.Sprintf("/?openlogin=true&showloginmessage=true&message=%s", message), http.StatusFound)
 }

@@ -1,0 +1,71 @@
+{{ define "content" }}
+
+<!--suppress GrazieInspection -->
+<div id="auth-register" class="auth-container win95-border hidden">
+  <div class="win95-header"><h1>{{ .Lang.pages.register.title }}</h1></div>
+  {{ if .Error }}
+    <p class="error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" scr="/img/warningIcon.png"> {{ .Lang.pages.register.error_message }}</p>
+  {{ end }}
+  <section class="register-section win95-border-indent">
+    <form id="register-form" class="auth-form" method="POST" action="/confirm-email-address">
+      <p class="register-paragraph">{{ .Lang.pages.register.enter_information_message }}</p>
+      {{ if .MissingFields }}
+        {{ range .MissingFields }}
+          {{ if eq . "firstName" }}
+            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_first_name }}</p>
+          {{ end }}
+        {{ end }}
+      {{ end }}
+      <div class="form-group">
+        <label class="auth-label" for="first-name">{{ .Lang.pages.register.field_first_name_label }} :</label>
+        <input class="auth-input win95-input-indent" type="text" id="first-name" name="first_name" placeholder="{{ .Lang.pages.register.field_first_name_label }}" required {{ if .ValueFirstName }}value="{{ .ValueFirstName }}"{{ end }}>
+      </div>
+      {{ if .MissingFields }}
+        {{ range .MissingFields }}
+          {{ if eq . "lastName" }}
+            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_last_name }}</p>
+          {{ end }}
+        {{ end }}
+      {{ end }}
+      <div class="form-group">
+        <label class="auth-label" for="last-name">{{ .Lang.pages.register.field_last_name_label }} :</label>
+        <input class="auth-input win95-input-indent" type="text" id="last-name" name="last_name" placeholder="{{ .Lang.pages.register.field_last_name_label }}" required {{ if .ValueLastName }} value="{{ .ValueLastName }}" {{ end }}>
+      </div>
+      {{ if .MissingFields }}
+        {{ range .MissingFields }}
+          {{ if eq . "username" }}
+            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_username }}</p>
+          {{ end }}
+        {{ end }}
+      {{ end }}
+      {{ if eq .UsernameError "alreadyInUse" }}
+        <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" src="/img/warningIcon.png"> {{ .Lang.pages.register.username_error_already_exists }}</p>
+      {{ end }}
+      {{ if eq .UsernameError "invalid" }}
+        <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" src="/img/warningIcon.png"> {{ .Lang.pages.register.username_error_invalid }}</p>
+      {{ end }}
+      <div class="form-group">
+        <label class="auth-label" for="username">{{ .Lang.pages.register.field_username_label }} :</label>
+        <input class="auth-input win95-input-indent" type="text" id="username" name="username" placeholder="{{ .Lang.pages.register.field_username_label }}" required {{ if .ValueUsername }} value="{{ .ValueUsername }}" {{ end }}>
+      </div>
+      {{ if .MissingFields }}
+        {{ range .MissingFields }}
+          {{ if eq . "terms" }}
+            <p class="error-missing-field error-message win95-border-outdent"><img class="win95-minor-logo unselectable" draggable="false" src="/img/warningIcon.png"> {{ .Lang.pages.register.missing_field_terms }}</p>
+          {{ end }}
+        {{ end }}
+      {{ end }}
+      <div class="form-group-checkbox">
+        <input type="checkbox" id="terms" class="win95-checkbox" name="terms" required>
+        <label class="auth-label-checkbox" for="terms">{{ .Lang.pages.register.terms_checkbox_label }}</label>
+      </div>
+      <button type="submit" class="auth-button win95-button">{{ .Lang.pages.register.register_button }}</button>
+    </form>
+  </section>
+  <section>
+    <form id="logout-form" class="auth-form" method="POST" action="/confirm-email-address?logout=true">
+      <button type="submit" class="auth-button win95-button">{{ .Lang.pages.register.logout_button }}</button>
+    </form>
+  </section>
+</div>
+{{ end }}
