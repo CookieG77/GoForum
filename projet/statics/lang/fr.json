@@ -14,7 +14,7 @@
     "resetPassword" : "Réinitialiser votre mot de passe",
     "error": "Erreur",
     "thread": "thread",
-    "threadNewMessage" : "threadNewMessage",
+    "threadNewMessage" : "Nouveau Post",
     "profile" : "Profil",
     "user_settings" : "Paramètres"
   },
@@ -82,24 +82,24 @@
       "password_error_mismatch"        : "Les mots de passe ne correspondent pas.",
       "password_error_invalid"         : "Mot de passe invalide : Doit contenir au moins 8 caractères, moins de 64 caractères, au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.",
       "password_field_label"           : "Mot de passe",
-      "password_confirm_field_label"   : "Mot de passe de confirmation",
+      "password_confirm_field_label"   : "Confirmer le mot de passe",
       "terms_checkbox_label"           : "J'accepte les conditions d'utilisation",
       "register_button"                : "S'inscrire",
       "register_with"                  : "S'inscrire avec",
       "login_instead"                  : "Déjà un membre ?",
-      "login_instead_button"           : "Connecte toi!"
+      "login_instead_button"           : "Connectez-vous !"
     },
     "user_settings" : {
       "title" : "Paramètres Utilisateur",
       "profile_picture_change" : "Changez votre photo de profil",
-      "user_lang": "Langage de l'utilisateur",
+      "user_lang": "Langue de l'utilisateur",
       "change_settings" : "Modifier les Paramètres",
-      "choose_language" : "Choisir une Langue",
+      "choose_language" : "Choisissez une langue",
       "close" : "Fermer",
       "change_pfp" : "Changement de Photo de Profil",
       "select_new_pfp" : "Cliquez pour sélectionner un fichier",
       "accepted_formats" : "Formats acceptés",
-      "size_warning" : "L'Image doit faire moins de"
+      "size_warning" : "La taille de l'image doit être inférieure à 20 Mo !"
     },
     "thread" : {
       "banned_message" : "Vous êtes banni(e) de ce thread. Vous n'êtes pas autorisé(e) à y accéder.",
@@ -139,7 +139,7 @@
         "comment_label" : "Commentaire : ",
         "comment_placeholder" : "Laissez un commentaire pour l'équipe de modération",
         "report_success" : "Votre signalement a été envoyé. Merci pour votre contribution.",
-        "report_error" : "Une erreur est survenu lors de l'envoi du signalement. Merci de réessayer ultérieurement."
+        "report_error" : "Une erreur est survenue lors de l'envoi du signalement. Merci de réessayer ultérieurement."
       },
       "edit" : {
         "title" : "Editer le Post",
@@ -154,7 +154,7 @@
       "thread_description" : "Description",
       "name_already_exist" : "Ce nom de thread existe déjà.",
       "name_invalid" : "Nom de thread invalide : Doit contenir entre 3 et 20 caractères et ne doit être composé que de lettres, chiffres, tirets bas et tirets.",
-      "description_invalid" : "Description invalide : Doit contenir entre 3 et 100 caractères et ne doit être composé que de lettres, chiffres, tirets bas et tirets.",
+      "description_invalid" : "Description invalide : Doit contenir entre 20 et 500 caractères et ne doit être composé que de lettres, chiffres, tirets bas et tirets.",
       "thread_creation_error" : "Une erreur est survenue lors de la création du thread. Veuillez réessayer plus tard.",
       "thread_creation_submit" : "Créer le thread"
     },
