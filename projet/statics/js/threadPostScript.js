@@ -383,7 +383,7 @@ document.addEventListener("DOMContentLoaded", function (){
             const deleteButton = optionMenu.querySelector(`#comment-delete-button-p${data.comment_id}`);
             deleteButton.addEventListener("click", function() {
                 console.log(`Delete button clicked for post ${data.comment_id}`);
-                const result = deleteComment(threadName, data.comment_id);
+                const result = deleteComment(threadName, messageId, data.comment_id);
                 result.then(async (response) => {
                     if (response.ok) {
                         container.remove();
