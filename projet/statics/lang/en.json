@@ -187,10 +187,20 @@
       "resolve_report" : "Resolve Report"
     },
     "profile" : {
-      "top_message" : "Welcome to ",
-      "top_message2" : "profile !",
-      "pfp_message" : "User's profile picture",
-      
+      "top_message" : "Welcome the profile page of : ",
+      "top_message2" : "Welcome to your profile page !",
+      "pfp_message" : "User's profile picture :",
+      "user_name" : "User's name is : ",
+      "user_language" : "User's language is : ",
+      "user_crd_the" : "User's account created the : ",
+      "user_thr_ls" : "User's thread(s) list : ",
+
+      "self_pfp_message" : "Profile picture :",
+      "self_user_name" : "Public Username is : ",
+      "self_full_name" : "Private First name and Last name are : ",
+      "self_user_language" : "Public language is : ",
+      "self_user_crd_the" : "Account created the : ",
+      "self_user_thr_ls" : "Your thread list : "
     }
 
   },
