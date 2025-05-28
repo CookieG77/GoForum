@@ -35,6 +35,8 @@ GoForum intègre plusieurs mécanismes pour garantir la sécurité des utilisate
 
 ## ⚙️ Installation et configuration
 
+⚠️ Le Docker n'est pas fonctionnel (cette fonctionnalité a été abandonnée pour ce projet dû à la suppression de sa nécessité et pour prioriser d'autres fonctionnalités).
+
 ### 🧰 Pré-requis
 
 - Go installé (`go 1.20+`)
